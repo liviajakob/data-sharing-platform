@@ -1,0 +1,6 @@
+RemoteSystemsTempFiles/
+.metadata/
+data_sharing/tests/test.db
+data_sharing/.project
+data_sharing/.pydevproject
+*.pyc
