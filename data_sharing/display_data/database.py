@@ -6,9 +6,13 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from display_data.models import *
+from definitions import CONFIG_PATH
+import os
+
+
 
 from configobj import ConfigObj
-config = ConfigObj('config.conf')
+config = ConfigObj(CONFIG_PATH)
 
 
 class Query(object):
@@ -26,6 +30,7 @@ class Query(object):
     def __repr__(self):
         return "this"
     
+
 
 
 
@@ -47,8 +52,9 @@ class Database():
             self._db = config['db']
         else:
             self._db = dbSettings
+
         
-        self._engine = create_engine(self._db['type']+"://"+self._db['path']+self._db['name'], echo=True)
+        self._engine = create_engine(self._db['type']+os.path.join(self._db['path'],self._db['name']), echo=True)
         #Base.metadata.create_all(bind=engine)
         #Session = sessionmaker(bind=engine)
         
@@ -168,4 +174,12 @@ class Database():
             query=query.filter(Dataset.id == ids)
             
         return query.all()
+    
+    
+    
+    
+
+db = config['db']
+print(db['type']+"://"+os.path.join(db['path'],db['name']))
+database=Database()
         

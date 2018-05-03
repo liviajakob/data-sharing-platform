@@ -10,7 +10,11 @@ class DatabaseTest(unittest.TestCase):
 
     def setUp(self):
         '''Sets up a test database'''
-        self.db = Database("test.db")
+        dict={"name":"test.db",
+              "path":"",
+              "type": "sqlite:///"
+              }
+        self.db = Database(dbSettings=dict)
         self.db.scopedSession()
 
 

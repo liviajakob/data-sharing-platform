@@ -2,6 +2,8 @@
 
 from configobj import ConfigObj
 config = ConfigObj()
+
+
 config.filename = "config.conf"
 #
 config['keyword1'] = 'value1'
@@ -10,7 +12,7 @@ config['keyword2'] = 'value2'
 
 config['db'] = {}
 config['db']['name'] = 'metadata.db'
-config['db']['type'] = 'sqlite'
+config['db']['type'] = 'sqlite:///'
 config['db']['path'] = '/Users/livia/msc_dissertation/CODE/data_sharing/data/output'
 #
 config['data'] = {}
