@@ -7,6 +7,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from display_data.models import *
 
+from configobj import ConfigObj
+config = ConfigObj('config.conf')
+
 
 class Query(object):
     '''
@@ -29,8 +32,23 @@ class Query(object):
 class Database():
     
 
-    def __init__(self, dbPath='/Users/livia/msc_dissertation/Data/metadata.db'):
-        self._engine = create_engine('sqlite:///'+dbPath, echo=True)
+    def __init__(self, dbSettings={}):
+        '''
+        
+        Input Parameter:
+            dbSettings - dictionary containing:
+                        'type' : type of db (e.g. sqllite, or oracle, or mysql)
+                        'path' : path to database
+                        'name' : database name
+                    
+        '''
+        
+        if len(dbSettings)==0:
+            self._db = config['db']
+        else:
+            self._db = dbSettings
+        
+        self._engine = create_engine(self._db['type']+"://"+self._db['path']+self._db['name'], echo=True)
         #Base.metadata.create_all(bind=engine)
         #Session = sessionmaker(bind=engine)
         
