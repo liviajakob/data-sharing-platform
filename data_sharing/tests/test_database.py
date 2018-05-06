@@ -10,12 +10,13 @@ class DatabaseTest(unittest.TestCase):
 
     def setUp(self):
         '''Sets up a test database'''
-        dict={"name":"test.db",
+        dbdict={"name":"test.db",
               "path":"",
               "type": "sqlite:///"
               }
-        self.db = Database(dbSettings=dict)
+        self.db = Database(dbSettings=dbdict)
         self.db.scopedSession()
+        
 
 
     def tearDown(self):
@@ -26,7 +27,7 @@ class DatabaseTest(unittest.TestCase):
 
     def test_tablesCreated(self):
         '''Check if it has created the tables'''
-        self.assertEqual(len(self.db.getTableNames()), 2, "Database should have 2 tables")
+        self.assertEqual(len(self.db.getTableNames()), 4, "Database should have 4 tables")
         
     def test_noEntries(self):
         self.assertEqual(len(self.db.getDatasets()), 0, "No table entries for projections should exist")
@@ -36,17 +37,25 @@ class DatabaseTest(unittest.TestCase):
     def test_dbInsert(self):
         '''Test insert values into database'''
         #insert 2 projections
+        self.db.newLayerType("dem")
+        self.db.newLayerType("error")
+        self.db.newLayerType("rate")
         self.db.newProjection("Projection1")
         self.db.newProjection("Projection2")
         self.db.newDataset("Dataset1", "this is how", 1)
         self.db.newDataset("Dataset2", "cite...", 1)
         self.db.newDataset("Dataset3", "this is how you cite", 2)
+        self.db.newLayer(1, "dem")
+        self.db.newLayer(1, "error")
         
         self.assertEqual(len(self.db.getDatasets()), 3, "couldnt insert all datasets")
         self.assertEquals(len(self.db.getProjections()), 2, "couldnt insert all projections")
         self.assertEquals(self.db.getDatasets(2)[0].name, "Dataset2", "Error in get Datasets")
         self.assertEquals(len(self.db.getDatasets([2,3])), 2, "Error in get Datasets")
+        self.assertEquals(len(self.db.getLayerTypes()), 3, "couldnt insert all layer types")
+        self.assertEquals(len(self.db.getLayers()), 2, "couldnt insert all layers")
         
+        print("TYPE: ----------------------------------------", self.db.getLayers()[0].timestamp)
 
 
 

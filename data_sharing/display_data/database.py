@@ -8,10 +8,9 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from display_data.models import *
 from definitions import CONFIG_PATH
 import os
-
-
-
 from configobj import ConfigObj
+
+
 config = ConfigObj(CONFIG_PATH)
 
 
@@ -51,6 +50,7 @@ class Database():
         if len(dbSettings)==0:
             self._db = config['db']
         else:
+            # @TODO: more tests
             self._db = dbSettings
 
         
@@ -114,6 +114,47 @@ class Database():
             self.Session.rollback()
             raise
         
+    def newLayer(self, dataset_id, layerTypeName):
+        """Adds a new dataset layer to a data set"""
+        
+        try:
+            layerType = self.Session.query(LayerType).filter(LayerType.name==layerTypeName).one() 
+        except:
+            print("input '{}' is NO valid layertype".format(layerTypeName))
+            raise
+        
+        try:
+            dataset = self.Session.query(Dataset).filter(Dataset.id==dataset_id).one() 
+        except:
+            print("input '{}' is NO valid is NO valid dataset id".format(dataset_id))
+            raise
+        
+        try:
+            layer = Layer()
+            layer.type_id = layerType.id
+            layer.dataset_id = dataset.id
+            layer.layertype_id = layerType.id
+            self.Session.add(layer)
+            self.Session.commit()
+        except:
+            self.Session.rollback()
+            raise
+       
+        
+    def newLayerType(self, name):
+        
+        try:
+            layerType = LayerType()
+            layerType.name = name
+            self.Session.add(layerType)
+            self.Session.commit()
+        except:
+            self.Session.rollback()
+            raise
+        
+        
+        
+        
     def dropTables(self, pw=None):
         '''
         Drops all tables within the database, used for testing
@@ -153,6 +194,52 @@ class Database():
         return query.all()
     
     
+    def getLayers(self, ids=None):
+        """returns a list of all requested datasets.
+        
+        Input parameter:
+            ids – (optional) a list of integers or one single integer
+                when ids is given only the requested datasets with matching ids are returned
+                when ids is none every dataset is returned
+        
+        Returns:
+            a list with Dataset objects/ one object
+        
+        """
+        
+        query = self.Session.query(Layer)
+        
+        if isinstance(ids, list):
+            query=query.filter(Layer.id.in_(ids))
+        elif isinstance(ids, int):
+            query=query.filter(Layer.id == ids)
+            
+        return query.all()
+    
+    
+    def getLayerTypes(self, ids=None):
+        """returns a list of all requested datasets.
+        
+        Input parameter:
+            ids – (optional) a list of integers or one single integer
+                when ids is given only the requested datasets with matching ids are returned
+                when ids is none every dataset is returned
+        
+        Returns:
+            a list with Dataset objects/ one object
+        
+        """
+        
+        query = self.Session.query(LayerType)
+        
+        if isinstance(ids, list):
+            query=query.filter(LayerType.id.in_(ids))
+        elif isinstance(ids, int):
+            query=query.filter(LayerType.id == ids)
+            
+        return query.all()
+    
+    
     def getProjections(self, ids=None):
         """returns a list of all requested projections.
         
@@ -175,11 +262,4 @@ class Database():
             
         return query.all()
     
-    
-    
-    
-
-db = config['db']
-print(db['type']+"://"+os.path.join(db['path'],db['name']))
-database=Database()
         

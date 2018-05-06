@@ -26,7 +26,6 @@ section2 = {
         'keyword7': 'value7'
         }
 }
-config['section2'] = section2
 #
 config['section3'] = {}
 config['section3']['keyword 8'] = ['value8', 'value9', 'value10']
