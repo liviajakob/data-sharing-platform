@@ -3,6 +3,9 @@
 '''
 import unittest
 from display_data import Database
+import sys, os
+
+
 
 
 class DatabaseTest(unittest.TestCase):
@@ -10,8 +13,11 @@ class DatabaseTest(unittest.TestCase):
 
     def setUp(self):
         '''Sets up a test database'''
+        module_path = sys.modules[__name__].__file__
+        dir_path = os.path.dirname(module_path)
+        path= os.path.join(dir_path, "testdata")
         dbdict={"name":"test.db",
-              "path":"",
+              "path":path,
               "type": "sqlite:///"
               }
         self.db = Database(dbSettings=dbdict)
@@ -62,3 +68,4 @@ class DatabaseTest(unittest.TestCase):
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
+    print("FIIIIIIILE",__file__)

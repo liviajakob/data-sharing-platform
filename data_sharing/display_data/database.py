@@ -262,4 +262,16 @@ class Database():
             
         return query.all()
     
+ 
+ 
+    
+    
+class DatabaseIngestion(object):
+    '''Handles everything to ingest an new entry'''
+    
+    def __init__(self, inputfile):
+        self._database = Database() #use the standard settings from the config file
         
+        
+    def addLayer(self):
+        pass
