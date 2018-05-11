@@ -27,7 +27,9 @@ class Rollback(object):
         
     def rollback(self):
         self.logger.info("Starting rollback...")
+        print(len(self._commands), self._commands)
         for cmd in reversed(self._commands):
+            print(cmd)
             cmd[0](**cmd[1])
         self.logger.info("Finished rollback...")
         

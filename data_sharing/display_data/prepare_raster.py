@@ -22,7 +22,7 @@ class RasterTiler(object):
         pass
     
     
-    def createTiles(self, inputfile, outputdir, colours = None, zoom="0-5"):
+    def createTiles(self, inputfile, outputdir, zoom="0-5"):
         commandlist=['gdal2tiles.py', '-z', zoom, '-p', 'raster', inputfile, outputdir]
         print(commandlist)
         subprocess.call(commandlist)
@@ -59,13 +59,20 @@ class RasterLayerProcessor(object):
     
     def layerUpdated(self):
         pass
+    
    
    
     def readFile(self, inputfile, band=1):
         '''read raster file with gdal'''
         self.logger.info("Starting to read raster...")
-        self.raster = gdal.Open(inputfile)
-        self.logger.info("Read raster...")
+        
+        try: 
+            self.raster = gdal.Open(inputfile)
+            assert(self.raster is not None)
+        except AssertionError:
+            print('file could not be opened. may not exist')
+            raise IOError('file: "'+ inputfile + '" could not be opened. Check if the file exists')
+        self.logger.info("Success reading raster...")
         self.band = self.raster.GetRasterBand(band) #for now I assume there is only one band
 
     def getStatistics(self):
@@ -91,8 +98,8 @@ class RasterLayerProcessor(object):
         return srs
 
     
-    def getBoundingBox(self):
-        '''Returns the bounding box of the raster (upper left corner and lower right corner)
+    def getBoundingBoxCorners(self):
+        '''Returns the bounding box corners of the raster (upper left corner and lower right corner)
         
         Returns:
             A dictionary - {"upleft": (ulx, uly), "downright": (lrx, lry)}
@@ -108,6 +115,19 @@ class RasterLayerProcessor(object):
     
     
     
+    def getBoundingBox(self):
+        '''Returns the bounding box in minx, maxx, miny and maxy'''
+        
+        box = self.getBoundingBoxCorners()
+        minXc, minYc = box['upleft'][0], box['upleft'][1]
+        maxXc, maxYc = box['downright'][0], box['downright'][1] 
+        if minXc > maxXc: minXc, maxXc = maxXc, minXc
+        if minYc > maxYc: minYc, maxYc = maxYc, minYc
+        
+        return {'xmin': minXc, 'xmax': maxXc, 'ymin': minYc, 'ymax': maxYc}
+    
+    
+    
     # @TODO check if min > max
     def getMinBoundingBox(self):
         '''Calculates a min boundingbox without cutting not Null values
@@ -116,9 +136,11 @@ class RasterLayerProcessor(object):
             {xmin: coord, xmax: coord, ymin: coord, ymax: coord}
         
         '''
-        grid = self.raster.ReadAsArray()
-        print(grid)
-        print(self.band.GetNoDataValue())
+        assert self.band is not None
+        
+        grid = self.band.ReadAsArray()
+        print('shape ', grid.shape)
+        print('NODATA ', self.band.GetNoDataValue())
         # create 1D array (x-direction) with True values where the whole column/raster of the raster is Null
         if self.band.GetNoDataValue() is None:
             xArr = np.all(np.isnan(grid), axis = 0)
@@ -132,13 +154,9 @@ class RasterLayerProcessor(object):
         xContent = np.where(np.invert(xArr))
         minX, maxX = xContent[0][0]-1, xContent[0][-1]+1
 
-        
-        print(yArr.shape)
-        print(yArr)
         # calculate indices where yArr is False
         yContent = np.where(np.invert(yArr))
-        print(yContent)
-        minY, maxY = yContent[0][0]-1, yContent[0][-1]+1
+        minY, maxY = yContent[-1][0]-1, yContent[-1][-1]+1
         
         ## adjust if out of boundary
         if minX < 0: minX = 0
@@ -167,6 +185,7 @@ class RasterLayerProcessor(object):
         Default cuts the minimum boundingbox for not NaN values
         
         '''
+        self.readFile(inputfile)
         # check if bounding box input is given
         if not boundbox:
             boundbox = self.getMinBoundingBox() # calculate bounding box 
@@ -199,49 +218,8 @@ class RasterLayerProcessor(object):
         commandlist=['gdaldem', 'color-relief', '-alpha', inputfile, colourfile, outputfile]
         subprocess.call(commandlist)
         self.logger.info('Colour added.')
-    
-    
-    def getColourTable(self):
-        assert self.band is not None
-        self.logger.info( "hi"+str(self.band.GetColorInterpretation()))
-        return self.band.GetColorInterpretation()
-    
-    
-    
-    
-    def writeProcessedRaster(self, outputfile, fileformat='GTiff', bandnr=1):
-        '''
-        
-        Input Params:
-            bandnr -- number of band
-        
-        '''
-        self.raster_8bit = self.raster.ReadAsArray()
-        assert self.raster_8bit is not None
-        driver = gdal.GetDriverByName(fileformat)
-        
-        print('output2',outputfile)
-        
-        outdata = driver.Create(outputfile, self.band.XSize, self.band.YSize, bandnr, gdal.GDT_Byte)
-        outdata.SetProjection( self.raster.GetProjection() )
-        outdata.GetRasterBand(bandnr).SetNoDataValue(np.nan)
-        outdata.SetGeoTransform(self.raster.GetGeoTransform())
-        outband=outdata.GetRasterBand(bandnr)
-        
-        #ct = gdal.ColorTable()
-        #ct.SetColorEntry(1, (0,0,102,255))      
-        #ct.SetColorEntry(2, (0,255,255,255))    
-        #outband.SetColorTable(ct)
-        
-        outband.WriteArray(self.raster_8bit)
-        
-        print(outband)
-        
-        #outband.FlushCache()
-        
-        #outband = None
-        #outdata = None
 
+    
     
 if __name__ == '__main__':
     pass

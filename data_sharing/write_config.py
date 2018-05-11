@@ -1,6 +1,7 @@
 """This script writes a configuration file"""
 
 from configobj import ConfigObj
+import os
 config = ConfigObj()
 
 
@@ -17,7 +18,7 @@ config['db']['path'] = '/Users/livia/msc_dissertation/CODE/data_sharing/data/out
 #
 config['data'] = {}
 config['data']['input'] = '/Users/livia/msc_dissertation/CODE/data_sharing/data/input'
-config['data']['output'] = config['db']['path']+'/datasets'
+config['data']['output'] = os.path.join(config['db']['path'],'datasets')
 #
 section2 = {
     'keyword5': 'value5',
@@ -26,9 +27,12 @@ section2 = {
         'keyword7': 'value7'
         }
 }
-#
-config['section3'] = {}
-config['section3']['keyword 8'] = ['value8', 'value9', 'value10']
-config['section3']['keyword 9'] = ['value11', 'value12', 'value13']
+
+# @TODO query layer types from database
+config['layers'] = {}
+config['layers']['types'] = ['dem', 'rate', 'error']
+config['layers']['colours'] = [config['layers']['types'][0]+'.txt', config['layers']['types'][1]+'.txt', config['layers']['types'][2]+'.txt']
+config['layers']['colpath'] = os.path.join(config['data']['input'], 'colourfiles')
+
 #
 config.write()

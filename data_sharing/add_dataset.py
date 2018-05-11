@@ -9,6 +9,7 @@ from definitions import CONFIG_PATH
 from configobj import ConfigObj
 from display_data.rollback import Rollback
 from display_data.database import DatabaseIngestion
+import logging
 
 
 def handle_input():
@@ -52,15 +53,21 @@ def add_dataset(layers, cite):
         layer: [[file1, type1],[file2, type2],[file3, type3]]
     
     '''
-    rollback = Rollback()
+    logging.basicConfig(level=logging.INFO) #NOTSET gives all the levels, e.g. INFO only .info
+    logger = logging.getLogger(__name__)
+    rollback = Rollback(logger)
+
     
     try:
-        DatabaseIngestion(rollback)
+        ing = DatabaseIngestion(rollback, logger)
+        ing.addDataset(layers, cite)
+        logger.info('Success!!!')
     except:
-        print('')
+        logger.info('Rolling back...')
         rollback.rollback()
+        logger.info('Rolled back!!')
     
-    pass
+    
 
 
 

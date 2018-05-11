@@ -28,7 +28,7 @@ if __name__ == '__main__':
     
     database = Database()
     database.scopedSession()
-    query = database.getDatasets(3)[0]
+    query = database.getDatasets(1)[0]
     print(query)
     
     app.run(debug=True)

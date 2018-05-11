@@ -20,8 +20,8 @@ class Test(unittest.TestCase):
         
         module_path = sys.modules[__name__].__file__
         dir_path = os.path.dirname(module_path)
-        self.inputfile = os.path.join(dir_path,"testdata","test_minbound.tif")
-        self.outputfile = os.path.join(dir_path, "testdata","test_proc_cut.tif")
+        self.inputfile = os.path.join(dir_path,"testdata","test_proc.tif")
+        self.inputfile_cropped = os.path.join(dir_path,"testdata","test_cut.tif")
         
         
 
@@ -32,10 +32,18 @@ class Test(unittest.TestCase):
     def test_minBoundingBox(self):
         raster_proc = RasterLayerProcessor(layertype="dem", logger=self.logger)
         raster_proc.readFile(self.inputfile)
-        print(raster_proc.getBoundingBox())
-        print(raster_proc.getMinBoundingBox())
-        #raster_proc.cutRaster(self.inputfile, self.outputfile)
+        self.assertNotEqual(raster_proc.getMinBoundingBox(),raster_proc.getBoundingBox())
+        print('BOUNDING 1', raster_proc.getBoundingBox())
 
+
+    def test_minBoundingBoxWithCropped(self):
+        raster_proc = RasterLayerProcessor(layertype="dem", logger=self.logger)
+        raster_proc.readFile(self.inputfile_cropped)
+        self.assertEqual(raster_proc.getMinBoundingBox(),raster_proc.getBoundingBox())
+
+
+
+    
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.test_minBoundingBox']

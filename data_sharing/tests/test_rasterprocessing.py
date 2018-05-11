@@ -20,23 +20,16 @@ class DEMRAsterProcessing(unittest.TestCase):
         module_path = sys.modules[__name__].__file__
         dir_path = os.path.dirname(module_path)
         self.inputfile = os.path.join(dir_path,"testdata","test_proc.tif")
-        self.outputfile = os.path.join(dir_path, "testdata","test_proc_output.tif")
+        self.outputfile_conv = os.path.join(dir_path, "testdata","test_proc_output_conv.tif")
+        self.outputfile_cut = os.path.join(dir_path, "testdata","test_proc_output_cut.tif")
         self.outputfile_colour = os.path.join(dir_path, "testdata","test_proc_output_col.tif")
         self.colourfile = os.path.join(dir_path, "testdata","colours.txt")
         #remove if already exists
         #try:
-        #    os.remove(self.outputfile)
+        #    os.remove(self.outputfile_conv)
         #except OSError:
         #    pass
-        
-        ## database
-        #dbpath= os.path.join(dir_path, "testdata")
-        #dbdict={"name":"test.db",
-        #      "path":dbpath,
-        #      "type": "sqlite:///"
-        #      }
-        #self.db = Database(dbSettings=dbdict)
-        #self.db.scopedSession()
+
 
         
     def tearDown(self):
@@ -44,12 +37,14 @@ class DEMRAsterProcessing(unittest.TestCase):
 
 
     def test_readRaster(self):
+        '''Tests the method read Raster'''
         raster_proc = RasterLayerProcessor(layertype="dem", logger=self.logger)
         raster_proc.readFile(self.inputfile)
-        box = raster_proc.getBoundingBox()
+        box = raster_proc.getBoundingBoxCorners()
         result = {'upleft': (-1771834.5, -521176.688), 'downright': (2117165.5, -3433176.688)}
         self.assertEqual(box, result)
-        raster_proc.getStatistics()
+        stats = {'min': 0.0, 'max': 3277.0476074219, 'mean': 2178.9048430742, 'stdev': 680.47755318626}
+        self.assertEqual(raster_proc.getStatistics(), stats)
         
         
         
@@ -66,13 +61,23 @@ class DEMRAsterProcessing(unittest.TestCase):
     def test_conversion(self):
         '''Tests the conversion of a raster using the gdal commandline tool'''
         raster_proc = RasterLayerProcessor(layertype="dem", logger=self.logger)
-        raster_proc.to8Bit(inputfile=self.inputfile, outputfile=self.outputfile, scale={'min': 0, 'max': 3277},)
-        self.assertTrue(os.path.exists(self.outputfile))
-        raster_proc.readFile(self.outputfile)
-        print(raster_proc.getColourTable())
-        #self.assertIsNone(raster_proc.getColourTable())
-        raster_proc.addColours(inputfile=self.outputfile, outputfile=self.outputfile_colour, colourfile=self.colourfile) # take the above computed as input
-        print(raster_proc.getColourTable())
+        
+        #convert to 8bit
+        raster_proc.to8Bit(inputfile=self.inputfile, outputfile=self.outputfile_conv, scale={'min': 0.0, 'max': 3277.0476074219},)
+        self.assertTrue(os.path.exists(self.outputfile_conv))
+        raster_proc.readFile(self.outputfile_conv)
+        minbound = raster_proc.getMinBoundingBox()
+        
+        #cut raster
+        raster_proc.cutRaster(inputfile=self.outputfile_conv, outputfile=self.outputfile_cut)
+        self.assertTrue(os.path.exists(self.outputfile_cut))
+        raster_proc.readFile(self.outputfile_cut)
+        bound =  raster_proc.getBoundingBox()
+        #check if raster is cut to min size
+        self.assertEqual(bound, minbound, 'Raster not properly cut')
+        
+        #add colour
+        raster_proc.addColours(inputfile=self.outputfile_cut, outputfile=self.outputfile_colour, colourfile=self.colourfile) # take the above computed as input
         self.assertTrue(os.path.exists(self.outputfile_colour))
         
 
