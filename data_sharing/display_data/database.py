@@ -11,6 +11,7 @@ import os
 from configobj import ConfigObj
 import shutil
 import logging
+from display_data.prepare_raster import RasterLayerProcessor, RasterTiler
 
 
 
@@ -50,7 +51,7 @@ class Database():
         
         if len(dbSettings)==0:
             filesys = ConfigSystem()
-            self._engine = create_engine(filesys.dbEngine()+filesys.dbPath(), echo=True)
+            self._engine = create_engine(filesys.dbEngine()+filesys.dbPath(), echo=False)
 
             
         else:
@@ -164,6 +165,7 @@ class Database():
                 self.Session.commit()
             else:
                 self.Session.flush()
+                return layer
         except:
             self.Session.rollback()
             raise
@@ -314,6 +316,9 @@ class ConfigSystem():
         self.config = ConfigObj(CONFIG_PATH)
         self.dataset_id=dataset_id
     
+    def getDataInputPath(self):
+        return self.config['data']['input']
+    
     
     def dbPath(self):
         settings = self.config['db']
@@ -328,7 +333,11 @@ class ConfigSystem():
         i = self.config['layers']['types'].index(layertype)
         filename = self.config['layers']['colours'][i]
         return os.path.join(self.config['layers']['colpath'], filename)
-        
+      
+    def getExponent(self, layertype):
+        assert layertype in self.config['layers']['types']
+        i = self.config['layers']['types'].index(layertype)
+        return float(self.config['layers']['exponent'][i])
         
     def newDatasetFolder(self, d_id=None):
         if d_id is None:
@@ -345,7 +354,7 @@ class ConfigSystem():
         if d_id is None:
             assert self.dataset_id is not None
             d_id = self.dataset_id
-        folder = os.path.join(self.datasetFolder(d_id), ltype)
+        folder = os.path.join(self.getDatasetFolder(d_id), ltype)
         if not os.path.exists(folder):
             os.makedirs(folder)
         else:
@@ -358,7 +367,7 @@ class ConfigSystem():
         if d_id is None:
             assert self.dataset_id is not None
             d_id = self.dataset_id
-        folder = os.path.join(self.datasetFolder(d_id), ltype)
+        folder = os.path.join(self.getDatasetFolder(d_id), ltype)
         if os.path.exists(folder):
             shutil.rmtree(folder)
             self.logger.info("folder '{}' removed.".format(folder))
@@ -379,18 +388,28 @@ class ConfigSystem():
         else:
             self.logger.info("folder '{}' doesn't exist.".format(folder))
     
-    def datasetFolder(self, d_id=None):
+    def getDatasetFolder(self, d_id=None):
+        '''Returns the path to a dataset folder'''
         if d_id is None:
             assert self.dataset_id is not None
             d_id = self.dataset_id
-        '''Returns the path to a dataset folder'''
         path = self.config['data']['output']
         folder = os.path.join(path, str(d_id))
         assert os.path.exists(folder)
         return folder
  
- 
- 
+    def getLayerFolder(self, ltype, d_id=None):
+        if d_id is None:
+            assert self.dataset_id is not None
+            d_id = self.dataset_id
+        folder = os.path.join(self.getDatasetFolder(d_id), ltype)
+        assert os.path.exists(folder)
+        return folder
+    
+    def getTilesFolder(self, ltype, d_id=None):
+        folder = os.path.join(self.getLayerFolder(ltype=ltype, d_id=d_id), self.config['data']['tiles'])
+        return folder
+    
  
     
 class DatabaseIngestion(object):
@@ -405,17 +424,62 @@ class DatabaseIngestion(object):
         self.rollback = rollback
         self.logger=logger
         
+        
+        
     def addLayer(self, filename, ltype, dataset_id):
+        
+        print('Adding layer', filename)
+        
         if self._db.Session is None:
             self._db.scopedSession()
             self.rollback.addCommand(self._db.closeSession)
         conf = ConfigSystem(dataset_id=dataset_id)
         conf.newLayerFolder(ltype)
-        self.rollback.addCommand(conf.removeLayerFolder, ltype)
-        #----->layer = self._db.newDataset(cite, 1, commit=False)
-
+        self.rollback.addCommand(conf.removeLayerFolder, {'ltype': ltype})
+        layer = self._db.newLayer(dataset_id=dataset_id, layerTypeName=ltype, commit=False)
+        
+        print('ye')
+        rast_proc = RasterLayerProcessor(layertype=ltype, logger=self.logger)
+        print('ye2')
+        fn, file_extension = os.path.splitext(filename) #extract extension
+        print('ye2')
+        srcf = os.path.join(conf.getDataInputPath(), filename)
+        print('ye2')
+        #save init file in output folder
+        cp = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('raw_input'+file_extension))
+        shutil.copyfile(srcf, cp)
+        
+        # compute stats
+        rast_proc.readFile(srcf)
+        stats = rast_proc.getStatistics()
+        print(stats)
+        #scale = {'min': stats['min'], 'max': stats['max']}
+        scale = {'min': -2, 'max': 2}
+        bit_8 = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('8bit'+file_extension))
+        rast_proc.to8Bit(inputfile=srcf, outputfile=bit_8, scale=scale, exponent=conf.getExponent(layertype=ltype))
+        
+        ########### PRINT STATS
+        rast_proc.readFile(bit_8)
+        print('EXPONENT: ', conf.getExponent(layertype=ltype))
+        print(rast_proc.getStatistics())
+        
+        #cut raster
+        cut = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('cropped'+file_extension))
+        rast_proc.cutRaster(inputfile=bit_8, outputfile=cut)        
+        #add colour
+        col_rast = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('coloured'+file_extension))
+        colourfile = conf.getColourFile(ltype)
+        rast_proc.addColours(inputfile=cut, outputfile=col_rast, colourfile=colourfile) # take the above computed as input
+        
+        #TILLEE
+        tiler = RasterTiler()
+        tiler.createTiles(col_rast, conf.getTilesFolder(ltype, d_id = dataset_id))
             
         print('FILE: ', filename, ' TYPE: ', ltype, ' DATASETID', dataset_id)
+    
+    
+    
+    
     
     def addDataset(self, layers, cite=None):
         print(self._db.Session)
@@ -424,7 +488,7 @@ class DatabaseIngestion(object):
         dataset = self._db.newDataset(cite, 1, commit=False)
         conf = ConfigSystem(dataset_id=dataset.id)
         conf.newDatasetFolder()
-        self.rollback.addCommand(conf.removeDatasetFolder, dataset.id)
+        self.rollback.addCommand(conf.removeDatasetFolder, {'d_id':dataset.id})
         
         print(dataset.id)
         
@@ -433,6 +497,7 @@ class DatabaseIngestion(object):
             self.addLayer(l[0], l[1], dataset.id)
         
         self._db.commit()
+        self._db.closeSession()
         
         
         

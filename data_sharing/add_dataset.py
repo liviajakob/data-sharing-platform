@@ -53,7 +53,7 @@ def add_dataset(layers, cite):
         layer: [[file1, type1],[file2, type2],[file3, type3]]
     
     '''
-    logging.basicConfig(level=logging.INFO) #NOTSET gives all the levels, e.g. INFO only .info
+    logging.basicConfig(level=logging.NOTSET) #NOTSET gives all the levels, e.g. INFO only .info
     logger = logging.getLogger(__name__)
     rollback = Rollback(logger)
 
@@ -62,7 +62,11 @@ def add_dataset(layers, cite):
         ing = DatabaseIngestion(rollback, logger)
         ing.addDataset(layers, cite)
         logger.info('Success!!!')
-    except:
+    except Exception as e:
+        if hasattr(e, 'message'):
+            print(e.message)
+        else:
+            print(e)
         logger.info('Rolling back...')
         rollback.rollback()
         logger.info('Rolled back!!')
