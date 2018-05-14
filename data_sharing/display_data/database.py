@@ -3,34 +3,17 @@
 @author: livia
 '''
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker, scoped_session
 from display_data.models import *
 from definitions import CONFIG_PATH
-import os
+import os, time
 from configobj import ConfigObj
 import shutil
 import logging
 from display_data.prepare_raster import RasterLayerProcessor, RasterTiler
-
-
-
-
-class Query(object):
-    '''
-    classdocs
-    '''
-
-
-    def __init__(self, params):
-        '''
-        Constructor
-        '''
-        pass
-    
-    def __repr__(self):
-        return "this"
-    
+from datetime import datetime
+from display_data.system_configuration import ConfigSystem
 
 
 
@@ -130,7 +113,6 @@ class Database():
             projection = Projection()
             projection.name = name
             self.Session.add(projection)
-            self.Session.commit()
             if commit:
                 self.Session.commit()
             else:
@@ -160,7 +142,6 @@ class Database():
             layer.dataset_id = dataset.id
             layer.layertype_id = layerType.id
             self.Session.add(layer)
-            self.Session.commit()
             if commit:
                 self.Session.commit()
             else:
@@ -231,8 +212,30 @@ class Database():
             
         return query.all()
     
+    def getLayertypeByName(self, tname):
+        query = self.Session.query(LayerType)
+        query=query.filter(LayerType.name == tname)
+        try:
+            return query.first()
+        except Exception as e:
+            print (e)
+            return []    
     
-    def getLayers(self, ids=None):
+    def getLayerById(self, l_id):
+
+        query = self.Session.query(Layer)
+        query=query.filter(Layer.id == l_id)
+        try:
+            return query.all()
+        except Exception as e:
+            print (e)
+            print('query all')
+            return []    
+        
+    
+    
+    
+    def getLayerByAttributes(self, dataset_id=None, layertype_name=None):
         """returns a list of all requested datasets.
         
         Input parameter:
@@ -245,14 +248,26 @@ class Database():
         
         """
         
+        print('get Layer')
+        l_typeid = self.getLayertypeByName(layertype_name)
+        print(l_typeid)
+        print(type(l_typeid))
         query = self.Session.query(Layer)
+        print('datasetid',dataset_id)
+        print(l_typeid.id)
+        query=query.filter(and_(Layer.dataset_id == dataset_id, Layer.layertype_id == l_typeid.id))
+        print('eh2')
+        try:
+            print('qur')
+            print(query)
+            print(query.all(), type(query.all()))
+            print('qu2')
+            return query.all()
+        except Exception as e:
+            print (e)
+            print('query all')
+            return []    
         
-        if isinstance(ids, list):
-            query=query.filter(Layer.id.in_(ids))
-        elif isinstance(ids, int):
-            query=query.filter(Layer.id == ids)
-            
-        return query.all()
     
     
     def getLayerTypes(self, ids=None):
@@ -300,117 +315,32 @@ class Database():
             
         return query.all()
     
+
+    def updateTimestamp(self, layer, commit=True):
+        
+        assert self.Session is not None
+        
+        time = datetime.utcnow() 
+        
+        layer.timestamp = time
+        if commit:
+            self.Session.commit()
+        else:
+            self.Session.flush()
+        
+        
+        
+
+
+
+
     
     
     
 
-class ConfigSystem():
-    '''A class that manages the file system'''
-    
-    def __init__(self, logger=None, dataset_id=None):
-        if logger is None:
-            logging.basicConfig(level=logging.INFO) #NOTSET gives all the levels, e.g. INFO only .info
-            self.logger = logging.getLogger(__name__)
-        else:
-            self.logger = logger
-        self.config = ConfigObj(CONFIG_PATH)
-        self.dataset_id=dataset_id
-    
-    def getDataInputPath(self):
-        return self.config['data']['input']
     
     
-    def dbPath(self):
-        settings = self.config['db']
-        return os.path.join(settings['path'],settings['name'])
-
-    def dbEngine(self):
-        return self.config['db']['type']
     
-    def getColourFile(self, layertype):
-        '''Returns name and path to the colourfile for a given layer'''
-        assert layertype in self.config['layers']['types']
-        i = self.config['layers']['types'].index(layertype)
-        filename = self.config['layers']['colours'][i]
-        return os.path.join(self.config['layers']['colpath'], filename)
-      
-    def getExponent(self, layertype):
-        assert layertype in self.config['layers']['types']
-        i = self.config['layers']['types'].index(layertype)
-        return float(self.config['layers']['exponent'][i])
-        
-    def newDatasetFolder(self, d_id=None):
-        if d_id is None:
-            assert self.dataset_id is not None
-            d_id = self.dataset_id
-        path = self.config['data']['output']
-        folder = os.path.join(path, str(d_id))
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        else:
-            self.logger.info('Path already exists')
-            
-    def newLayerFolder(self, ltype, d_id=None):
-        if d_id is None:
-            assert self.dataset_id is not None
-            d_id = self.dataset_id
-        folder = os.path.join(self.getDatasetFolder(d_id), ltype)
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-        else:
-            self.logger.info('Path already exists')
-            
-            
-            
-    def removeLayerFolder(self, ltype, d_id=None):
-        '''Removes the layer directory'''
-        if d_id is None:
-            assert self.dataset_id is not None
-            d_id = self.dataset_id
-        folder = os.path.join(self.getDatasetFolder(d_id), ltype)
-        if os.path.exists(folder):
-            shutil.rmtree(folder)
-            self.logger.info("folder '{}' removed.".format(folder))
-        else:
-            self.logger.error("folder '{}' doesn't exist.".format(folder))  
-        
-        
-        
-    def removeDatasetFolder(self, d_id=None):
-        '''Removes the dataset directory'''
-        if d_id is None:
-            assert self.dataset_id is not None
-            d_id = self.dataset_id
-        path = self.config['data']['output']
-        folder = os.path.join(path, str(d_id))
-        if os.path.exists(folder):
-            shutil.rmtree(folder)
-        else:
-            self.logger.info("folder '{}' doesn't exist.".format(folder))
-    
-    def getDatasetFolder(self, d_id=None):
-        '''Returns the path to a dataset folder'''
-        if d_id is None:
-            assert self.dataset_id is not None
-            d_id = self.dataset_id
-        path = self.config['data']['output']
-        folder = os.path.join(path, str(d_id))
-        assert os.path.exists(folder)
-        return folder
- 
-    def getLayerFolder(self, ltype, d_id=None):
-        if d_id is None:
-            assert self.dataset_id is not None
-            d_id = self.dataset_id
-        folder = os.path.join(self.getDatasetFolder(d_id), ltype)
-        assert os.path.exists(folder)
-        return folder
-    
-    def getTilesFolder(self, ltype, d_id=None):
-        folder = os.path.join(self.getLayerFolder(ltype=ltype, d_id=d_id), self.config['data']['tiles'])
-        return folder
-    
- 
     
 class DatabaseIngestion(object):
     '''Handles everything to ingest an new entry'''
@@ -433,18 +363,38 @@ class DatabaseIngestion(object):
         if self._db.Session is None:
             self._db.scopedSession()
             self.rollback.addCommand(self._db.closeSession)
+
+        #check if entry already exist and if it should be updated
+        self.logger.info('Checking if layer exists...')
+        dupl = self._db.getLayerByAttributes(dataset_id=dataset_id, layertype_name=ltype)
+        print(dupl)
         conf = ConfigSystem(dataset_id=dataset_id)
-        conf.newLayerFolder(ltype)
-        self.rollback.addCommand(conf.removeLayerFolder, {'ltype': ltype})
-        layer = self._db.newLayer(dataset_id=dataset_id, layerTypeName=ltype, commit=False)
-        
-        print('ye')
-        rast_proc = RasterLayerProcessor(layertype=ltype, logger=self.logger)
-        print('ye2')
+        if len(dupl)==0:
+            conf.newLayerFolder(ltype)
+            self.rollback.addCommand(conf.removeLayerFolder, {'ltype': ltype})
+            layer = self._db.newLayer(dataset_id=dataset_id, layerTypeName=ltype, commit=False)
+            self.processRaster(filename=filename, ltype=ltype, dataset_id=dataset_id)
+        else:
+            srcf = os.path.join(conf.getDataInputPath(), filename)
+            timestamp = time.ctime(os.path.getmtime(srcf))
+            timestamp = datetime.strptime(timestamp, "%a %b %d %H:%M:%S %Y")
+            print(type(timestamp),timestamp, type(dupl[0].timestamp), dupl[0].timestamp)
+            if timestamp >= dupl[0].timestamp: ##update layer
+                print('UPDATE LAYER')
+                self.processRaster(filename=filename, ltype=ltype, dataset_id=dataset_id)
+                self._db.updateTimestamp(dupl[0], commit=False)
+            else:
+                msg = 'Layer with file={} , type={} datasetid={} is up to date.'.format(filename, ltype, dataset_id)
+                self.logger.info(msg)
+            ## check timestamps
+            ## at the end update timestamp
+    
+    
+    def processRaster(self, filename, ltype, dataset_id):
+        conf = ConfigSystem(dataset_id=dataset_id)
+        rast_proc = RasterLayerProcessor(logger=self.logger)
         fn, file_extension = os.path.splitext(filename) #extract extension
-        print('ye2')
         srcf = os.path.join(conf.getDataInputPath(), filename)
-        print('ye2')
         #save init file in output folder
         cp = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('raw_input'+file_extension))
         shutil.copyfile(srcf, cp)
@@ -454,7 +404,7 @@ class DatabaseIngestion(object):
         stats = rast_proc.getStatistics()
         print(stats)
         #scale = {'min': stats['min'], 'max': stats['max']}
-        scale = {'min': -2, 'max': 2}
+        scale = conf.getLayerScale(ltype)
         bit_8 = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('8bit'+file_extension))
         rast_proc.to8Bit(inputfile=srcf, outputfile=bit_8, scale=scale, exponent=conf.getExponent(layertype=ltype))
         
@@ -479,10 +429,23 @@ class DatabaseIngestion(object):
     
     
     
+    def addOneLayer(self, filename, ltype, dataset_id):
+        
+        print('Adding layer', filename)
+        
+        if self._db.Session is None:
+            self._db.scopedSession()
+            self.rollback.addCommand(self._db.closeSession)
+            
+        self.addLayer(filename, ltype, dataset_id)   
+            
+        self.logger.info('Commit')  
+        self._db.commit()
+        self._db.closeSession()
+    
     
     
     def addDataset(self, layers, cite=None):
-        print(self._db.Session)
         self._db.scopedSession()
         self.rollback.addCommand(self._db.closeSession)
         dataset = self._db.newDataset(cite, 1, commit=False)
@@ -490,15 +453,31 @@ class DatabaseIngestion(object):
         conf.newDatasetFolder()
         self.rollback.addCommand(conf.removeDatasetFolder, {'d_id':dataset.id})
         
-        print(dataset.id)
+        self.addBoundingBox(dataset, layers)
         
-        print('test')
         for l in layers:
             self.addLayer(l[0], l[1], dataset.id)
-        
+            
+        print('commit')
         self._db.commit()
         self._db.closeSession()
         
+        
+        
+    def addBoundingBox(self, dataset, layers):
+        assert len(layers) > 0
+        ## for now just take the first layer
+        
+        conf = ConfigSystem(dataset_id=dataset.id)
+        srcf = os.path.join(conf.getDataInputPath(), layers[0][0])
+        rast_proc = RasterLayerProcessor(self.logger)
+        rast_proc.readFile(srcf)
+        box=rast_proc.getBoundingBox()        
+        dataset.xmin = box['xmin']
+        dataset.xmax = box['xmax']
+        dataset.ymin = box['ymin']
+        dataset.ymax = box['ymax']
+        self.logger.info('ADDED BOUNDING BOX')
         
         
         

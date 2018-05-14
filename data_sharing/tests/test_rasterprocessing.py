@@ -38,7 +38,7 @@ class DEMRAsterProcessing(unittest.TestCase):
 
     def test_readRaster(self):
         '''Tests the method read Raster'''
-        raster_proc = RasterLayerProcessor(layertype="dem", logger=self.logger)
+        raster_proc = RasterLayerProcessor(logger=self.logger)
         raster_proc.readFile(self.inputfile)
         box = raster_proc.getBoundingBoxCorners()
         result = {'upleft': (-1771834.5, -521176.688), 'downright': (2117165.5, -3433176.688)}
@@ -50,7 +50,7 @@ class DEMRAsterProcessing(unittest.TestCase):
         
     def test_getProjection(self):
         '''Tests the method getProjection'''
-        raster_proc = RasterLayerProcessor(layertype="dem", logger=self.logger)
+        raster_proc = RasterLayerProcessor(logger=self.logger)
         raster_proc.readFile(self.inputfile)
         proj = raster_proc.getProjection()
         self.assertEqual(proj.GetAttrValue('PROJECTION'), 'Polar_Stereographic')
@@ -60,7 +60,7 @@ class DEMRAsterProcessing(unittest.TestCase):
 
     def test_conversion(self):
         '''Tests the conversion of a raster using the gdal commandline tool'''
-        raster_proc = RasterLayerProcessor(layertype="dem", logger=self.logger)
+        raster_proc = RasterLayerProcessor(logger=self.logger)
         
         #convert to 8bit
         raster_proc.to8Bit(inputfile=self.inputfile, outputfile=self.outputfile_conv, scale={'min': 0.0, 'max': 3277.0476074219},)

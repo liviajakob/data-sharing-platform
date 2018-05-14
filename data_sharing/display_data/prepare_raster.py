@@ -41,7 +41,7 @@ class RasterLayerProcessor(object):
     
     
     
-    def __init__(self, layertype, logger):
+    def __init__(self, logger):
         '''
         Constructor
         '''
@@ -49,7 +49,7 @@ class RasterLayerProcessor(object):
         self.raster = None
         self.band = None
         self.raster_8bit = None
-        self.type = layertype
+
         
         
     
@@ -204,9 +204,10 @@ class RasterLayerProcessor(object):
             scale -- [minraster, maxraster, min_newraster, max_newraster]
         
         '''
-        
+        print(scale, type(scale))
         self.logger.info('Converting raster to 8 Bit...')
         commandlist=['gdal_translate', '-ot', 'Byte', '-of', fileformat, '-scale', str(scale['min']), str(scale['max']), str(bits[0]), str(bits[1]),'-exponent', str(exponent), '-a_nodata', str(nodata), inputfile, outputfile]
+        print(commandlist)
         subprocess.call(commandlist)
 
         self.logger.info('Finished converting to 8 Bit')

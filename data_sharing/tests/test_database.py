@@ -54,14 +54,16 @@ class DatabaseTest(unittest.TestCase):
         self.db.newLayer(1, "dem")
         self.db.newLayer(1, "error")
         
+        self.db.commit()
+        
         self.assertEqual(len(self.db.getDatasets()), 3, "couldnt insert all datasets")
         self.assertEquals(len(self.db.getProjections()), 2, "couldnt insert all projections")
         self.assertEquals(self.db.getDatasets(2)[0].id, 2, "Error in get Datasets")
         self.assertEquals(len(self.db.getDatasets([2,3])), 2, "Error in get Datasets")
         self.assertEquals(len(self.db.getLayerTypes()), 3, "couldnt insert all layer types")
-        self.assertEquals(len(self.db.getLayers()), 2, "couldnt insert all layers")
+        self.assertEquals(len(self.db.getLayerByAttributes()), 2, "couldnt insert all layers")
         
-        print("TYPE: ----------------------------------------", self.db.getLayers()[0].timestamp)
+        print("TYPE: ----------------------------------------", self.db.getLayerByAttributes()[0].timestamp)
 
 
 

@@ -10,7 +10,8 @@ from configobj import ConfigObj
 from display_data.rollback import Rollback
 from display_data.database import DatabaseIngestion
 import logging
-import os, traceback
+import os
+import traceback
 
 
 def handle_input():
@@ -19,39 +20,22 @@ def handle_input():
     config = ConfigObj(CONFIG_PATH)
     types = config['layers']['types'] ## read from config file
     
-    parser = argparse.ArgumentParser(description='Register a new dataset.')
-    parser.add_argument('layerfile1', action='store', nargs=1,
+    parser = argparse.ArgumentParser(description='Register a new layer.')
+    parser.add_argument('dataset_id', action='store', nargs=1, type=int,
+                help='ID of the dataset:')
+    parser.add_argument('layerfile', action='store', nargs=1,
                 help='filename of the layer:')
-    parser.add_argument('layertype1', action='store', nargs=1, choices=types, metavar='layertype',
+    parser.add_argument('layertype', action='store', nargs=1, choices=types, metavar='layertype',
                 help='choices = {%(choices)s} ||| type of the layer')
-    parser.add_argument('-a', dest='additional', action='append',nargs=2, metavar=('layername','layertype'), 
-                help='Additional Layer: [filename, filetype] with filetype choices = {} ||| Any number of additional can be given as input'.format(types))
-    parser.add_argument('-c', dest="cite", action='store', 
-                help='How to cite this dataset (Description)')
     parser.add_argument('--version', action='version', version='Version 1.0, Not released yet.', help="Show program's version number")
 
     args = parser.parse_args()
-    
-    if args.additional is None:
-        layers=[[args.layerfile1[0], args.layertype1[0]]]
-        print('dta', layers)
-        add_dataset(layers=layers, cite=args.cite)
+    add_layer(layerfile=args.layerfile[0], layertype=args.layertype[0], dataset_id = args.dataset_id[0])
         
-    elif typeConstraintMet(args.additional, types):
-        layers = args.additional
-        layers.insert(0,[args.layerfile1[0], args.layertype1[0]])
         
-        print('dta', layers)
-        add_dataset(layers=layers, cite=args.cite)
-        
-    else:
-        print("layertypes must have one of the following values: {} ".format(types))
 
-
-def add_dataset(layers, cite):
+def add_layer(layerfile, layertype, dataset_id):
     '''
-    Input Params:
-        layer: [[file1, type1],[file2, type2],[file3, type3]]
     
     '''
     logging.basicConfig(level=logging.NOTSET) #NOTSET gives all the levels, e.g. INFO only .info
@@ -61,20 +45,23 @@ def add_dataset(layers, cite):
     
     try:
         ing = DatabaseIngestion(rollback, logger)
-        ing.addDataset(layers, cite)
+        ing.addOneLayer(filename=layerfile, ltype=layertype, dataset_id=dataset_id)
+        print('hi')
         logger.info('Success!!!')
     except Exception as e:
         if hasattr(e, 'message'):
             print(e.message)
+            print(e)
         else:
             print(e)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        #print(exc_type, fname, exc_tb.tb_lineno)
         print(traceback.format_exc())
         logger.info('Rolling back...')
         rollback.rollback()
         logger.info('Rolled back!!')
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        print(exc_type, fname, exc_tb.tb_lineno)
+
     
     
 
@@ -94,6 +81,4 @@ def typeConstraintMet(inp, types):
 
 if __name__ == '__main__':
     handle_input()
-
-
 
