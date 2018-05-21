@@ -3,5 +3,16 @@ h1{
 }
 
 body{
-	background-color: grey;
+	background-color: lightgrey;
+}
+
+
+#llmap {
+    height: 400px;
+     width: 800px;
+ }
+
+ #mapContainer {
+   height: 400px;
+     width: 800px;
 }

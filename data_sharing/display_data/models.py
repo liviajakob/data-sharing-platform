@@ -42,6 +42,22 @@ class Dataset(Base):
     def getBoundingBox(self):
         return {'xmin':self.xmin,'xmax': self.xmax, 'ymin':self.ymin,'ymax': self.ymax}
     
+    
+    def asGeoDict(self):
+        '''Returns a dict which can be used to convert to a geoJSON'''
+        dic = {}
+        dic['type']="Feature"
+        dic['properties']={}
+        dic['properties']['id']=self.id
+        dic['properties']['cite']=self.cite
+        dic['properties']['popupContent']= "Example!"
+        dic['geometry']={}
+        dic['geometry']['type']="Polygon"
+        dic['geometry']['coordinates']=[[self.xmin,self.ymin],[self.xmax,self.ymin], [self.xmax,self.ymax], [self.xmin,self.ymax], [self.xmin,self.ymin]]
+        return dic
+
+    
+    
     def __str__(self):
         return "DATASET: id={} cite={}".format(self.id, self.cite)
    
