@@ -8,7 +8,7 @@ import argparse
 from definitions import CONFIG_PATH
 from configobj import ConfigObj
 from display_data.rollback import Rollback
-from display_data.database import DatabaseIngestion
+from display_data.ingestion import DatabaseIngestion
 import logging
 import os, traceback
 

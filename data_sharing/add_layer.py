@@ -8,7 +8,7 @@ import argparse
 from definitions import CONFIG_PATH
 from configobj import ConfigObj
 from display_data.rollback import Rollback
-from display_data.database import DatabaseIngestion
+from display_data.ingestion import DatabaseIngestion
 import logging
 import os
 import traceback
@@ -45,7 +45,7 @@ def add_layer(layerfile, layertype, dataset_id):
     
     try:
         ing = DatabaseIngestion(rollback, logger)
-        ing.addOneLayer(filename=layerfile, ltype=layertype, dataset_id=dataset_id)
+        ing.addLayerToDataset(filename=layerfile, ltype=layertype, dataset_id=dataset_id)
         print('hi')
         logger.info('Success!!!')
     except Exception as e:

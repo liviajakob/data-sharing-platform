@@ -3,7 +3,7 @@ Created on 25 Apr 2018
 
 @author: livia
 '''
-from display_data.database import Query, Database
+from display_data.database import Database
 from flask import Flask, render_template
 
 app = Flask(__name__)
@@ -12,19 +12,17 @@ app = Flask(__name__)
 def index():
     database = Database()
     database.scopedSession()
-    query = database.getDatasets(3)
+    query = database.getDatasets(1)[0]
     
     database.closeSession()
     
-    return "This is {}".format(query[0])
+    return render_template('main.html', data=query.getBoundingBox(), error=False)
     
 
 
 
 if __name__ == '__main__':
     print("hi")
-    query = Query(3)
-    print(query)
     
     database = Database()
     database.scopedSession()

@@ -61,9 +61,8 @@ class DatabaseTest(unittest.TestCase):
         self.assertEquals(self.db.getDatasets(2)[0].id, 2, "Error in get Datasets")
         self.assertEquals(len(self.db.getDatasets([2,3])), 2, "Error in get Datasets")
         self.assertEquals(len(self.db.getLayerTypes()), 3, "couldnt insert all layer types")
-        self.assertEquals(len(self.db.getLayerByAttributes()), 2, "couldnt insert all layers")
+        self.assertEquals(self.db.getLayerById(1)[0].layertype_id, 1, "couldnt insert dem layer")
         
-        print("TYPE: ----------------------------------------", self.db.getLayerByAttributes()[0].timestamp)
 
 
 

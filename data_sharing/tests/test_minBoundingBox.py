@@ -30,14 +30,14 @@ class Test(unittest.TestCase):
 
 
     def test_minBoundingBox(self):
-        raster_proc = RasterLayerProcessor(layertype="dem", logger=self.logger)
+        raster_proc = RasterLayerProcessor(logger=self.logger)
         raster_proc.readFile(self.inputfile)
         self.assertNotEqual(raster_proc.getMinBoundingBox(),raster_proc.getBoundingBox())
         print('BOUNDING 1', raster_proc.getBoundingBox())
 
 
     def test_minBoundingBoxWithCropped(self):
-        raster_proc = RasterLayerProcessor(layertype="dem", logger=self.logger)
+        raster_proc = RasterLayerProcessor(logger=self.logger)
         raster_proc.readFile(self.inputfile_cropped)
         self.assertEqual(raster_proc.getMinBoundingBox(),raster_proc.getBoundingBox())
 

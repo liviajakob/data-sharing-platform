@@ -39,7 +39,7 @@ class DatabaseIngestionTest(unittest.TestCase):
         rollback=Rollback(self.logger)
         
         self.insert=DatabaseIngestion(rollback=rollback, logger=self.logger, database=self.db)
-        self.insert.addDataset(layers=None, cite='hi')
+        #self.insert.addDataset(layers=None, cite='hi')
 
         
 

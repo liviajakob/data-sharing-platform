@@ -125,4 +125,3 @@ class ConfigSystem():
         folder = os.path.join(self.getLayerFolder(ltype=ltype, d_id=d_id), self.config['data']['tiles'])
         return folder
     
- 

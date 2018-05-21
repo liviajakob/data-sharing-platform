@@ -39,6 +39,8 @@ class Dataset(Base):
     projection_id=Column(Integer(), ForeignKey("projection.id"))
     projection = relationship("Projection", backref=backref("dataset"))
     
+    def getBoundingBox(self):
+        return {'xmin':self.xmin,'xmax': self.xmax, 'ymin':self.ymin,'ymax': self.ymax}
     
     def __str__(self):
         return "DATASET: id={} cite={}".format(self.id, self.cite)
