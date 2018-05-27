@@ -71,7 +71,11 @@ class Database():
         
         
         """
+        
         assert self.Session is not None
+        
+        if cite is None:
+            cite="No information given."
         
         try:
             proj = self.Session.query(Projection).filter(Projection.id==projection_id).one() 

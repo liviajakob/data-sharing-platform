@@ -1,24 +1,35 @@
 {% extends "layout.html" %}
 {% block head %}
+
+
     <script src="{{url_for('static', filename='js/jquery.js')}}"></script>
     <script src="{{url_for('static', filename='leaflet/leaflet.js')}}"></script>
     <script src="{{url_for('static', filename='js/proj4.js')}}"></script>
-    <script src="{{url_for('static', filename='js/proj4leaflet.js')}}"></script>
-    <link rel="stylesheet" href="{{url_for('static', filename='css/polarmap.css')}}"/>
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.6.4/css/ol.css" type="text/css">
+	
+	<!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
+	<script src="https://openlayers.org/en/v4.6.4/build/ol.js"></script>
+
+
+
     <link rel="stylesheet" href="{{url_for('static', filename='leaflet/leaflet.css')}}">
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" type=text/css href="{{url_for('static', filename='css/map.css')}}">
+
+
+
+    
 {% endblock %}
 {% block content %}
-<div class="container">
-  <h2>Main Page</h2>
-  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
-  
- <p>{{data}} HI</p>
- </div>
- <div id="llmap"></div>
- 
- <div id="mapContainer"></div>
- 
+<div id="map">{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}</div>
+<div id="checkbox">
+<input type="checkbox" id="visible" checked> Toggle Layer Visibility</input>
+</div>
+
+<div id="mouse-position"></div>
+
+ <script>console.log('{{data}}')</script>
  <script src="{{url_for('static', filename='js/map.js')}}"></script>
+
 {% endblock %}
 
