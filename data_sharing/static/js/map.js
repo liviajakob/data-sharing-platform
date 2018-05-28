@@ -6,8 +6,9 @@ var map = new ol.Map({
     target: 'map',
     controls: ol.control.defaults({
     	attributionOptions: {
-              target: document.getElementById('myattribution'),
-              className: 'myCustomClass'
+              target: document.getElementById('attribution'),
+              //className: 'myCustomClass',
+              collapsible: true,
         }
     }).extend([
           scaleLineControl, 
@@ -21,12 +22,14 @@ var map = new ol.Map({
 
 
     
-    $.getJSON('datasets/1', function(data) {
+	$.getJSON('datasets/1', function(data) {
         //data is the JSON string
     	console.log('DATAA')
     	console.log(data);
+    	console.log(data.features[0].properties.id);
+    	console.log(typeof data)
+    	return data;
     });
-    
     
     
     
@@ -208,6 +211,7 @@ var map = new ol.Map({
          }),
          style: getStackedStyle
        });
+       console.log("OSM"+vectorLayer)
        map.addLayer(vectorLayer)
        
        
@@ -258,21 +262,94 @@ var map = new ol.Map({
      ///
      console.log(vectorSource);
      
-     var vectorLayer = new ol.layer.Vector({
+     var vectorLayer2 = new ol.layer.Vector({
          source: vectorSource,
          style: geometryStyle,
          opacity: 0.6
      });
      
+     //// third polygon
+     
+     //var source = new ol.source.Vector({
+   	  //url: 'datasets/1',
+   	  //format: new ol.format.GeoJSON()
+   	//});
+     
+     
+     var thing = new ol.geom.Polygon(
+    	    [[ol.proj.transform([-16,-22], 'EPSG:4326', 'EPSG:3857'),
+    	    ol.proj.transform([-44,-55], 'EPSG:4326', 'EPSG:3857'),
+    	    ol.proj.transform([-88,75], 'EPSG:4326', 'EPSG:3857')]]
+     );
+     
+
+     
+     
+     var featurething = new ol.Feature({
+    	    name: "Thing",
+    	    geometry: thing
+    });
+     vectorSource.addFeature(featurething);
+     
+     
+ 	$.getJSON('datasets/1', function(data) {
+        //data is the JSON string
+    	console.log('MakePOLY')
+    	console.log(data);
+    	console.log(data.features[0].properties.id);
+    	console.log(typeof data)
+    	makePoly(data)
+    });
+
+
+     function makePoly(geojsonObject){
+    	 console.log(geojsonObject)
+    	 var source = new ol.source.Vector({
+       	  url: 'http://localhost:5000/datasets/1',
+       	  format: new ol.format.GeoJSON()
+       	 //features: (new ol.format.GeoJSON()).readFeatures(geojsonObject)
+       	 
+       	});
+    	 //console.log('hi',new ol.format.GeoJSON()).readFeatures(geojsonObject)
+        console.log("SOURCE" + source)
+        
+        map.addLayer(new ol.layer.Vector({
+            title: 'added Layer',
+            source: source
+         }));
+    	 
+     }
+     
+     
      //console.log(polygon);
-     map.addLayer(vectorLayer);
+     map.addLayer(vectorLayer2);
+     
+     
+
+     
      
      /////////hover interaction/////////////////////////////////////////////////
      hoverInteraction = new ol.interaction.Select({
          condition: ol.events.condition.pointerMove,
-         layers:[vectorLayer]  //Setting layers to be hovered
+         layers:[vectorLayer2]  //Setting layers to be hovered
      });
      map.addInteraction(hoverInteraction);
+     
+     var target = map.getTarget();
+     var jTarget = typeof target === "string" ? $("#" + target) : $(target);
+     // change mouse cursor when over marker
+     $(map.getViewport()).on('mousemove', function (e) {
+         var pixel = map.getEventPixel(e.originalEvent);
+         var hit = map.forEachFeatureAtPixel(pixel, function (feature, layer) {
+             return true;
+         });
+         if (hit) {
+             jTarget.css("cursor", "pointer");
+         } else {
+             jTarget.css("cursor", "");
+         }
+     });
+     
      
      //////////click interaction//////////////////////////////
      
@@ -281,7 +358,7 @@ var map = new ol.Map({
     	 map.getView().fit(feature.getGeometry(), {
     		  duration: 1000
     		});
-    	 
+    	 vectorLayer2.setVisible(false);
          console.log(feature.getId());
          //alert("Feature Listener Called");
        };
@@ -293,12 +370,52 @@ var map = new ol.Map({
         	 console.log(feature.getGeometry().getType())
            if (feature.getGeometry().getType() == 'Polygon') {
              //feature.setStyle(listenerStyle);
+        	 
              featureListener(event, feature);
            }
          });
        });
      
      
+    // display popup on hover
+       
+       ///////popup
+       
+       var element = document.getElementById('popup');
+
+       var popup = new ol.Overlay({
+           element: element,
+           positioning: 'bottom-center',
+           stopEvent: false
+       });
+       map.addOverlay(popup);
+       
+     ///pointermove event
+       
+       map.on('pointermove', function (evt) {
+           var feature = map.forEachFeatureAtPixel(evt.pixel,
+
+           function (feature, layer) {
+               return feature;
+           });
+           if (feature) {
+               var geometry = feature.getGeometry();
+               //calculate center of polygon
+               var oo = ol.extent.getCenter(geometry.getExtent());               
+               var coord=oo;               
+               popup.setPosition(coord);
+               $(element).popover({
+                   'placement': 'top',
+                       'html': true,
+                       'content': 'hi'//feature.get('name')
+               });
+               $(element).popover('show');
+           } else {
+               $(element).popover('dispose');
+           }
+       });
+       
+       
      //map.getView().fit(source.getExtent(), map.getSize()); 
      
        
@@ -384,16 +501,16 @@ var map = new ol.Map({
     	
     	
     	
-    	//popup
+    	//layercheckbox
     	
-        var popup = new ol.Overlay({
+        var check = new ol.Overlay({
             element: document.getElementById('checkbox')
           });
     
      
         var ol3_sprint_location = ol.proj.transform([-1.20472, 52.93646], 'EPSG:4326', 'EPSG:3857');
-        map.addOverlay(popup);
-        popup.setPosition(ol3_sprint_location);
+        map.addOverlay(check);
+        check.setPosition(ol3_sprint_location);
      
      
 
@@ -536,6 +653,5 @@ var map = new ol.Map({
         //bbox.addFeatures(features);
         console.log(bbox);
         //map.addLayer()
-        
         
         

@@ -53,7 +53,7 @@ class Dataset(Base):
         dic['properties']['popupContent']= "Example!"
         dic['geometry']={}
         dic['geometry']['type']="Polygon"
-        dic['geometry']['coordinates']=[[self.xmin,self.ymin],[self.xmax,self.ymin], [self.xmax,self.ymax], [self.xmin,self.ymax], [self.xmin,self.ymin]]
+        dic['geometry']['coordinates']=[[[self.xmin,self.ymin],[self.xmax,self.ymin], [self.xmax,self.ymax], [self.xmin,self.ymax], [self.xmin,self.ymin]]]
         return dic
 
     

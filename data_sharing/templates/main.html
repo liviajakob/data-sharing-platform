@@ -2,7 +2,7 @@
 {% block head %}
 
 
-    <script src="{{url_for('static', filename='js/jquery.js')}}"></script>
+
     <script src="{{url_for('static', filename='js/proj4.js')}}"></script>
     <link rel="stylesheet" href="https://openlayers.org/en/v4.6.4/css/ol.css" type="text/css">
 	
@@ -18,17 +18,41 @@
     
 {% endblock %}
 {% block content %}
-<div id="map">{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}</div>
-<div id="checkbox">
-<input type="checkbox" id="visible" checked> Toggle Layer Visibility</input>
-</div>
+
+
+
+<div id=side>
+    <div id="side-content">
+    <p>HI</p>   
+     <div id="checkbox">
+	<input type="checkbox" id="visible" checked> Toggle Layer Visibility</input>
+	</div>
+	
+	
+	<div><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer eget laoreet justo. Morbi feugiat purus velit, at feugiat quam vestibulum id. Morbi a finibus orci. Mauris non mi rhoncus, accumsan erat sed, blandit turpis. Fusce tincidunt maximus risus, sit amet fermentum sapien accumsan nec. Donec consequat sollicitudin nisi sit amet cursus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur ullamcorper condimentum aliquam. Pellentesque volutpat pulvinar enim. Morbi accumsan vestibulum volutpat.
+Vestibulum ut lectus lacus. Sed enim diam, rutrum at maximus suscipit, consequat in metus. Fusce nec ipsum nec nisi mattis porta ac vitae quam. Pellentesque viverra sapien augue, nec tincidunt purus volutpat vitae. Aliquam vitae scelerisque nibh, quis maximus massa. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vivamus vitae felis metus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras a tortor id arcu sollicitudin aliquet. Ut a accumsan ex. Nullam fermentum quam non odio volutpat rhoncus. Praesent tincidunt, justo at euismod elementum, felis lectus vehicula lectus, vitae dapibus quam odio dictum ex. Morbi imperdiet sem eget risus ultrices, sed cursus sapien pellentesque. Etiam eleifend mattis quam ut posuere. Nullam eget tincidunt nisl.
+Aenean pharetra dignissim est, non placerat massa semper vitae. Duis et est mauris. Proin pretium ut massa ut finibus. Aliquam aliquet sodales magna vel sollicitudin. Etiam interdum, ex in tincidunt fringilla, felis nisl convallis arcu, sed placerat mi nisi vitae neque. Quisque at aliquet enim. Sed ornare ipsum et ligula sagittis, quis vestibulum augue luctus. Nullam id rhoncus ante, at euismod nulla. Quisque consequat ultrices dolor eget tristique. Mauris porta tellus ut tellus aliquet, non pellentesque sem ultrices. Ut pretium, velit in ultricies malesuada, sapien urna tempus velit, sit amet mollis ante enim elementum purus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Interdum et malesuada fames ac ante ipsum primis in faucibus.
+
+<div id="attribution">Attribution: </div>
+
+	</p></div>
+    </div> <!-- end side-content -->
+    </div> <!-- end side -->
+    
+   <div id="map">{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+   
+   <div id="popup"></div>
+   </div> 
+
 
     <div id="search" style="position: absolute; top: 60px; right: 10px; padding: 5px; background-color: rgba(255,255,255,0.5);">
       <input type="text" placeholder="Search photos by tag(s)" style="width: 200px">
       <button type="button">Search</button>
     </div>
 
-<div id="mouse-position"></div>
+<div id="mouse-position">Mouse Position:
+</div>
+
 
  <script>console.log('{{data}}')</script>
  <script src="{{url_for('static', filename='js/map.js')}}"></script>

@@ -2,8 +2,17 @@
 
 
  #map {
-   height:  /*100vh;*/ 500px;;
-     width: 100%;
+ margin-top: 59px;
+ margin-bottom: 30px;
+ height: -moz-calc(100% - 89px);
+ height: -webkit-calc(100% - 89px);
+ height: calc(100% - 89px);
+   /*height: 100vh; *//*500px;*/
+ width: -moz-calc(100% - 250px);
+ width: -webkit-calc(100% - 250px);
+ width: calc(100% - 250px);
+   position: absolute;
+   margin-left: 250px;
 }
 
 .rotate-north {
@@ -28,4 +37,26 @@
     left: calc(45px);
     bottom: 10px;
 
+}
+
+#mouse-position{
+	position:absolute;
+	top: -moz-calc(100% - 58px);
+ 	top: -webkit-calc(100% - 58px);
+ 	top: calc(100% - 58px);
+	left: -moz-calc(100% - 250px);
+ 	left: -webkit-calc(100% - 250px);
+ 	left: calc(100% - 250px);
+ 	font-size: 10px;
+ 	padding: 2px; 
+ 	background-color: rgba(255,255,255,0.5);
+ 	display:inline;
+}
+
+.custom-mouse-position{
+	display:inline;
+}
+
+#popup {
+    padding-bottom: 15px;
 }

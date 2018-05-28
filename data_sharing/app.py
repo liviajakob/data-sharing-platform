@@ -29,9 +29,14 @@ def datasets(dataset_id):
     dataset=database.getDatasets(dataset_id)[0]
     geoDict=dataset.asGeoDict()
     print(geoDict)
+    geoCollection = {}
+    geoCollection['type']= 'FeatureCollection'
+    geoCollection['features'] = [geoDict]
+    
     database.closeSession()
-    return jsonify(geoDict)
+    return jsonify(geoCollection)
 
+ 
  
  
     

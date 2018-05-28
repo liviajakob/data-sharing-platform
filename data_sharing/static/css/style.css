@@ -3,7 +3,7 @@ h1{
 }
 
 body{
-	background-color: lightgrey;
+	background-color: darkgrey;
 }
 
 .footertext{
@@ -28,3 +28,29 @@ body{
     font-size: 90%;
     padding-top: 0.3%;
 }
+
+
+#side{
+	
+	position: absolute;
+	padding-top: 59px;
+    padding-bottom: 30px;
+	width: 250px;
+    height: 100%;
+}
+
+#side-content{
+	width: 100%;
+    height: 100%;
+	direction: rtl;
+	padding-left: 20px;
+	padding-bottom: 20px;
+	padding-top: 20px;
+	padding-right: 20px;
+	overflow-y: auto;
+}
+
+#attribution{
+	position:relative;
+}
+
