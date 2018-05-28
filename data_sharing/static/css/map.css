@@ -2,8 +2,30 @@
 
 
  #map {
-   height:  /*100vh;*/ 400px;;
+   height:  /*100vh;*/ 500px;;
      width: 100%;
 }
 
+.rotate-north {
+	top: 65px;
+	left: .5em;
+}
+.ol-touch .rotate-north {
+	top: 80px;
+}
 
+.ol-touch .rotate-north {
+	top: 80px;
+}
+
+.ol-scale-line{
+
+    //top: -moz-calc(100% - 35px);
+    //top: -webkit-calc(100% - 35px);
+    //top: calc(100% - 35px);
+    left: -moz-calc(45px);
+    left: -webkit-calc(45px);
+    left: calc(45px);
+    bottom: 10px;
+
+}

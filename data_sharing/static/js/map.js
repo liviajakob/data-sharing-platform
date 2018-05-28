@@ -1,13 +1,35 @@
-    var map = new ol.Map({
-    	target: 'map',
-    	controls: ol.control.defaults({
-            attributionOptions: {
+    
+var scaleLineControl = new ol.control.ScaleLine();
+
+
+var map = new ol.Map({
+    target: 'map',
+    controls: ol.control.defaults({
+    	attributionOptions: {
               target: document.getElementById('myattribution'),
               className: 'myCustomClass'
-            }
+        }
+    }).extend([
+          scaleLineControl, 
+          new ol.control.OverviewMap(),
+        ]),
+    
+	});
+
+//map.addControl(new ol.control.OverviewMap());
+//ol.control.defaults().extend(new ol.control.OverviewMap());
+
+
+    
+    $.getJSON('datasets/1', function(data) {
+        //data is the JSON string
+    	console.log('DATAA')
+    	console.log(data);
+    });
     
     
-    })});
+    
+    
 
     proj4.defs('EPSG:3413', '+proj=stere +lat_0=90 +lat_ts=70 +lon_0=-45 +k=1 ' +
     '+x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs');
@@ -33,11 +55,24 @@
       //zoomFactor: (default:2)
       //maxResolution: ...calculated by default
       //projection: 'EPSG:3857'//'EPSG:4326'
-      extent: [-1037508.3427892,-10037508.3427892, 537508.3427892, 11037508.3427892], //left, bottom ,right, top
+      //extent: [-20037508.3427892,-20037508.3427892,20037508.3427892,20037508.3427892], //left, bottom ,right, top //minx, miny, maxx, maxy
+      extent: ol.proj.get("EPSG:3857").getExtent(),
       projection: 'EPSG:3857',
       center: [400000, 4000000] //[-4194301, -4194301]
     	
     }));
+    
+    
+    //extent: [-20037508.3427892,-20037508.3427892,20037508.3427892,20037508.3427892]
+    //map.getView().fitExtent(extent, map.getSize());
+
+    
+    // Add controls
+    
+    
+
+    
+    
 
      var osmSource = new ol.source.OSM(); //get remote data for a layer
 
@@ -45,11 +80,12 @@
      //ol.layer.Tile
      //ol.layer.Image
      //ol.layer.Vector
+     
+
 
      var osmLayer = new ol.layer.Tile({
        source: osmSource,
-       projection: 'EPSG:3857'
-
+       projection: 'EPSG:3857',
      });
      map.addLayer(osmLayer);
 
@@ -81,21 +117,249 @@
 
      //map.addLayer(wms);
 
+    
+    var extent1 = [-602834.5, -3251176.688, 664165.5, -757176.6880000001]
+    console.log(extent1)
+    ext1 = ol.proj.transformExtent(extent1, ol.proj.get('EPSG:3413'), ol.proj.get('EPSG:3857'));
 
      var source = new ol.source.OSM({
                  url: 'http://127.0.0.1:8887/tiles3/{z}/{x}/{-y}.png',
-                 crossOrigin: null //hack file
+                 crossOrigin: null, //hack file
          })
 
 
      var myLayer = new ol.layer.Tile({
        source: source,
-       projection: 'EPSG:4326'
-
+       projection: 'EPSG:4326',
+    	   extent: ext1 
      });
      map.addLayer(myLayer);
+     //map.getView().fit(ext1, map.getSize());
      
      
+   /// PAttern  ////////////////////////////////////////////////////////////////////////////
+     var canvas = document.createElement('canvas');
+     var context = canvas.getContext('2d');
+
+     // Gradient and pattern are in canvas pixel space, so we adjust for the
+     // renderer's pixel ratio
+     var pixelRatio = ol.has.DEVICE_PIXEL_RATIO;
+     
+     // Generate a canvasPattern with two circles on white background
+     var pattern = (function() {
+       canvas.width = 11 * pixelRatio;
+       canvas.height = 11 * pixelRatio;
+       // white background
+       context.fillStyle = 'white';
+       context.fillRect(0, 0, canvas.width, canvas.height);
+       // outer circle
+       context.fillStyle = 'rgba(102, 0, 102, 0.5)';
+       context.beginPath();
+       context.arc(5 * pixelRatio, 5 * pixelRatio, 4 * pixelRatio, 0, 2 * Math.PI);
+       context.fill();
+       // inner circle
+       context.fillStyle = 'rgb(55, 0, 170)';
+       context.beginPath();
+       context.arc(5 * pixelRatio, 5 * pixelRatio, 2 * pixelRatio, 0, 2 * Math.PI);
+       context.fill();
+       return context.createPattern(canvas, 'repeat');
+     }());
+     
+     // Generate a canvasPattern with two circles on white background
+     var pattern2 = (function() {
+       canvas.width = 5 * pixelRatio;
+       canvas.height = 5 * pixelRatio;
+       // transparent background
+       context.fillStyle = 'transparent';
+       context.fillRect(0, 0, canvas.width, canvas.height);
+       // outer circle
+       context.fillStyle = 'black';
+       context.beginPath();
+       context.arc(5 * pixelRatio, 5 * pixelRatio, 0.5 * pixelRatio, 0, 2 * Math.PI);
+       context.fill();
+
+       return context.createPattern(canvas, 'repeat');
+     }());
+     
+     
+     var fill = new ol.style.Fill();
+     var style = new ol.style.Style({
+       fill: fill,
+       stroke: new ol.style.Stroke({
+         color: '#333',
+         width: 2
+       })
+     });
+     
+     var getStackedStyle = function(feature, resolution) {
+         var id = feature.getId();
+
+         fill.setColor(id > 'J' ? pattern2: 'transparent');
+         //fill.setColor(pattern)
+         return style;
+       };
+       
+       
+       // Create a vector layer that makes use of the style function above…
+       var vectorLayer = new ol.layer.Vector({
+         source: new ol.source.Vector({
+           url: 'https://openlayers.org/en/v4.6.5/examples/data/geojson/countries.geojson',
+           format: new ol.format.GeoJSON()
+         }),
+         style: getStackedStyle
+       });
+       map.addLayer(vectorLayer)
+       
+       
+       
+////////////////////////////////////////////////////////////////////////////
+     
+     
+     
+     
+     
+     /////// POLYGON /////////////////////////////////////////
+     
+     var extent = [-602834.5, -3251176.688, 664165.5, -757176.6880000001]
+     ext = ol.proj.transformExtent(extent, ol.proj.get('EPSG:3413'), ol.proj.get('EPSG:3857'));
+     
+     //3395
+     
+     //'EPSG:3413'
+     
+     var style2 = new ol.style.Style({
+     	fill: new ol.style.Fill({
+             color: 'green'
+           }),
+     });
+     
+     var vectorSource = new ol.source.Vector({
+         //create empty vector
+     });
+     
+     var feature = new ol.Feature({
+         geometry: new ol.geom.Polygon.fromExtent(ext)
+     });
+     feature.setId(1);
+   
+     
+     vectorSource.addFeature(feature);
+
+     ///second polygon
+     
+     var extent2 = [-62834.5, -3051176.688, 6004165.5, -7007176.6880000001]
+     ext2 = ol.proj.transformExtent(extent2, ol.proj.get('EPSG:3413'), ol.proj.get('EPSG:3857'));
+     var feature3 = new ol.Feature({
+         geometry: new ol.geom.Polygon.fromExtent(ext2)
+     });
+     feature3.setId(2);
+     
+     vectorSource.addFeature(feature3);
+     ///
+     console.log(vectorSource);
+     
+     var vectorLayer = new ol.layer.Vector({
+         source: vectorSource,
+         style: geometryStyle,
+         opacity: 0.6
+     });
+     
+     //console.log(polygon);
+     map.addLayer(vectorLayer);
+     
+     /////////hover interaction/////////////////////////////////////////////////
+     hoverInteraction = new ol.interaction.Select({
+         condition: ol.events.condition.pointerMove,
+         layers:[vectorLayer]  //Setting layers to be hovered
+     });
+     map.addInteraction(hoverInteraction);
+     
+     //////////click interaction//////////////////////////////
+     
+     /*Zoom to layer on click*/
+     var featureListener = function(event, feature) {
+    	 map.getView().fit(feature.getGeometry(), {
+    		  duration: 1000
+    		});
+    	 
+         console.log(feature.getId());
+         //alert("Feature Listener Called");
+       };
+
+       map.on('click', function(event) {
+         map.forEachFeatureAtPixel(event.pixel,
+         function(feature, layer) {
+        	 console.log(feature.getId())
+        	 console.log(feature.getGeometry().getType())
+           if (feature.getGeometry().getType() == 'Polygon') {
+             //feature.setStyle(listenerStyle);
+             featureListener(event, feature);
+           }
+         });
+       });
+     
+     
+     //map.getView().fit(source.getExtent(), map.getSize()); 
+     
+       
+       
+     
+     
+     ////////////////////// STYLE
+     
+     function geometryStyle(feature){
+    	    var
+    	        style = [],
+    	        geometry_type = feature.getGeometry().getType(),
+    	        white = [255, 255, 255, 1],
+    	        blue = [0, 153, 255, 1],
+    	        width = 3;
+    	        
+    	    style['LineString'] = [
+    	        new ol.style.Style({
+    	            stroke: new ol.style.Stroke({
+    	                color: white, width: width + 2
+    	            })
+    	        }),
+    	        new ol.style.Style({
+    	            stroke: new ol.style.Stroke({
+    	                color: blue, width: width
+    	            })
+    	        })
+    	    ],
+    	    style['Polygon'] = [
+    	        new ol.style.Style({
+    	            fill: new ol.style.Fill({ color: [255, 255, 255, 0.5] })
+    	        }),
+    	        new ol.style.Style({
+    	            stroke: new ol.style.Stroke({
+    	                color: white, width: 3.5
+    	            })
+    	        }),
+    	        new ol.style.Style({
+    	            stroke: new ol.style.Stroke({
+    	                color: blue, width: 2.5
+    	            })
+    	        })
+    	    ],
+    	    style['Point'] = [
+    	        new ol.style.Style({
+    	            image: new ol.style.Circle({
+    	                radius: width * 2,
+    	                fill: new ol.style.Fill({color: blue}),
+    	                stroke: new ol.style.Stroke({
+    	                    color: white, width: width / 2
+    	                })
+    	            })
+    	        })
+    	    ];
+    	    
+    	    return style[geometry_type];
+    	}
+     
+     
+     
+     //////////////////////
      
      
      ///////////
@@ -154,79 +418,124 @@
         map.addControl(mousePositionControl);
        
         
-        /// PAttern  ////////////////////////////////////////////////////////////////////////////
-        var canvas = document.createElement('canvas');
-        var context = canvas.getContext('2d');
+        
+          
+          /////custom controls
+          
+      /**
+       * Define a namespace for the application.
+       */
+      window.app = {};
+      var app = window.app;
+      
+          
+      app.RotateNorthControl = function(opt_options) {
 
-        // Gradient and pattern are in canvas pixel space, so we adjust for the
-        // renderer's pixel ratio
-        var pixelRatio = ol.has.DEVICE_PIXEL_RATIO;
-        
-        // Generate a canvasPattern with two circles on white background
-        var pattern = (function() {
-          canvas.width = 11 * pixelRatio;
-          canvas.height = 11 * pixelRatio;
-          // white background
-          context.fillStyle = 'white';
-          context.fillRect(0, 0, canvas.width, canvas.height);
-          // outer circle
-          context.fillStyle = 'rgba(102, 0, 102, 0.5)';
-          context.beginPath();
-          context.arc(5 * pixelRatio, 5 * pixelRatio, 4 * pixelRatio, 0, 2 * Math.PI);
-          context.fill();
-          // inner circle
-          context.fillStyle = 'rgb(55, 0, 170)';
-          context.beginPath();
-          context.arc(5 * pixelRatio, 5 * pixelRatio, 2 * pixelRatio, 0, 2 * Math.PI);
-          context.fill();
-          return context.createPattern(canvas, 'repeat');
-        }());
-        
-        // Generate a canvasPattern with two circles on white background
-        var pattern2 = (function() {
-          canvas.width = 5 * pixelRatio;
-          canvas.height = 5 * pixelRatio;
-          // transparent background
-          context.fillStyle = 'transparent';
-          context.fillRect(0, 0, canvas.width, canvas.height);
-          // outer circle
-          context.fillStyle = 'black';
-          context.beginPath();
-          context.arc(5 * pixelRatio, 5 * pixelRatio, 0.5 * pixelRatio, 0, 2 * Math.PI);
-          context.fill();
+        var options = opt_options || {};
 
-          return context.createPattern(canvas, 'repeat');
-        }());
+        var button = document.createElement('button');
+        button.innerHTML = 'N';
         
+        var nort = document.createElement('button');
+        nort.innerHTML = 'N';
         
-        var fill = new ol.style.Fill();
-        var style = new ol.style.Style({
-          fill: fill,
-          stroke: new ol.style.Stroke({
-            color: '#333',
-            width: 2
-          })
+        var tool = document.createElement('select');
+        var option = document.createElement('option')
+        option.setAttribute('value', 'hi');
+        //var textNode = document.createTextNode(feature.get('NOM'));
+        tool.appendChild(option);
+        
+        tool.addEventListener('onchange', handleRotateNorth, false);
+        
+
+        var this_ = this;
+        var handleRotateNorth = function() {
+          this_.getMap().getView().setRotation(0);
+        };
+        
+        button.addEventListener('click', handleRotateNorth, false);
+        button.addEventListener('touchstart', handleRotateNorth, false);
+
+        
+        var element = document.createElement('div');
+        element.className = 'rotate-north ol-unselectable ol-control';
+        element.appendChild(nort);
+        element.appendChild(button);
+        element.appendChild(tool);
+
+        
+        ol.control.Control.call(this, {
+          element: element,
+          target: options.target
         });
         
-        var getStackedStyle = function(feature, resolution) {
-            var id = feature.getId();
-
-            fill.setColor(id > 'J' ? pattern2: 'transparent');
-            //fill.setColor(pattern)
-            return style;
-          };
+      };
+        
+        ol.inherits(app.RotateNorthControl, ol.control.Control);
+        
+        map.addControl(new app.RotateNorthControl());
           
           
-          // Create a vector layer that makes use of the style function above…
-          var vectorLayer = new ol.layer.Vector({
-            source: new ol.source.Vector({
-              url: 'https://openlayers.org/en/v4.6.5/examples/data/geojson/countries.geojson',
-              format: new ol.format.GeoJSON()
-            }),
-            style: getStackedStyle
+//////////////////////////////////////////////////
+        
+        
+        ////// Polygon
+        
+        //var extent = [-402834.5, -3251176.688, 464165.5, -757176.6880000001]; //has to be in 38
+        
+        
+        ///Add GEOJSON from file
+        
+        /*var countriesSource = new ol.source.GeoJSON({
+            projection: 'EPSG:2154',
+            url: '../assets/data/nutsv9_lea.geojson'
           });
-          map.addLayer(vectorLayer)
-          
-          
-          
-////////////////////////////////////////////////////////////////////////////
+        
+        var bbox = new ol.layer.Vector({
+            source: new ol.source.GeoJSON()
+          });
+          map.addLayer(bbox);*/
+        
+        
+        var geojson = {
+        	      "type": "FeatureCollection",
+        	      "features": [
+        	        {
+        	          "type": "Feature",
+        	          "properties": {},
+        	          "geometry": {
+        	            "type": "Polygon",
+        	            "coordinates": [
+        	              [[-0.944824, 46.134170], [-0.944824, 48.312428],
+        	               [4.438477, 48.312428], [4.438477, 46.134170],
+        	               [-0.944824, 46.134170]
+        	              ]
+        	            ]
+        	          }
+        	        }
+        	      ]
+        	    };
+       
+
+
+        var format = new ol.format.GeoJSON({
+        	      defaultDataProjection: 'EPSG:4326'
+        });
+        var features = format.readFeatures(geojson, {
+        	      dataProjection: 'EPSG:4326',
+        	      featureProjection: 'EPSG:2154'
+        });
+        
+        var bbox = new ol.layer.Vector({
+            title: 'added Layer',
+            projection : 'EPSG:3413',
+            format : new ol.format.GeoJSON(),
+            url: 'datasets/1'
+          });
+          map.addLayer(bbox);
+        //bbox.addFeatures(features);
+        console.log(bbox);
+        //map.addLayer()
+        
+        
+        

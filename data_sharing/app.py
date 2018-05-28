@@ -22,6 +22,7 @@ def index():
  
 @app.route('/datasets/<int:dataset_id>')
 def datasets(dataset_id):
+    '''Returns a JSON of the dataset'''
     database = Database()
     database.scopedSession()
     

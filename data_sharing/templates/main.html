@@ -3,7 +3,6 @@
 
 
     <script src="{{url_for('static', filename='js/jquery.js')}}"></script>
-    <script src="{{url_for('static', filename='leaflet/leaflet.js')}}"></script>
     <script src="{{url_for('static', filename='js/proj4.js')}}"></script>
     <link rel="stylesheet" href="https://openlayers.org/en/v4.6.4/css/ol.css" type="text/css">
 	
@@ -12,8 +11,6 @@
 	<script src="https://openlayers.org/en/v4.6.4/build/ol.js"></script>
 
 
-
-    <link rel="stylesheet" href="{{url_for('static', filename='leaflet/leaflet.css')}}">
     <link rel="stylesheet" type=text/css href="{{url_for('static', filename='css/map.css')}}">
 
 
@@ -25,6 +22,11 @@
 <div id="checkbox">
 <input type="checkbox" id="visible" checked> Toggle Layer Visibility</input>
 </div>
+
+    <div id="search" style="position: absolute; top: 60px; right: 10px; padding: 5px; background-color: rgba(255,255,255,0.5);">
+      <input type="text" placeholder="Search photos by tag(s)" style="width: 200px">
+      <button type="button">Search</button>
+    </div>
 
 <div id="mouse-position"></div>
 
