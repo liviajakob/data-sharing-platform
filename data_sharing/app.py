@@ -4,7 +4,8 @@ Created on 25 Apr 2018
 @author: livia
 '''
 from display_data.database import Database
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
+import json
 
 app = Flask(__name__)
     
@@ -37,6 +38,47 @@ def datasets(dataset_id):
     return jsonify(geoCollection)
 
  
+  
+@app.route('/data')
+def data():
+    '''Returns a JSON of the datasets, including filteroptions'''
+    database = Database()
+    database.scopedSession()
+    
+    filtering = 'hi' #request.args
+    
+    #data = request.data
+    #dataDict = json.loads(data)
+    
+    ##lid = request.args.get('lid')    
+    
+    
+    datasets=database.getDatasets(filtering=filtering, dic=True)
+    ''''features=[]
+    for ds in datasets:
+        features.append(ds.asGeoDict())
+        
+    #print(geoDict)
+    geoCollection = {}
+    geoCollection['type']= 'FeatureCollection'
+    geoCollection['features'] = features'''
+    
+    database.closeSession()
+
+    return jsonify(datasets)
+
+ 
+   
+@app.route('/layertypes')
+def layertypes():
+    '''Returns a JSON of the datasets, including filteroptions'''
+    database = Database()
+    database.scopedSession()
+    layertypes=database.getLayerTypes(dic=True)    
+    database.closeSession()
+
+    return jsonify(layertypes)
+
  
  
     

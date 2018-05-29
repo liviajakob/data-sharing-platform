@@ -212,7 +212,7 @@ var map = new ol.Map({
          style: getStackedStyle
        });
        console.log("OSM"+vectorLayer)
-       map.addLayer(vectorLayer)
+       //map.addLayer(vectorLayer)
        
        
        
@@ -242,19 +242,19 @@ var map = new ol.Map({
      });
      
      var feature = new ol.Feature({
-         geometry: new ol.geom.Polygon.fromExtent(ext)
+         geometry: new ol.geom.Polygon.fromExtent(ext),
      });
      feature.setId(1);
    
      
-     vectorSource.addFeature(feature);
+     //vectorSource.addFeature(feature);
 
      ///second polygon
      
      var extent2 = [-62834.5, -3051176.688, 6004165.5, -7007176.6880000001]
      ext2 = ol.proj.transformExtent(extent2, ol.proj.get('EPSG:3413'), ol.proj.get('EPSG:3857'));
      var feature3 = new ol.Feature({
-         geometry: new ol.geom.Polygon.fromExtent(ext2)
+         geometry: new ol.geom.Polygon.fromExtent(ext2),
      });
      feature3.setId(2);
      
@@ -269,11 +269,6 @@ var map = new ol.Map({
      });
      
      //// third polygon
-     
-     //var source = new ol.source.Vector({
-   	  //url: 'datasets/1',
-   	  //format: new ol.format.GeoJSON()
-   	//});
      
      
      var thing = new ol.geom.Polygon(
@@ -292,33 +287,40 @@ var map = new ol.Map({
      vectorSource.addFeature(featurething);
      
      
- 	$.getJSON('datasets/1', function(data) {
+     
+     /////////////// POLYGONS FROM DATASET GEOJSON
+     
+ 	$.getJSON('data', function(data) {
         //data is the JSON string
-    	console.log('MakePOLY')
-    	console.log(data);
-    	console.log(data.features[0].properties.id);
-    	console.log(typeof data)
-    	makePoly(data)
+    	console.log('Make Polygons....')
+    	makePolys(data)
     });
 
+ 	console.log('Dataproj', ol.dataProjection)
 
-     function makePoly(geojsonObject){
+     function makePolys(geojsonObject){
     	 console.log(geojsonObject)
     	 var source = new ol.source.Vector({
-       	  url: 'http://localhost:5000/datasets/1',
-       	  format: new ol.format.GeoJSON()
-       	 //features: (new ol.format.GeoJSON()).readFeatures(geojsonObject)
+       	  //url: 'datasets/1',
+       	  //format: new ol.format.GeoJSON()
+       	 features: (new ol.format.GeoJSON()).readFeatures(geojsonObject, {
+   	      dataProjection: 'EPSG:3413',
+	      featureProjection: 'EPSG:3857'
+       	 })
        	 
        	});
     	 //console.log('hi',new ol.format.GeoJSON()).readFeatures(geojsonObject)
         console.log("SOURCE" + source)
         
-        map.addLayer(new ol.layer.Vector({
+        polylayer = new ol.layer.Vector({
             title: 'added Layer',
-            source: source
-         }));
-    	 
-     }
+            source: source,
+         })
+        
+        console.log('keys'+polylayer.getKeys());
+        
+        map.addLayer(polylayer);
+        }
      
      
      //console.log(polygon);
@@ -356,7 +358,8 @@ var map = new ol.Map({
      /*Zoom to layer on click*/
      var featureListener = function(event, feature) {
     	 map.getView().fit(feature.getGeometry(), {
-    		  duration: 1000
+    		  duration: 1000,
+    		  nearest: true
     		});
     	 vectorLayer2.setVisible(false);
          console.log(feature.getId());
@@ -368,7 +371,7 @@ var map = new ol.Map({
          function(feature, layer) {
         	 console.log(feature.getId())
         	 console.log(feature.getGeometry().getType())
-           if (feature.getGeometry().getType() == 'Polygon') {
+           if (feature && feature.getGeometry().getType() == 'Polygon') {
              //feature.setStyle(listenerStyle);
         	 
              featureListener(event, feature);
@@ -398,7 +401,7 @@ var map = new ol.Map({
            function (feature, layer) {
                return feature;
            });
-           if (feature) {
+           if (feature && feature.getGeometry().getType() == 'Polygon') {
                var geometry = feature.getGeometry();
                //calculate center of polygon
                var oo = ol.extent.getCenter(geometry.getExtent());               
@@ -407,7 +410,7 @@ var map = new ol.Map({
                $(element).popover({
                    'placement': 'top',
                        'html': true,
-                       'content': 'hi'//feature.get('name')
+                       'content': 'id: '+feature.get('id')
                });
                $(element).popover('show');
            } else {
@@ -567,7 +570,7 @@ var map = new ol.Map({
 
         var this_ = this;
         var handleRotateNorth = function() {
-          this_.getMap().getView().setRotation(0);
+          map.getView().setRotation(90, {duration: 1000});
         };
         
         button.addEventListener('click', handleRotateNorth, false);
@@ -636,12 +639,16 @@ var map = new ol.Map({
 
 
         var format = new ol.format.GeoJSON({
-        	      defaultDataProjection: 'EPSG:4326'
+        	      defaultDataProjection: 'EPSG:3995'
         });
         var features = format.readFeatures(geojson, {
-        	      dataProjection: 'EPSG:4326',
-        	      featureProjection: 'EPSG:2154'
+        	      //dataProjection: 'EPSG:4326',
+        	      //featureProjection: 'EPSG:2154'
+        	dataProjection: 'EPSG:3995',
+  	      	featureProjection: 'EPSG:3857'
         });
+        
+        
         
         var bbox = new ol.layer.Vector({
             title: 'added Layer',
@@ -649,7 +656,7 @@ var map = new ol.Map({
             format : new ol.format.GeoJSON(),
             url: 'datasets/1'
           });
-          map.addLayer(bbox);
+          //map.addLayer(bbox);
         //bbox.addFeatures(features);
         console.log(bbox);
         //map.addLayer()

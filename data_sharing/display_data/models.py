@@ -73,6 +73,14 @@ class Layer(Base):
     layertype_id =Column(Integer(), ForeignKey("layerType.id"))
     layerType = relationship("LayerType", backref=backref("layer"))
     
+    def asDict(self):
+        '''Returns a dict which can be used to convert to a JSON'''
+        dic = {}
+        dic['id']=self.id
+        dic['timestamp']=self.timestamp
+        dic['layertype']=self.layertype_id
+        return dic
+    
     def __str__(self):
         return "LAYER: id={} datasetid={}".format(self.id, self.dataset_id)
        
@@ -88,7 +96,12 @@ class LayerType(Base):
     def __str__(self):
         return "LAYERTYPE: id={} name={}".format(self.id, self.name)
  
-
+    def asDict(self):
+        '''Returns a dict which can be used to convert to a JSON'''
+        dic = {}
+        dic['id']=self.id
+        dic['name']=self.name
+        return dic
     
  
     

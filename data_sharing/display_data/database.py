@@ -189,14 +189,15 @@ class Database():
         return self._engine.table_names()
         
         
-    def getDatasets(self, ids=None):
+    def getDatasets(self, ids=None, filtering={}, dic=False):
         """returns a list of all requested datasets.
         
         Input parameter:
             ids – (optional) a list of integers or one single integer
                 when ids is given only the requested datasets with matching ids are returned
                 when ids is none every dataset is returned
-        
+            dic - if dic is set true it will return a dictionnary which can be converted to a geojson
+            
         Returns:
             a list with Dataset objects/ one object
         
@@ -208,8 +209,39 @@ class Database():
             query=query.filter(Dataset.id.in_(ids))
         elif isinstance(ids, int):
             query=query.filter(Dataset.id == ids)
+           
+        result=query.all()
+        
+        if not dic:
+            return result
+        else: 
+            return self.asDictionary(result) 
+    
+    
+    def asDictionary(self, datasets):
+        '''Returns a list of datasets as GeoJSON dictionary'''
+        features=[]
+        for ds in datasets:
+            geodic = ds.asGeoDict()
+            layers = self.getLayerByDataset(ds.id)
+            layers_dict=[]
+            for l in layers:
+                l_dict=l.asDict()
+                l_dict['layertype']=self.getLayertypeById(l.layertype_id).name
+                layers_dict.append(l_dict)
+                
+            geodic['properties']['layers'] = layers_dict
+            features.append(geodic)
             
-        return query.all()
+        #print(geoDict)
+        geoCollection = {}
+        geoCollection['type']= 'FeatureCollection'
+        geoCollection['features'] = features
+    
+        return geoCollection
+    
+    
+    
     
     def getLayertypeByName(self, tname):
         query = self.Session.query(LayerType)
@@ -218,7 +250,17 @@ class Database():
             return query.first()
         except Exception as e:
             print (e)
-            return []    
+            return [] 
+        
+    def getLayertypeById(self, tid):
+        query = self.Session.query(LayerType)
+        query=query.filter(LayerType.id == tid)
+        try:
+            return query.first()
+        except Exception as e:
+            print (e)
+            return [] 
+           
     
     def getLayerById(self, l_id):
 
@@ -232,7 +274,7 @@ class Database():
         
     
     
-    
+    ##TODO: rewrite this method
     def getLayerByAttributes(self, dataset_id=None, layertype_name=None):
         """returns a list of all requested datasets.
         
@@ -256,10 +298,33 @@ class Database():
         except Exception as e:
             print (e)
             return []    
+    
+    
+    def getLayerByDataset(self, dataset_id):
+        """returns a list of all requested datasets.
+        
+        Input parameter:
+            ids – (optional) a list of integers or one single integer
+                when ids is given only the requested datasets with matching ids are returned
+                when ids is none every dataset is returned
+        
+        Returns:
+            a list with Dataset objects/ one object
+        
+        """
+        query = self.Session.query(Layer)
+        print('datasetid ',dataset_id)
+        query=query.filter(Layer.dataset_id == dataset_id)
+        try:
+            return query.all()
+        except Exception as e:
+            print (e)
+            return [] ##empty array
+    
         
     
     
-    def getLayerTypes(self, ids=None):
+    def getLayerTypes(self, ids=None, dic=False):
         """returns a list of all requested datasets.
         
         Input parameter:
@@ -278,9 +343,16 @@ class Database():
             query=query.filter(LayerType.id.in_(ids))
         elif isinstance(ids, int):
             query=query.filter(LayerType.id == ids)
-            
-        return query.all()
-    
+        result = query.all()
+        if not dic:      
+            return result
+        else: #return a dictionary
+            types=[]
+            for l in result:
+                types.append(l.asDict())
+            dic={}
+            dic['layertypes']=types
+            return dic
     
     def getProjections(self, ids=None):
         """returns a list of all requested projections.
