@@ -300,6 +300,7 @@ var map = new ol.Map({
 	      featureProjection: 'EPSG:3413'
        	 })
        	 
+       	 
        	});
     	 //console.log('hi',new ol.format.GeoJSON()).readFeatures(geojsonObject)
         console.log("SOURCE" + source)
@@ -313,6 +314,14 @@ var map = new ol.Map({
         console.log('keys'+polylayer.getKeys());
         
         map.addLayer(polylayer);
+        
+        for (var i = 0, l = source.getFeatures().length; i < l; i++) {
+            var feat = source.getFeatures()[i];
+            feat.setId(feat.get('id'));
+        }
+        
+        console.log('FEAT'+source.getFeatures());
+        
         }
      
      
@@ -350,6 +359,7 @@ var map = new ol.Map({
      
      /*Zoom to layer on click*/
      var featureListener = function(event, feature) {
+    	 console.log('EVENT',event);
     	 map.getView().fit(feature.getGeometry(), {
     		  duration: 1000,
     		  nearest: true
@@ -379,7 +389,8 @@ var map = new ol.Map({
 	         });
          }
        });
-     
+       
+       
        
      function displayDataset(dataset){
     	 console.log('DATASET_CLICKED',dataset.get('id'));
@@ -394,8 +405,7 @@ var map = new ol.Map({
     	                 url: url, //'http://127.0.0.1:8887/14/dem/tiles/{z}/{x}/{-y}.png',
     	                 crossOrigin: null //hack file
     	         })
-
-    	     
+     
     	     var myLayer = new ol.layer.Tile({
     	       source: source,
     	       projection: 'EPSG:4326',
@@ -419,14 +429,19 @@ var map = new ol.Map({
        map.addOverlay(popup);
        
      ///pointermove event
-       
+      
+var hoverFeature = null;    
        map.on('pointermove', function (evt) {
            var feature = map.forEachFeatureAtPixel(evt.pixel,
-
+        		   
            function (feature, layer) {
                return feature;
            });
            if (feature && feature.getGeometry().getType() == 'Polygon') {
+               if(!!hoverFeature && hoverFeature != feature){
+            	   hoverFeature.setStyle(polystyle);
+               }
+               hoverFeature=feature;
                var geometry = feature.getGeometry();
                //calculate center of polygon
                var oo = ol.extent.getCenter(geometry.getExtent());               
@@ -437,9 +452,16 @@ var map = new ol.Map({
                        'html': true,
                        'content': 'id: '+feature.get('id')
                });
-               //$(element).popover('show');
+               
+               console.log('HOVERFEAT',hoverFeature);
+               $(element).popover('show');
+               feature.setStyle(hoverstyle);
            } else {
-               //$(element).popover('dispose');
+               $(element).popover('dispose');
+               if(!!hoverFeature){
+            	   hoverFeature.setStyle(polystyle);
+               }
+               
            }
        });
        
@@ -456,8 +478,8 @@ var map = new ol.Map({
     	    var
     	        style = [],
     	        geometry_type = feature.getGeometry().getType(),
-    	        white = [255, 255, 255, 1],
-    	        blue = [0, 153, 255, 1],
+    	        white = [255,255,255, 1],//[95,158,160,1],
+    	        blue = [95,158,160,1],// [25,25,112, 1],
     	        width = 3;
     	        
     	    style['LineString'] = [
@@ -474,16 +496,16 @@ var map = new ol.Map({
     	    ],
     	    style['Polygon'] = [
     	        new ol.style.Style({
-    	            fill: new ol.style.Fill({ color: [255, 255, 255, 0.5] })
+    	            fill: new ol.style.Fill({ color: [255, 255, 255, 0.2] })
     	        }),
     	        new ol.style.Style({
     	            stroke: new ol.style.Stroke({
-    	                color: white, width: 3.5
+    	                color: white, width: width
     	            })
     	        }),
     	        new ol.style.Style({
     	            stroke: new ol.style.Stroke({
-    	                color: blue, width: 2.5
+    	                color: blue, width: width
     	            })
     	        })
     	    ],
@@ -501,6 +523,45 @@ var map = new ol.Map({
     	    
     	    return style[geometry_type];
     	}
+     
+     
+     /*Hoverstyle for polygons*/
+     
+     var hoverstyle = [
+	        new ol.style.Style({
+	            fill: new ol.style.Fill({ color: [95,158,160, 0.4] })
+	        }),
+	        new ol.style.Style({
+	            stroke: new ol.style.Stroke({
+	                color: 'white', width: 4
+	            })
+	        }),
+	        new ol.style.Style({
+	            stroke: new ol.style.Stroke({
+	                color: [61, 100, 102,1], width: 3.5
+	            })
+	        })
+	    ];
+     
+     white = [255,255,255, 1],//[95,158,160,1],
+     blue = [95,158,160,1],// [25,25,112, 1],
+     width = 3;
+     
+     var polystyle = [
+	        new ol.style.Style({
+	            fill: new ol.style.Fill({ color: [255,255,255, 0.2] })
+	        }),
+	        new ol.style.Style({
+	            stroke: new ol.style.Stroke({
+	                color: 'white', width: width
+	            })
+	        }),
+	        new ol.style.Style({
+	            stroke: new ol.style.Stroke({
+	                color: blue, width: width
+	            })
+	        })
+	    ];
      
      
      
@@ -603,6 +664,7 @@ var map = new ol.Map({
         	//map.getView().refresh();
         	console.log('UPDATE SIZE');
         	map.getView().setRotation(0, {duration: 1000});
+        	//map.getView().fit(map.getView().extent, map.getSize()); 
         }
         
         nort.addEventListener('onchange', handleRotateNorth, false);

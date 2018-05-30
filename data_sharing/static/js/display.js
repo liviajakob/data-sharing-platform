@@ -63,7 +63,6 @@ function displayDatasets(datasets){
 	
 	
 	var list = $("#datasets-list");
-
 	for (i in datasetsarr){
 	    var id = datasetsarr[i].properties.id;
 		var cite = datasetsarr[i].properties.cite;
@@ -74,7 +73,7 @@ function displayDatasets(datasets){
 		    return a.layertype.localeCompare(b.layertype);
 		});
 
-		html= "<tr><td>" + "<b>"+ "Dataset: " + id + "</b> -- Cite this dataset as: " + cite + "<br>" + "<b>Layers: </b>"
+		html= "<tr><td value='" + id + "'>" + "<b>"+ "Dataset: " + id + "</b> -- Cite this dataset as: " + cite + "<br> " + "<b>Layers: </b>"
 		for (l in layers){
 			html=html.concat(layers[l].layertype + ' | ')
 		}
@@ -83,3 +82,71 @@ function displayDatasets(datasets){
 	    list.append(html);
 	}
 }
+
+
+
+
+
+////////////////////////////////////////////////////////////////
+//// click effect
+
+
+$(document).ready(function($) {
+	$(document).on('click', 'td', function(){
+	id = $(this).attr("value");
+	console.log('ID',id);
+	var fetbid = polylayer.getSource().getFeatureById(id);
+	console.log(fetbid);
+	featureListener(event, fetbid);
+	//fetbid.setStyle(stylecoll);
+					
+	}//,
+	//function(){
+    //var fetbid = polylayer.getFeatureById($(this).attr("id"));
+    //fetbid.setStyle(cStyle);
+	//}
+	);
+});
+
+
+////////////////////////////////////////////////////////////////
+////hover effect
+
+
+$(document).ready(function($) {
+$(document).on('mouseenter mouseleave', 'td', function(){
+console.log('HOVERED');
+id = $(this).attr("value");
+console.log('ID',id);
+var fetbid = polylayer.getSource().getFeatureById(id);
+console.log(fetbid);
+
+var stylecoll = new ol.style.Style({
+image: new ol.style.Icon(/** @type {olx.style.IconOptions} */ ({
+//zIndex: -1000,
+anchor: [16, 32],	
+anchorXUnits: 'pixels',
+anchorYUnits: 'pixels',
+src: 'http://tennisterin.com/images/gmap/maps-point.png'
+//opacity : 0
+}))
+});
+
+//featureListener(event, fetbid);
+if (fetbid.getStyle() === hoverstyle){
+	fetbid.setStyle(geometryStyle(fetbid));
+}else{
+	fetbid.setStyle(hoverstyle);
+}
+
+
+}//,
+//function(){
+//var fetbid = polylayer.getFeatureById($(this).attr("id"));
+//fetbid.setStyle(cStyle);
+//}
+);
+});
+
+
+
