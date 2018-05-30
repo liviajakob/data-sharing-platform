@@ -2,8 +2,8 @@
 
 
  #map {
- margin-top: 59px;
- margin-bottom: 30px;
+ 	margin-top: 59px;
+ 	margin-bottom: 30px;
  height: -moz-calc(100% - 89px);
  height: -webkit-calc(100% - 89px);
  height: calc(100% - 89px);
@@ -60,4 +60,40 @@
 #popup {
     padding-bottom: 15px;
 }
+
+
+
+      .fullscreen:-moz-full-screen {
+        height: 100%;
+        width: 100%;
+        padding: 0px;
+        margin: 0px;
+        background-color: darkgrey;
+      }
+      .fullscreen:-webkit-full-screen {
+        height: 100%;
+        width: 100%;
+        padding: 0px;
+        margin: 0px;
+        background-color: darkgrey;
+      }
+      .fullscreen:-ms-fullscreen {
+        height: 100%;
+        width: 100%;
+        padding: 0px;
+        margin: 0px;
+        background-color: darkgrey;
+      }
+
+      .fullscreen:fullscreen {
+        height: 100%;
+        width: 100%;
+        padding: 0px;
+        margin: 0px;
+        background-color: darkgrey;
+      }
+      
+      
+ /**/     
+
 

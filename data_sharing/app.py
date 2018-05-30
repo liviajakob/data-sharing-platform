@@ -13,7 +13,7 @@ app = Flask(__name__)
 def index():
     database = Database()
     database.scopedSession()
-    query = database.getDatasets(1)[0]
+    query = database.getDatasets()[0]
     
     database.closeSession()
     

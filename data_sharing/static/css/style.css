@@ -42,6 +42,7 @@ hr{
     padding-bottom: 30px;
 	width: 250px;
     height: 100%;
+    float: left;
 }
 
 #side-content{
@@ -53,6 +54,7 @@ hr{
 	padding-top: 20px;
 	padding-right: 13px;
 	overflow-y: auto;
+	float: left;
 }
 
 #attribution{
@@ -68,6 +70,7 @@ hr{
     padding: 5px;
     font-size: 13px;
 	direction:ltr;
+	
 }
 
 .text{

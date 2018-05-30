@@ -141,7 +141,7 @@ class DatabaseIngestion(object):
         srcf = os.path.join(conf.getDataInputPath(), layers[0][0])
         rast_proc = RasterLayerProcessor(self.logger)
         rast_proc.readFile(srcf)
-        box=rast_proc.getBoundingBox()        
+        box=rast_proc.getMinBoundingBox()        
         dataset.xmin = box['xmin']
         dataset.xmax = box['xmax']
         dataset.ymin = box['ymin']

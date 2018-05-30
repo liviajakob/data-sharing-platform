@@ -19,7 +19,7 @@
 {% endblock %}
 {% block content %}
 
-
+<div id="fullscreen" class="fullscreen"> 
 
 <div id=side>
     <div id="side-content">
@@ -43,7 +43,7 @@
         <div id="scroll-icon">&#8597;</div>
     </div>
      <div id="checkbox">
-	<input type="checkbox" id="visible" checked> Toggle Layer Visibility</input>
+	<input type="checkbox" id="visible" checked> Toggle Layer Visibility
 	</div>
 	
 	
@@ -53,17 +53,19 @@ Aenean pharetra dignissim est, non placerat massa semper vitae. Duis et est maur
 
 <div id="attribution">Attribution: </div>
 
-	</p></div>
+	</div>
     </div> <!-- end side-content -->
     </div> <!-- end side -->
     
-   <div id="map">{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+    
+    
    
-   <div id="popup"></div>
-   </div> 
+   <div class='map' id="map">{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
+   </div>   
+   <div id="popup"></div> 
+   
 
-
-    <div id="search" style="position: absolute; top: 60px; right: 10px; padding: 5px; background-color: rgba(255,255,255,0.5);">
+    <div id="search" style="position: absolute; top: 60px; right: 50px; padding: 5px; background-color: rgba(255,255,255,0.5);">
       <input type="text" placeholder="Search for datasets..." style="width: 200px">
       <button type="button">Search</button>
     </div>
@@ -71,6 +73,8 @@ Aenean pharetra dignissim est, non placerat massa semper vitae. Duis et est maur
 <div id="mouse-position">Mouse Position:
 </div>
 
+
+</div> <!-- End of fullscreen -->
 
  <script>console.log('{{data}}')</script>
  <script src="{{url_for('static', filename='js/map.js')}}"></script>

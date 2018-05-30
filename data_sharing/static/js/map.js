@@ -1,5 +1,8 @@
     
+var clickdatasets = true;
 var scaleLineControl = new ol.control.ScaleLine();
+var root = 'http://127.0.0.1:8887';
+
 
 
 var map = new ol.Map({
@@ -21,36 +24,20 @@ var map = new ol.Map({
 //ol.control.defaults().extend(new ol.control.OverviewMap());
 
 
-    
-	$.getJSON('datasets/1', function(data) {
-        //data is the JSON string
-    	console.log('DATAA')
-    	console.log(data);
-    	console.log(data.features[0].properties.id);
-    	console.log(typeof data)
-    	return data;
-    });
-    
+
     
     
 
     proj4.defs('EPSG:3413', '+proj=stere +lat_0=90 +lat_ts=70 +lon_0=-45 +k=1 ' +
     '+x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs');
     var proj3413 = ol.proj.get('EPSG:3413');
-    proj3413.setExtent([-4194304, -4194304, 4194304, 4194304]);
-
-    proj4.defs('EPSG:27700', '+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 ' +
-        '+x_0=400000 +y_0=-100000 +ellps=airy ' +
-        '+towgs84=446.448,-125.157,542.06,0.15,0.247,0.842,-20.489 ' +
-        '+units=m +no_defs');
-    var proj27700 = ol.proj.get('EPSG:27700');
-    proj27700.setExtent([0, 0, 700000, 1300000]);
+    proj3413.setExtent([-5194304, -5194304, 5194304, 5194304]);
 
 
 
     map.setView(new ol.View({
       //center: [0, 0],
-      zoom: 2, //map resolution
+      zoom: 3, //map resolution
       minZoom: 2,
       maxZoom: 10,
       //projection and units,, default mercator and meters
@@ -58,10 +45,10 @@ var map = new ol.Map({
       //zoomFactor: (default:2)
       //maxResolution: ...calculated by default
       //projection: 'EPSG:3857'//'EPSG:4326'
-      //extent: [-20037508.3427892,-20037508.3427892,20037508.3427892,20037508.3427892], //left, bottom ,right, top //minx, miny, maxx, maxy
-      extent: ol.proj.get("EPSG:3857").getExtent(),
-      projection: 'EPSG:3857',
-      center: [400000, 4000000] //[-4194301, -4194301]
+      extent: [-5194304, -5194304, 5194304, 5194304], //left, bottom ,right, top //minx, miny, maxx, maxy
+      //extent: ol.proj.get("EPSG:3857").getExtent(),
+      projection: "EPSG:3413", //'',
+      center: [30665.5, -2039176.688] //[-4194301, -4194301]
     	
     }));
     
@@ -106,6 +93,8 @@ var map = new ol.Map({
      //map.addLayer(wms4326);
 
 
+     
+     
     var wms = new ol.layer.Tile({
        source: new ol.source.TileWMS({
          url: 'https://ahocevar.com/geoserver/wms',
@@ -123,21 +112,24 @@ var map = new ol.Map({
     
     var extent1 = [-602834.5, -3251176.688, 664165.5, -757176.6880000001]
     console.log(extent1)
-    ext1 = ol.proj.transformExtent(extent1, ol.proj.get('EPSG:3413'), ol.proj.get('EPSG:3857'));
+    //ext1 = ol.proj.transformExtent(extent1, ol.proj.get('EPSG:3413'), ol.proj.get('EPSG:3857'));
 
      var source = new ol.source.OSM({
-                 url: 'http://127.0.0.1:8887/tiles3/{z}/{x}/{-y}.png',
-                 crossOrigin: null, //hack file
+                 url: 'http://127.0.0.1:8887/14/dem/tiles/{z}/{x}/{-y}.png',
+                 crossOrigin: null //hack file
          })
 
-
+     
      var myLayer = new ol.layer.Tile({
        source: source,
        projection: 'EPSG:4326',
-    	   extent: ext1 
+    	   extent: extent1, 
+    	   opacity: 1
      });
-     map.addLayer(myLayer);
+     //map.addLayer(myLayer);
      //map.getView().fit(ext1, map.getSize());
+    
+     
      
      
    /// PAttern  ////////////////////////////////////////////////////////////////////////////
@@ -305,7 +297,7 @@ var map = new ol.Map({
        	  //format: new ol.format.GeoJSON()
        	 features: (new ol.format.GeoJSON()).readFeatures(geojsonObject, {
    	      dataProjection: 'EPSG:3413',
-	      featureProjection: 'EPSG:3857'
+	      featureProjection: 'EPSG:3413'
        	 })
        	 
        	});
@@ -315,6 +307,7 @@ var map = new ol.Map({
         polylayer = new ol.layer.Vector({
             title: 'added Layer',
             source: source,
+            style: geometryStyle,
          })
         
         console.log('keys'+polylayer.getKeys());
@@ -323,8 +316,8 @@ var map = new ol.Map({
         }
      
      
-     //console.log(polygon);
-     map.addLayer(vectorLayer2);
+     
+     //map.addLayer(vectorLayer2);
      
      
 
@@ -361,24 +354,56 @@ var map = new ol.Map({
     		  duration: 1000,
     		  nearest: true
     		});
-    	 vectorLayer2.setVisible(false);
-         console.log(feature.getId());
+    	 polylayer.setVisible(false);
+    	 displayDataset(feature)
+         //console.log(feature.getId());
          //alert("Feature Listener Called");
+    	 clickdatasets=true;
        };
 
        map.on('click', function(event) {
-         map.forEachFeatureAtPixel(event.pixel,
-         function(feature, layer) {
-        	 console.log(feature.getId())
-        	 console.log(feature.getGeometry().getType())
-           if (feature && feature.getGeometry().getType() == 'Polygon') {
-             //feature.setStyle(listenerStyle);
-        	 
-             featureListener(event, feature);
-           }
-         });
+    	 if (clickdatasets){
+    		 clickdatasets=false;
+    		 polyfound=false;
+	         map.forEachFeatureAtPixel(event.pixel,
+	         function(feature, layer) {
+
+	           if (!polyfound && feature && feature.getGeometry().getType() == 'Polygon') {
+	             //feature.setStyle(listenerStyle);
+		        	 console.log(feature.getId())
+		        	 console.log(feature.getGeometry().getType())
+	        	 polyfound = true
+	             featureListener(event, feature);
+	             
+	           }
+	         });
+         }
        });
      
+       
+     function displayDataset(dataset){
+    	 console.log('DATASET_CLICKED',dataset.get('id'));
+    	 polyext = dataset.getGeometry().getExtent();
+    	 console.log('EXTENT',polyext);
+    	 //polyext_tr = ol.proj.transformExtent(polyext, ol.proj.get('EPSG:3413'), ol.proj.get('EPSG:3857'))
+    	 
+    	 url= root+ '/'+ dataset.get('id') + '/'+dataset.get('layers')[0].layertype + '/tiles/{z}/{x}/{-y}.png';
+    	 console.log('URL',url);
+    	 
+    	     var source = new ol.source.OSM({
+    	                 url: url, //'http://127.0.0.1:8887/14/dem/tiles/{z}/{x}/{-y}.png',
+    	                 crossOrigin: null //hack file
+    	         })
+
+    	     
+    	     var myLayer = new ol.layer.Tile({
+    	       source: source,
+    	       projection: 'EPSG:4326',
+    	    	   extent: polyext, 
+    	    	   opacity: 1
+    	     });
+    	     map.addLayer(myLayer);
+     }
      
     // display popup on hover
        
@@ -412,9 +437,9 @@ var map = new ol.Map({
                        'html': true,
                        'content': 'id: '+feature.get('id')
                });
-               $(element).popover('show');
+               //$(element).popover('show');
            } else {
-               $(element).popover('dispose');
+               //$(element).popover('dispose');
            }
        });
        
@@ -520,8 +545,8 @@ var map = new ol.Map({
         //////get mouseposition
         
         var mousePositionControl = new ol.control.MousePosition({
-            coordinateFormat: ol.coordinate.createStringXY(4),
-            projection: 'EPSG:3857', //'EPSG:3857',
+            coordinateFormat: ol.coordinate.createStringXY(4), //precision
+            projection: 'EPSG:4313', //'EPSG:3857',
             // comment the following two lines to have the mouse position
             // be placed within the map.
             className: 'custom-mouse-position',
@@ -553,35 +578,46 @@ var map = new ol.Map({
 
         var options = opt_options || {};
 
-        var button = document.createElement('button');
-        button.innerHTML = 'N';
+        var reset = document.createElement('button');
+        reset.innerHTML = 'R';
         
         var nort = document.createElement('button');
         nort.innerHTML = 'N';
         
-        var tool = document.createElement('select');
-        var option = document.createElement('option')
-        option.setAttribute('value', 'hi');
+        //var tool = document.createElement('select');
+        //var option = document.createElement('option')
+        //option.setAttribute('value', 'hi');
         //var textNode = document.createTextNode(feature.get('NOM'));
-        tool.appendChild(option);
+        //tool.appendChild(option);
         
-        tool.addEventListener('onchange', handleRotateNorth, false);
-        
+
 
         var this_ = this;
         var handleRotateNorth = function() {
+        	console.log('ROTATE')
           map.getView().setRotation(90, {duration: 1000});
         };
         
-        button.addEventListener('click', handleRotateNorth, false);
-        button.addEventListener('touchstart', handleRotateNorth, false);
+        
+        var updatesize= function(){
+        	//map.getView().refresh();
+        	console.log('UPDATE SIZE');
+        	map.getView().setRotation(0, {duration: 1000});
+        }
+        
+        nort.addEventListener('onchange', handleRotateNorth, false);
+        nort.addEventListener('click', handleRotateNorth, false);
+        nort.addEventListener('touchstart', handleRotateNorth, false);
+        
+        reset.addEventListener('click', updatesize, false);
+        reset.addEventListener('touchstart', updatesize, false);
 
         
         var element = document.createElement('div');
         element.className = 'rotate-north ol-unselectable ol-control';
         element.appendChild(nort);
-        element.appendChild(button);
-        element.appendChild(tool);
+        element.appendChild(reset);
+        //element.appendChild(tool);
 
         
         ol.control.Control.call(this, {
@@ -592,73 +628,15 @@ var map = new ol.Map({
       };
         
         ol.inherits(app.RotateNorthControl, ol.control.Control);
+
+//// ADD CONTROLS
+        
         
         map.addControl(new app.RotateNorthControl());
-          
+        map.addControl(new ol.control.FullScreen({source: 'fullscreen'}));
           
 //////////////////////////////////////////////////
         
-        
-        ////// Polygon
-        
-        //var extent = [-402834.5, -3251176.688, 464165.5, -757176.6880000001]; //has to be in 38
-        
-        
-        ///Add GEOJSON from file
-        
-        /*var countriesSource = new ol.source.GeoJSON({
-            projection: 'EPSG:2154',
-            url: '../assets/data/nutsv9_lea.geojson'
-          });
-        
-        var bbox = new ol.layer.Vector({
-            source: new ol.source.GeoJSON()
-          });
-          map.addLayer(bbox);*/
-        
-        
-        var geojson = {
-        	      "type": "FeatureCollection",
-        	      "features": [
-        	        {
-        	          "type": "Feature",
-        	          "properties": {},
-        	          "geometry": {
-        	            "type": "Polygon",
-        	            "coordinates": [
-        	              [[-0.944824, 46.134170], [-0.944824, 48.312428],
-        	               [4.438477, 48.312428], [4.438477, 46.134170],
-        	               [-0.944824, 46.134170]
-        	              ]
-        	            ]
-        	          }
-        	        }
-        	      ]
-        	    };
-       
 
 
-        var format = new ol.format.GeoJSON({
-        	      defaultDataProjection: 'EPSG:3995'
-        });
-        var features = format.readFeatures(geojson, {
-        	      //dataProjection: 'EPSG:4326',
-        	      //featureProjection: 'EPSG:2154'
-        	dataProjection: 'EPSG:3995',
-  	      	featureProjection: 'EPSG:3857'
-        });
-        
-        
-        
-        var bbox = new ol.layer.Vector({
-            title: 'added Layer',
-            projection : 'EPSG:3413',
-            format : new ol.format.GeoJSON(),
-            url: 'datasets/1'
-          });
-          //map.addLayer(bbox);
-        //bbox.addFeatures(features);
-        console.log(bbox);
-        //map.addLayer()
-        
         

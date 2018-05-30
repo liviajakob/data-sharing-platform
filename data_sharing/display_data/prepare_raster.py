@@ -23,7 +23,8 @@ class RasterTiler(object):
     
     
     def createTiles(self, inputfile, outputdir, zoom="0-5"):
-        commandlist=['gdal2tiles.py', '-z', zoom, '-p', 'raster', inputfile, outputdir]
+        #commandlist=['gdal2tiles.py', '-z', zoom, '-p', 'raster', inputfile, outputdir]
+        commandlist=['gdal2tiles.py', '-z', zoom, inputfile, outputdir]
         print(commandlist)
         subprocess.call(commandlist)
     
