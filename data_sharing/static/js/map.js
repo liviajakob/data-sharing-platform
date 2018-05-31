@@ -3,7 +3,13 @@ var clickdatasets = true;
 var scaleLineControl = new ol.control.ScaleLine();
 var root = 'http://127.0.0.1:8887';
 
-
+var corineUrl = 'http://filotis.itia.ntua.gr/mapserver?SERVICE=WFS&' +
+'VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=biotopes_corine&' +
+'SRSNAME=EPSG:4326&OUTPUTFORMAT=gml3';
+var naturaUrl = 'http://filotis.itia.ntua.gr/mapserver?SERVICE=WFS&' +
+'VERSION=1.1.0&REQUEST=GetFeature&TYPENAME=biotopes_natura&' +
+'SRSNAME=EPSG:4326&OUTPUTFORMAT=gml3';
+var cadastreUrl = 'http://gis.ktimanet.gr/wms/wmsopen/wmsserver.aspx';
 
 var map = new ol.Map({
     target: 'map',
@@ -17,6 +23,47 @@ var map = new ol.Map({
           scaleLineControl, 
           new ol.control.OverviewMap(),
         ]),
+        
+        layers: [
+        	new ol.layer.Group({
+                title: 'Base maps',
+                layers: [
+                    new ol.layer.Tile({
+                        title: 'Open Street Map',
+                        source: new ol.source.OSM(),
+                        projection: 'EPSG:3857',
+                        type: 'base'
+                    }),
+                    new ol.layer.Tile({
+                        title: 'Aerial Photo',
+                    	visible: false,
+                    	type: 'base',
+                        preload: Infinity,
+                        source: new ol.source.BingMaps({
+                          key: 'At5OL80sddUSOspCvAIkyQK0sQ4BLRsjJQ9Mu55m9HgPQp1mUjaq_dJ0A2gdjrmt',
+                          imagerySet: 'Aerial',
+                          // use maxZoom 19 to see stretched tiles instead of the BingMaps
+                          // "no photos at this zoom level" tiles
+                          // maxZoom: 19
+                        
+                     })}),
+                     new ol.layer.Tile({
+                         title: 'Aerial Photo',
+                     	visible: false,
+                     	type: 'base',
+                         preload: Infinity,
+                         source: new ol.source.BingMaps({
+                           key: 'At5OL80sddUSOspCvAIkyQK0sQ4BLRsjJQ9Mu55m9HgPQp1mUjaq_dJ0A2gdjrmt',
+                           imagerySet: 'Aerial',
+                           // use maxZoom 19 to see stretched tiles instead of the BingMaps
+                           // "no photos at this zoom level" tiles
+                           // maxZoom: 19
+                         
+                         })})
+                    
+                ]
+            })
+        ]
     
 	});
 
@@ -56,58 +103,6 @@ var map = new ol.Map({
     //extent: [-20037508.3427892,-20037508.3427892,20037508.3427892,20037508.3427892]
     //map.getView().fitExtent(extent, map.getSize());
 
-    
-    // Add controls
-    
-    
-
-    
-    
-
-     var osmSource = new ol.source.OSM(); //get remote data for a layer
-
-     ///layer
-     //ol.layer.Tile
-     //ol.layer.Image
-     //ol.layer.Vector
-     
-
-
-     var osmLayer = new ol.layer.Tile({
-       source: osmSource,
-       projection: 'EPSG:3857',
-     });
-     map.addLayer(osmLayer);
-
-     wms4326 = new ol.layer.Tile({
-       source: new ol.source.TileWMS({
-         url: 'https://ahocevar.com/geoserver/wms',
-         crossOrigin: '',
-         params: {
-           'LAYERS': 'ne:NE1_HR_LC_SR_W_DR',
-           'TILED': true
-         },
-         projection: 'EPSG:4326'
-       })
-     });
-     //map.addLayer(wms4326);
-
-
-     
-     
-    var wms = new ol.layer.Tile({
-       source: new ol.source.TileWMS({
-         url: 'https://ahocevar.com/geoserver/wms',
-         crossOrigin: '',
-         params: {
-           'LAYERS': 'ne:NE1_HR_LC_SR_W_DR',
-           'TILED': true
-         },
-         projection: 'EPSG:4326'
-       })
-     });
-
-     //map.addLayer(wms);
 
     
     var extent1 = [-602834.5, -3251176.688, 664165.5, -757176.6880000001]
@@ -302,43 +297,37 @@ var map = new ol.Map({
        	 
        	 
        	});
-    	 //console.log('hi',new ol.format.GeoJSON()).readFeatures(geojsonObject)
-        console.log("SOURCE" + source)
         
         polylayer = new ol.layer.Vector({
-            title: 'added Layer',
+            title: 'Extents',
             source: source,
             style: geometryStyle,
          })
         
-        console.log('keys'+polylayer.getKeys());
+        polylayer_group = new ol.layer.Group({
+        	title: 'Datasets',
+        	layers: [polylayer]
+        })
         
-        map.addLayer(polylayer);
+        
+        map.addLayer(polylayer_group);
         
         for (var i = 0, l = source.getFeatures().length; i < l; i++) {
             var feat = source.getFeatures()[i];
             feat.setId(feat.get('id'));
         }
         
-        console.log('FEAT'+source.getFeatures());
-        
         }
      
      
      
-     //map.addLayer(vectorLayer2);
+     
      
      
 
      
      
-     /////////hover interaction/////////////////////////////////////////////////
-     hoverInteraction = new ol.interaction.Select({
-         condition: ol.events.condition.pointerMove,
-         layers:[vectorLayer2]  //Setting layers to be hovered
-     });
-     map.addInteraction(hoverInteraction);
-     
+     /////////hover interaction/////////////////////////////////////////////////     
      var target = map.getTarget();
      var jTarget = typeof target === "string" ? $("#" + target) : $(target);
      // change mouse cursor when over marker
@@ -393,12 +382,12 @@ var map = new ol.Map({
        
        
      function displayDataset(dataset){
-    	 console.log('DATASET_CLICKED',dataset.get('id'));
+    	 console.log('DATASET_CLICKED',dataset.getId());
     	 polyext = dataset.getGeometry().getExtent();
     	 console.log('EXTENT',polyext);
     	 //polyext_tr = ol.proj.transformExtent(polyext, ol.proj.get('EPSG:3413'), ol.proj.get('EPSG:3857'))
     	 
-    	 url= root+ '/'+ dataset.get('id') + '/'+dataset.get('layers')[0].layertype + '/tiles/{z}/{x}/{-y}.png';
+    	 url= root+ '/'+ dataset.getId() + '/'+dataset.get('layers')[0].layertype + '/tiles/{z}/{x}/{-y}.png';
     	 console.log('URL',url);
     	 
     	     var source = new ol.source.OSM({
@@ -413,6 +402,8 @@ var map = new ol.Map({
     	    	   opacity: 1
     	     });
     	     map.addLayer(myLayer);
+    	     $('#infobox').hide();
+    	     displayDetailedInfo(detailedInfo(dataset));
      }
      
     // display popup on hover
@@ -453,14 +444,16 @@ var hoverFeature = null;
                        'content': 'id: '+feature.get('id')
                });
                
-               console.log('HOVERFEAT',hoverFeature);
-               $(element).popover('show');
+               
+               //$(element).popover('show');
                feature.setStyle(hoverstyle);
+               displayInfo(hoverInfo(feature));
            } else {
-               $(element).popover('dispose');
+               //$(element).popover('dispose');
                if(!!hoverFeature){
             	   hoverFeature.setStyle(polystyle);
                }
+               $('#infobox').hide();
                
            }
        });
@@ -468,6 +461,78 @@ var hoverFeature = null;
        
      //map.getView().fit(source.getExtent(), map.getSize()); 
      
+     
+  //////////////////////////////////////
+       ////display infobox
+       
+       
+
+       $('#infobox').appendTo(
+         $('.ol-overlaycontainer')
+       );
+       
+       function displayInfo(info) {
+         $('#infobox').html(info);
+         $('#infobox').show();
+       }
+       
+            
+       /*Returns html for info showed when hovering over*/
+       function hoverInfo(feature){
+    	   
+    	   html = '<h5>Dataset: '+feature.getId()+'</h5><p>';
+    	   
+    	   "</b> -- Cite this dataset as: " + feature.get('cite') + "<br> " + "<b>Layers: </b>"
+    	   layers=feature.get('layers');
+	   		for (l in layers){
+	   			html=html.concat(layers[l].layertype + ' | ')
+	   		}
+	   		html=html.slice(0,-2);
+	   		html = html.concat("</p>");
+    	   
+    	   
+    	   return html;
+       }
+       
+       
+       
+       ///////////////////////////////////////
+       ///////detailed infoxox
+       $('#infobox-detailed').appendTo(
+    	         $('.ol-overlaycontainer')
+    	       )
+
+       
+       function displayDetailedInfo(info) {
+    	   $('#info-title').html(info[0]);
+           $('#infobox-detailed-content').html(info[1]);
+           $('#infobox-detailed').show();
+           $('#infobox-detailed-content').show();
+         }
+       
+       
+       
+       
+       /*Returns html for info showed when exploring a dataset*/
+       function detailedInfo(feature){
+    	   title = '<h5>Dataset: '+feature.getId()+'</h5>'
+    	   html = '<p>'+"</b> -- Cite this dataset as: " + feature.get('cite') + "<br> " + "<b>Layers: </b>";
+    	   layers=feature.get('layers');
+	   		for (l in layers){
+	   			html=html.concat(layers[l].layertype + ' | ')
+	   		}
+	   		html=html.slice(0,-2);
+	   		html = html.concat("</p>");
+    	   
+    	   
+    	   return [title, html];
+       }
+         
+       
+       
+       
+       
+       
        
        
      
@@ -696,9 +761,36 @@ var hoverFeature = null;
         
         map.addControl(new app.RotateNorthControl());
         map.addControl(new ol.control.FullScreen({source: 'fullscreen'}));
-          
+ 
+        
+        //layerswitcher
+        
+        var layerSwitcher = new ol.control.LayerSwitcher({
+            tipLabel: 'Layers', // Optional label for button
+            enableOpacitySliders: true
+        });
+        map.addControl(layerSwitcher);
+        
+        
+        
 //////////////////////////////////////////////////
         
+        
+
+        var bing = new ol.layer.Tile({
+            title: 'Aerial Photo',
+        	visible: true,
+            preload: Infinity,
+            source: new ol.source.BingMaps({
+              key: 'At5OL80sddUSOspCvAIkyQK0sQ4BLRsjJQ9Mu55m9HgPQp1mUjaq_dJ0A2gdjrmt',
+              imagerySet: 'Aerial',
+              // use maxZoom 19 to see stretched tiles instead of the BingMaps
+              // "no photos at this zoom level" tiles
+              // maxZoom: 19
+            
+         })})
+        
+        map.addLayer(bing);
 
 
         

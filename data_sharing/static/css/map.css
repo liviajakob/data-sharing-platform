@@ -68,21 +68,21 @@
         width: 100%;
         padding: 0px;
         margin: 0px;
-        background-color: darkgrey;
+        background-color: lightsteelblue;
       }
       .fullscreen:-webkit-full-screen {
         height: 100%;
         width: 100%;
         padding: 0px;
         margin: 0px;
-        background-color: darkgrey;
+        background-color: lightsteelblue;
       }
       .fullscreen:-ms-fullscreen {
         height: 100%;
         width: 100%;
         padding: 0px;
         margin: 0px;
-        background-color: darkgrey;
+        //background-color: lightsteelblue;
       }
 
       .fullscreen:fullscreen {
@@ -90,10 +90,85 @@
         width: 100%;
         padding: 0px;
         margin: 0px;
-        background-color: darkgrey;
+        background-color: lightsteelblue;
       }
       
       
  /**/     
+ 
+
+#infobox{
+	position:absolute;
+	top: 50px;
+	left: -moz-calc(100% - 250px);
+ 	left: -webkit-calc(100% - 250px);
+ 	left: calc(100% - 250px);
+ 	font-size: 12px;
+ 	padding: 10px; 
+ 	background-color: rgba(95,158,160,0.5);
+ 	display:inline;
+ 	height: 100px;
+ 	width: 200px;
+ 	display: none;
+ 	border-radius: 7px;
+ 	overflow: hidden;
+}
+
+#infobox p{
+	padding-left: 5px;
+}
+ 
+ 
+ 
+#infobox-detailed{
+	position:absolute;
+	top: -moz-calc(100% - 370px);
+ 	top: -webkit-calc(100% - 370px);
+ 	top: calc(100% - 370px);
+	left: -moz-calc(100% - 340px);
+ 	left: -webkit-calc(100% - 340px);
+ 	left: calc(100% - 340px);
+ 	font-size: 12px;
+ 	padding: 10px; 
+ 	background-color: rgba(95,158,160,0.5);
+ 	
+ 	height: 300px;
+ 	width: 300px;
+ 	display: none;
+ 	border-radius: 7px;
+ 	//overflow: scroll;
+}
+
+#infobox-detailed p{
+	padding-left: 5px;
+}
+
+
+#infobox-detailed-content{
+	position:relative;
+ 	padding: 10px; 
+ 	background-color: rgba(255,255,255,0.6);
+ 	
+ 	height: 240px;
+ 	width: 100%;
+ 	//border-radius: 7px;
+ 	overflow-y: scroll;
+}
+ 
+ 
+ 
+ 
+#swipe{
+	position: absolute;
+	top: -moz-calc(100% - 80px);
+ 	top: -webkit-calc(100% - 80px);
+ 	top: calc(100% - 80px);
+	left: 280px;
+	width: -moz-calc(100% - 300px);
+	width: -webkit-calc(100% - 300px);
+	width: -webkit-calc(100% - 300px);
+}
+ 
+ 
 
 
