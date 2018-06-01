@@ -20,3 +20,8 @@ var swipe = document.getElementById('swipe');
       swipe.addEventListener('input', function() {
         map.render();
       }, false);
+      
+      
+      
+      
+      

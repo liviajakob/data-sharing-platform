@@ -51,9 +51,7 @@
     </tbody></table></div>
         <div id="scroll-icon">&#8597;</div>
     </div>
-     <div id="checkbox">
-	<input type="checkbox" id="visible" checked> Toggle Layer Visibility	
-	</div>
+
 	
 	
 	<a id="png" class="btn btn-default">Download view as PNG</a>
@@ -100,8 +98,11 @@ Aenean pharetra dignissim est, non placerat massa semper vitae. Duis et est maur
 </div> <!-- End of fullscreen -->
 
  <script>console.log('{{data}}')</script>
+ <script src="{{url_for('static', filename='js/mapstyles.js')}}"></script>
  <script src="{{url_for('static', filename='js/map.js')}}"></script>
- <script src="{{url_for('static', filename='js/display.js')}}"></script>
+  <script src="{{url_for('static', filename='js/controls.js')}}"></script>
+    <script src="{{url_for('static', filename='js/show-dataset.js')}}"></script>
+ <script src="{{url_for('static', filename='js/sidebar-display.js')}}"></script>
 <script src="{{url_for('static', filename='js/export.js')}}"></script>
 <script src="{{url_for('static', filename='js/swipe.js')}}"></script>
 

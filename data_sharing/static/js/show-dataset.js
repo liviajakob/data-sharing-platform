@@ -1,0 +1,1 @@
+/* All actions when user clicks on a dataset; zoom to extent and display dataset and layer information */
