@@ -1,16 +1,27 @@
 h1, h2, h3, h4, h5, h6{
     font-family: 'PT Serif', serif;
     font-weight: bold;
+    
+}
+
+p b{
+	color: rgb(62, 41, 40);
 }
 
 body{
 	background-color: rgba(95,158,160,0.6);
 	font-family: 'Raleway', sans-serif;
+	
 }
 
 hr{
 	padding: 1px;
 	margin: 1px;
+}
+
+
+a{
+	color: rgb(93, 62, 60);
 }
 
 .footertext{
@@ -35,6 +46,7 @@ hr{
     font-size: 90%;
     padding-top: 0.3%;
 }
+
 
 
 #side{

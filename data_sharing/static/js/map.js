@@ -75,14 +75,14 @@ map.setView(new ol.View({
       //zoomFactor: (default:2)
       //maxResolution: ...calculated by default
       extent: [-5194304, -5194304, 5194304, 5194304], //left, bottom ,right, top //minx, miny, maxx, maxy
-      //extent: ol.proj.get("EPSG:3857").getExtent(),
+      //extent: ol.proj.get("EPSG:3413").getExtent(),
       projection: "EPSG:3413",
       center: [30665.5, -2039176.688] // This is the center of greenland. Could be set automatically...
 }));
  
      
      
-     /////////////// POLYGONS FROM DATASET GEOJSON
+/////////////// READ AND DISPLAY POLYGONS FROM DATASET GEOJSON
      
  	$.getJSON('data', function(data) {
         //data is the JSON string
@@ -130,11 +130,11 @@ map.setView(new ol.View({
      
      
      
-     
+///////////// HOVER     
 
      
      
-     /////////hover interaction, on hover over polygon/////////////////////////////////////////////////     
+/////////hover interaction, on hover over polygon/////////////////////////////////////////////////     
      var target = map.getTarget();
      var jTarget = typeof target === "string" ? $("#" + target) : $(target);
      // change mouse cursor when over marker
@@ -151,85 +151,25 @@ map.setView(new ol.View({
      });
      
      
-     //////////click interaction//////////////////////////////
+   
      
-     /*Zoom to layer on click*/
-     var featureListener = function(event, feature) {
-    	 console.log('EVENT',event);
-    	 map.getView().fit(feature.getGeometry(), {
-    		  duration: 1000,
-    		  nearest: true
-    		});
-    	 polylayer.setVisible(false);
-    	 displayDataset(feature)
-         //console.log(feature.getId());
-         //alert("Feature Listener Called");
-    	 clickdatasets=true;
-       };
 
-       map.on('click', function(event) {
-    	 if (clickdatasets){
-    		 clickdatasets=false;
-    		 polyfound=false;
-	         map.forEachFeatureAtPixel(event.pixel,
-	         function(feature, layer) {
-
-	           if (!polyfound && feature && feature.getGeometry().getType() == 'Polygon') {
-	             //feature.setStyle(listenerStyle);
-		        	 console.log(feature.getId())
-		        	 console.log(feature.getGeometry().getType())
-	        	 polyfound = true
-	             featureListener(event, feature);
-	             
-	           }
-	         });
-         }
-       });
-       
-       
-       
-     function displayDataset(dataset){
-    	 console.log('DATASET_CLICKED',dataset.getId());
-    	 polyext = dataset.getGeometry().getExtent();
-    	 console.log('EXTENT',polyext);
-    	 //polyext_tr = ol.proj.transformExtent(polyext, ol.proj.get('EPSG:3413'), ol.proj.get('EPSG:3857'))
-    	 
-    	 url= root_link+ '/'+ dataset.getId() + '/'+dataset.get('layers')[0].layertype + '/tiles/{z}/{x}/{-y}.png';
-    	 console.log('URL',url);
-    	 
-    	     var source = new ol.source.OSM({
-    	                 url: url, //'http://127.0.0.1:8887/14/dem/tiles/{z}/{x}/{-y}.png',
-    	                 crossOrigin: null //hack file
-    	         })
      
-    	     var myLayer = new ol.layer.Tile({
-    	       source: source,
-    	       projection: 'EPSG:4326',
-    	    	   extent: polyext, 
-    	    	   opacity: 1,
-    	    	id: dataset.get('layers')[0].id
-    	     });
-    	     dataset_tilelayers.getLayers().getArray().push(myLayer);
-    	     //.addLayer(myLayer);
-    	     $('#infobox').hide();
-    	     displayDetailedInfo(detailedInfo(dataset));
-     }
+//////////////////////////////////////
+     ////display infobox
      
-    // display popup on hover
-       
-       ///////popup
-       
-       //var element = document.getElementById('popup');
+     
 
-       //var popup = new ol.Overlay({
-       //    element: element,
-       //    positioning: 'bottom-center',
-       //    stopEvent: false
-       //});
-       //map.addOverlay(popup);
-       
-     ///pointermove event
-      
+     $('#infobox').appendTo(
+       $('.ol-overlaycontainer')
+     );
+     
+     function displayInfo(info) {
+       $('#infobox').html(info);
+       $('#infobox').show();
+     }     
+     
+     
 var hoverFeature = null;    
        map.on('pointermove', function (evt) {
            var feature = map.forEachFeatureAtPixel(evt.pixel,
@@ -271,19 +211,7 @@ var hoverFeature = null;
      //map.getView().fit(source.getExtent(), map.getSize()); 
      
      
-  //////////////////////////////////////
-       ////display infobox
-       
-       
 
-       $('#infobox').appendTo(
-         $('.ol-overlaycontainer')
-       );
-       
-       function displayInfo(info) {
-         $('#infobox').html(info);
-         $('#infobox').show();
-       }
        
             
        /*Returns html for info showed when hovering over*/
@@ -304,43 +232,7 @@ var hoverFeature = null;
        }
        
        
-       
-       ///////////////////////////////////////
-       ///////detailed infobox
-       $('#infobox-detailed').appendTo(
-    	         $('.ol-overlaycontainer')
-    	       )
 
-       
-       function displayDetailedInfo(info) {
-    	   $('#info-title').html(info[0]);
-           $('#infobox-detailed-content').html(info[1]);
-           $('#infobox-detailed').show();
-           $('#infobox-detailed-content').show();
-         }
-       
-       
-       
-       
-       /*Returns html for info showed when exploring a dataset*/
-       function detailedInfo(feature){
-    	   title = '<h5>Dataset: '+feature.getId()+'</h5>'
-    	   html = '<p>'+"</b>Cite this dataset as: " + feature.get('cite') + "<br> " + "<h6>Layers: </h6>";
-    	   layers=feature.get('layers');
-	   		for (l in layers){
-	   			html=html.concat('<div><input type="checkbox" value="'+layers[l].id+'" id="l_visible" checked>')
-	   			html=html.concat(' Layer: '+ layers[l].id+ ' | <b>'+layers[l].layertype + ' </b> </div>')
-	   		}
-	   		html=html.slice(0,-2);
-	   		html = html.concat("</p>");
-    	   
-	   		
-    	   
-    	   return [title, html];
-       }
-         
-      
-      
        
        
 
@@ -348,42 +240,6 @@ var hoverFeature = null;
 
      
      
-     ///////////
-     //checkbox
-     
-     // create a DOM Input helper for the checkbox
-     //var checkbox = document.querySelector('#visible');
-     // and bind its 'checked' property to the layer's 'visible' property
-     //checkbox.addEventListener('change', function() {
-    	//  var checked = this.checked;
-    	 // if (checked !== myLayer.getVisible()) {
-    	 //   myLayer.setVisible(checked);
-    	 // }
-    	//});
-
-    	//myLayer.on('change:visible', function() {
-    	//  var visible = this.getVisible();
-    	//  if (visible !== checkbox.checked) {
-    	//    checkbox.checked = visible;
-    	//  }
-    	//});
-    	
-    	
-    	
-    	//layercheckbox
-    	
-        //var check = new ol.Overlay({
-            //element: document.getElementById('checkbox')
-         //// });
-    
-     
-        //var ol3_sprint_location = ol.proj.transform([-1.20472, 52.93646], 'EPSG:4326', 'EPSG:3857');
-        //map.addOverlay(check);
-        //check.setPosition(ol3_sprint_location);
-     
-     
-
-          
 
         
         
@@ -425,38 +281,10 @@ var hoverFeature = null;
          		 document.querySelector('#layer_check').checked = visible;
          	  }
          	});*/
-         	
-          
-         	$(document).ready(function(e) {
-         		$(document).on('change', '#l_visible', function(e){
-         			var checked = $(e.target).prop("checked") //.checked;
-         			console.log('prop',$(e.target).prop('checked'))
-         			id_ = $(e.target).prop("value");
-         			console.log('id',id_);
-         			var layer_byid;
-         			
-         			dataset_tilelayers.getLayers().forEach(function (lyr) {
-         				console.log('layer',lyr)
-         				console.log(id_, lyr.get('id'))
-			            if (id_.toString() === lyr.get('id').toString()) {
-			                layer_byid = lyr;
-			            }            
-			        });
-         			console.log(layer_byid);
-         			
-               	  if (typeof layer_byid !='undefined' && checked !== layer_byid.getVisible()) {
-               	    layer_byid.setVisible(checked);
-               	    console.log('SETTING TO', checked);
-               	  }
-         	});
-         	});
-          
-          
-          
-          
-         	
-         	
-         	
+  
+        
+        
+
          	
          	
          	
@@ -561,4 +389,81 @@ var hoverFeature = null;
             	    geometry: thing
             });
              vectorSource.addFeature(featurething);*/
+         	
+         	
+         	
+         	
+         	
+         	
+         	
+         	
+         	
+         	
+         	
+         	
+         	
+            // display popup on hover
+            
+            ///////popup
+            
+            //var element = document.getElementById('popup');
+
+            //var popup = new ol.Overlay({
+            //    element: element,
+            //    positioning: 'bottom-center',
+            //    stopEvent: false
+            //});
+            //map.addOverlay(popup);
+            
+          ///pointermove event
+
              
+         	
+         	
+         	
+         	
+         	
+         	
+         	
+         	
+         	
+         	
+         	
+         	
+         	
+            ///////////
+            //checkbox
+            
+            // create a DOM Input helper for the checkbox
+            //var checkbox = document.querySelector('#visible');
+            // and bind its 'checked' property to the layer's 'visible' property
+            //checkbox.addEventListener('change', function() {
+           	//  var checked = this.checked;
+           	 // if (checked !== myLayer.getVisible()) {
+           	 //   myLayer.setVisible(checked);
+           	 // }
+           	//});
+
+           	//myLayer.on('change:visible', function() {
+           	//  var visible = this.getVisible();
+           	//  if (visible !== checkbox.checked) {
+           	//    checkbox.checked = visible;
+           	//  }
+           	//});
+           	
+           	
+           	
+           	//layercheckbox
+           	
+               //var check = new ol.Overlay({
+                   //element: document.getElementById('checkbox')
+                //// });
+           
+            
+               //var ol3_sprint_location = ol.proj.transform([-1.20472, 52.93646], 'EPSG:4326', 'EPSG:3857');
+               //map.addOverlay(check);
+               //check.setPosition(ol3_sprint_location);
+            
+            
+
+                 

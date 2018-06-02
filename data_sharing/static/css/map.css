@@ -105,7 +105,7 @@
  	left: calc(100% - 250px);
  	font-size: 12px;
  	padding: 10px; 
- 	background-color: rgba(95,158,160,0.5);
+ 	background-color: rgba(95,158,160,0.6);
  	display:inline;
  	height: 100px;
  	width: 200px;
@@ -130,7 +130,7 @@
  	left: calc(100% - 340px);
  	font-size: 12px;
  	padding: 10px; 
- 	background-color: rgba(95,158,160,0.5);
+ 	background-color: rgba(95,158,160,0.6);
  	
  	height: 300px;
  	width: 300px;
@@ -163,7 +163,7 @@
 	top: -moz-calc(100% - 80px);
  	top: -webkit-calc(100% - 80px);
  	top: calc(100% - 80px);
-	left: 280px;
+	left: 275px;
 	width: -moz-calc(100% - 300px);
 	width: -webkit-calc(100% - 300px);
 	width: -webkit-calc(100% - 300px);
