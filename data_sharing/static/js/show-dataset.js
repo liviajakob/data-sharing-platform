@@ -45,7 +45,8 @@
     	 //polyext_tr = ol.proj.transformExtent(polyext, ol.proj.get('EPSG:3413'), ol.proj.get('EPSG:3857'))
     	 d_layers = dataset.get('layers');
     	 console.log(d_layers);
-    	 for (var i = 0; i < d_layers.length; i++){
+    	 for (var i = d_layers.length-1; i >= 0; i--){
+    		 /* TODO: CONFIGURE URL */
 	    	 url= root_link+ '/'+ dataset.getId() + '/'+dataset.get('layers')[i].layertype + '/tiles/{z}/{x}/{-y}.png';
 	    	 console.log('URL',url);
 	    	 
@@ -59,7 +60,8 @@
 	    	       projection: 'EPSG:4326',
 	    	    	   extent: polyext, 
 	    	    	   opacity: 1,
-	    	    	id: dataset.get('layers')[0].id
+	    	    	id: dataset.get('layers')[i].id,
+	    	    	visible: (i==0),
 	    	     });
 	    	     dataset_tilelayers.getLayers().getArray().push(myLayer); //add it to the group layer
     	 }
@@ -98,9 +100,11 @@
   	   title = '<h5>Dataset: '+feature.getId()+'</h5>'
   	   html = '<p>'+"</b>Cite this dataset as: " + feature.get('cite') + "<br> " + "<h6>Layers: </h6>";
   	   layers=feature.get('layers');
-	   		for (l in layers){
-	   			html=html.concat('<div><input type="checkbox" value="'+layers[l].id+'" id="l_visible" checked')
-	   			html=html.concat('> Layer: '+ layers[l].id+ ' | <b>'+layers[l].layertype + ' </b> </div>')
+	   		for (i = 0; i < layers.length; i++){
+	   			html=html.concat('<div><input type="checkbox" value="'+layers[i].id+'" id="l_visible" ')
+	   			//console.log(layers[i].get('visible'))
+	   			if (i==0) html=html.concat('checked')
+	   			html=html.concat('> Layer: '+ layers[i].id+ ' | <b>'+layers[i].layertype + ' </b> </div>')
 	   		}
 	   		html=html.slice(0,-2);
 	   		html = html.concat("</p>");
@@ -126,6 +130,7 @@
   			
   			dataset_tilelayers.getLayers().forEach(function (lyr) {
   				console.log('length',dataset_tilelayers.getLayers().getArray().length)
+  				console.log('-->',dataset_tilelayers.getLayers().getArray()[1].get('id'))
   				console.log('layer',lyr)
   				console.log(id_, lyr.get('id'))
 		            if (id_.toString() === lyr.get('id').toString()) {

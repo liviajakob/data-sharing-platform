@@ -4,7 +4,7 @@ Created on 25 Apr 2018
 @author: livia
 '''
 from display_data.database import Database
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_from_directory
 import json
 
 app = Flask(__name__)
@@ -80,7 +80,16 @@ def layertypes():
     return jsonify(layertypes)
 
  
- 
+    
+@app.route('/download', methods=['GET', 'POST'])
+def download():
+    ''''''
+    #database = Database()
+    #database.scopedSession()
+    #layertypes=database.getLayerTypes(dic=True)    
+    #database.closeSession()
+
+    return send_from_directory(directory='/Users/livia/msc_dissertation/CODE/data_sharing/data/input', filename='Greenland_1000_error.tif')
     
 
 

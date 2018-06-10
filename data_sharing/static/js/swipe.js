@@ -1,8 +1,14 @@
       
+var bing = map.getLayers().getArray()[2];
 
-var swipe = document.getElementById('swipe');
+console.log('BINDG',bing);
+console.log(map.getLayers().getArray().length)
+startSwipe(bing);
 
-      bing.on('precompose', function(event) {
+
+function startSwipe(layer){
+	var swipe = document.getElementById('swipe');
+    layer.on('precompose', function(event) {
         var ctx = event.context;
         var width = ctx.canvas.width * (swipe.value / 100);
 
@@ -12,7 +18,7 @@ var swipe = document.getElementById('swipe');
         ctx.clip();
       });
 
-      bing.on('postcompose', function(event) {
+      layer.on('postcompose', function(event) {
         var ctx = event.context;
         ctx.restore();
       });
@@ -20,8 +26,5 @@ var swipe = document.getElementById('swipe');
       swipe.addEventListener('input', function() {
         map.render();
       }, false);
-      
-      
-      
-      
-      
+
+}
