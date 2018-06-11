@@ -146,3 +146,28 @@ a{
 	cursor: pointer;
 	}
 
+
+.info-button{
+    /*fix border opacity*/
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding;
+    background-clip: padding-box;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,0.8);
+    background-image: url(../img/info2.png);
+    background-size: 8px;
+    background-repeat: no-repeat;
+    background-position: 6px;
+    background-color: rgba(0,60,136,.5);
+    border-radius: 50%;
+    color:white;
+   	padding-left: 20px;
+   	display: inline;
+   	margin: 3px;
+}
+
+.info:hover{
+	cursor: pointer;
+}
+

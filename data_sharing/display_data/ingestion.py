@@ -65,7 +65,7 @@ class DatabaseIngestion(object):
         fn, file_extension = os.path.splitext(filename) #extract extension
         srcf = os.path.join(conf.getDataInputPath(), filename)
         #save init file in output folder
-        cp = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('raw_input'+file_extension))
+        cp = os.path.join(conf.getLayerFolder(ltype, dataset_id), (conf.getRawInputFilename()+file_extension))
         shutil.copyfile(srcf, cp)
         
         # compute stats

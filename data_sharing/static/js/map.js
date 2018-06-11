@@ -2,7 +2,7 @@
 var clickdatasets = true;
 var root_link = 'http://127.0.0.1:8887';
 var projection = 'EPSG:4313';
-
+var api_link = 'http://localhost:5002'
 
 
 var map = new ol.Map({
@@ -80,7 +80,7 @@ map.setView(new ol.View({
       center: [30665.5, -2039176.688] // This is the center of greenland. Could be set automatically...
 }));
  
-     
+var mapextent = map.getView().calculateExtent();     
      
 /////////////// READ AND DISPLAY POLYGONS FROM DATASET GEOJSON
      
@@ -261,11 +261,14 @@ var hoverFeature = null;
             
          })})
         
-        map.addLayer(bing);
+        //map.addLayer(bing);
 
 
+       
         
         
+        
+
         
         
         

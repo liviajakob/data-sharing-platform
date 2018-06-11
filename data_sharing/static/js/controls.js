@@ -49,7 +49,9 @@
         var options = opt_options || {};
 
         var reset = document.createElement('button');
-        reset.innerHTML = 'R';
+        reset.className = 'custom-reset';
+        reset.title = 'Reset Map';
+        //reset.innerHTML = 'R';
         
         var nort = document.createElement('button');
         nort.innerHTML = 'N';
@@ -69,24 +71,33 @@
         };
         
         
-        var updatesize= function(){
+        var refresh= function(){
         	//map.getView().refresh();
-        	console.log('UPDATE SIZE');
-        	map.getView().setRotation(0, {duration: 1000});
-        	//map.getView().fit(map.getView().extent, map.getSize()); 
+        	console.log('REFRESH');
+        	//map.getView().setRotation(0, {duration: 1000});
+        	//zoom out
+        	map.getView().fit(mapextent, {duration: 1000}); 
+        	
+        	//show extents
+        	polylayer.setVisible(true);
+        	
+        	//remove layers
+        	resetDatasetMode();
+        	clickdatasets=true;
         }
         
-        nort.addEventListener('onchange', handleRotateNorth, false);
-        nort.addEventListener('click', handleRotateNorth, false);
-        nort.addEventListener('touchstart', handleRotateNorth, false);
+        //nort.addEventListener('onchange', handleRotateNorth, false);
+        //nort.addEventListener('click', handleRotateNorth, false);
+        //nort.addEventListener('touchstart', handleRotateNorth, false);
         
-        reset.addEventListener('click', updatesize, false);
-        reset.addEventListener('touchstart', updatesize, false);
+        reset.addEventListener('onchange', refresh, false);
+        reset.addEventListener('click', refresh, false);
+        reset.addEventListener('touchstart', refresh, false);
 
         
         var element = document.createElement('div');
-        element.className = 'rotate-north ol-unselectable ol-control';
-        element.appendChild(nort);
+        element.className = 'refresh-control ol-unselectable ol-control';
+        //element.appendChild(nort);
         element.appendChild(reset);
         //element.appendChild(tool);
 
@@ -114,3 +125,62 @@
             enableOpacitySliders: true
         });
         map.addControl(layerSwitcher);
+        
+        
+        
+        
+        
+//// ADD TOOLTIPS FOR BUTTONS
+        
+        /*Enable all tooltips on the page*/
+        $(function () {
+        	  $('[data-toggle="tooltip"]').tooltip()
+        	})
+        
+        
+        $('.ol-zoom-in, .ol-zoom-out').tooltip({
+            placement: 'right'
+          });
+        $('.custom-reset').tooltip({
+            placement: 'right'
+          });
+        
+        $('.ol-full-screen-false').tooltip({
+            placement: 'left'
+          });
+        
+        $('.ol-full-screen-true').tooltip({
+            placement: 'left'
+          });
+        $('.ol-overviewmap button').tooltip({
+            placement: 'right'
+          });
+        
+        $('.toggle-swipe').tooltip({
+            placement: 'right'
+          });
+        
+   
+        
+        
+        
+  /// RESET
+        
+        /*Resets the dataset explore mode (resets tool modes and removes layers)*/
+        function resetDatasetMode(){
+        	//stop swipe mode
+        	stopSwipe(swipelayer);
+        	//hide toolbox
+        	$('#toolbox').hide();
+        	//hide infobox
+        	$('#infobox-detailed').hide();
+        	//remove layers
+        	removeLayers();
+        }
+        
+        /*Removes all layers in the datasetview*/
+        function removeLayers(){
+        	while(dataset_tilelayers.getLayers().getArray().length > 0) {
+        		dataset_tilelayers.getLayers().getArray().pop();
+        	}
+        }

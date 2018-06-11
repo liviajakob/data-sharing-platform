@@ -6,7 +6,7 @@ Created on 14 May 2018
 import logging, os, ast
 from definitions import CONFIG_PATH
 from configobj import ConfigObj
-import shutil
+import shutil, glob
     
 
 class ConfigSystem():
@@ -47,6 +47,24 @@ class ConfigSystem():
         # convert to dict
         return ast.literal_eval(scale)
     
+    def getRawInputFilename(self):
+        return self.config['layers']['rawfilename']
+    
+    
+    
+    def getLayerRawFile(self, ltype, d_id):
+        pth = self.getLayerFolder(ltype, d_id)
+        # get file with any extension
+        fname=''
+        print(self.getRawInputFilename()+".*")
+        for file in glob.glob(os.path.join(pth,self.getRawInputFilename())+".*"):
+            print(file)
+            fname=file
+            break
+        #fname = self.getRawInputFilename()+'.tif'
+        print(fname)
+        print(os.path.join(pth,fname))
+        return os.path.join(pth,fname)
     
       
     def getExponent(self, layertype):
@@ -124,4 +142,5 @@ class ConfigSystem():
     def getTilesFolder(self, ltype, d_id=None):
         folder = os.path.join(self.getLayerFolder(ltype=ltype, d_id=d_id), self.config['data']['tiles'])
         return folder
+    
     

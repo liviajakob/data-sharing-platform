@@ -36,7 +36,8 @@
     </div>
     <div id="datasets">
     <div id=datasets-bar>
-    Datasets
+    Datasets   
+    <div class="info-button" data-toggle="tooltip" data-placement="top" title="Search or filter datasets and their layers."></div>
     <div id="layertypes" class="small"><b>Layertypes: </b></div>
     <input type="text" id="myInput" onkeyup="filterDatasets()" placeholder="Search for datasets..." title="Type in keywords">
     
@@ -74,9 +75,19 @@ Aenean pharetra dignissim est, non placerat massa semper vitae. Duis et est maur
    
    <div class='map' id="map">{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
    </div>   
-   <div id="popup"></div> 
+   <!-- div id="popup"></div>  -->
    
-   <input id="swipe" type="range">
+   <div id="toolbox">
+	   <div class="content">
+	   	<h6>Toolbox  <span class="info-button" data-toggle="tooltip" data-placement="right" title="Tools to explore this dataset"></span></h6>
+	   	<hr>
+	   	
+	   	<button id="toggle-swipe" data-toggle="tooltip" data-placement="right" title="Enter swipe mode to compare the two top layers">Swipe Tool</button>
+	   	
+	   </div>
+   </div>
+   
+   <input id="swipe" type="range" class="slider" >
    
    
       <div id='infobox'>
@@ -86,10 +97,10 @@ Aenean pharetra dignissim est, non placerat massa semper vitae. Duis et est maur
    <div id='infobox-detailed-content'></div>
       </div>
 
-    <div id="search" style="position: absolute; top: 60px; right: 50px; padding: 5px; background-color: rgba(255,255,255,0.5);">
+    <!--div id="search" style="position: absolute; top: 60px; right: 50px; padding: 5px; background-color: rgba(255,255,255,0.5);">
       <input type="text" placeholder="Search for datasets..." style="width: 200px">
       <button type="button">Search</button>
-    </div>
+    </div-->
 
 <div id="mouse-position">Mouse Position:
 </div>

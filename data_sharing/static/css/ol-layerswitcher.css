@@ -8,7 +8,7 @@
 
 .layer-switcher {
     position: absolute;
-    top: 3.5em;
+    top: 2.7em;
     right: 0.5em;
     text-align: left;
 }
@@ -34,8 +34,8 @@
 
 .layer-switcher button {
     float: right;
-    width: 26px;
-    height: 26px;
+    width: 25.5px;
+    height: 25.5px;
     background-image: url(../img/layer_icon.png);
     background-size: 95%;
     background-repeat: no-repeat;

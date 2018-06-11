@@ -31,6 +31,7 @@ section2 = {
 
 # @TODO query layer types from database
 config['layers'] = {}
+config['layers']['rawfilename'] = 'raw_input'
 config['layers']['types'] = ['dem', 'rate', 'error']
 config['layers']['exponent'] = [1, 5, 3]
 config['layers']['scale']=[{'min': 0, 'max': 4000},{'min': -2, 'max': 2},{'min': 0, 'max': 3000}]

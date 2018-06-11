@@ -3,6 +3,10 @@
 
   //////////click interaction//////////////////////////////
      
+
+//TODO: clickdataset assure that can't be false for a long time...
+
+
      /*Zoom to layer on click*/
      var featureListener = function(event, feature) {
     	 console.log('EVENT',event);
@@ -11,14 +15,16 @@
     		  nearest: true
     		});
     	 polylayer.setVisible(false);
-    	 displayDataset(feature)
+    	 displayDataset(feature);
          //console.log(feature.getId());
          //alert("Feature Listener Called");
     	 clickdatasets=true;
        };
 
        map.on('click', function(event) {
+    	   console.log('1');
     	 if (clickdatasets){
+    		 console.log('2');
     		 clickdatasets=false;
     		 polyfound=false;
 	         map.forEachFeatureAtPixel(event.pixel,
@@ -40,6 +46,10 @@
        
      function displayDataset(dataset){
     	 console.log('DATASET_CLICKED',dataset.getId());
+    	 
+    	 // remove other dataset layers
+    	 resetDatasetMode();
+    	 
     	 polyext = dataset.getGeometry().getExtent();
     	 console.log('EXTENT',polyext);
     	 //polyext_tr = ol.proj.transformExtent(polyext, ol.proj.get('EPSG:3413'), ol.proj.get('EPSG:3857'))
@@ -66,6 +76,7 @@
 	    	     dataset_tilelayers.getLayers().getArray().push(myLayer); //add it to the group layer
     	 }
 	    	     $('#infobox').hide();
+	    	     $('#toolbox').show();
 	    	     displayDetailedInfo(detailedInfo(dataset));
 	    	     
      }
@@ -101,10 +112,12 @@
   	   html = '<p>'+"</b>Cite this dataset as: " + feature.get('cite') + "<br> " + "<h6>Layers: </h6>";
   	   layers=feature.get('layers');
 	   		for (i = 0; i < layers.length; i++){
-	   			html=html.concat('<div><input type="checkbox" value="'+layers[i].id+'" id="l_visible" ')
+	   			html=html.concat('<div style="padding-bottom: 10px;"><input type="checkbox" value="'+layers[i].id+'" id="l_visible" ')
 	   			//console.log(layers[i].get('visible'))
 	   			if (i==0) html=html.concat('checked')
-	   			html=html.concat('> Layer: '+ layers[i].id+ ' | <b>'+layers[i].layertype + ' </b> </div>')
+	   			html=html.concat('> Layer: '+ layers[i].id+ ' | <b>'+layers[i].layertype + ' </b> ')
+	   			html=html.concat('<button class="download" data-toggle="tooltip" data-placement="right" data-original-title="Download this layer" id="download-layer" value="'+layers[i].id+'" >Download </button>')
+	   			html=html.concat('</div>')
 	   		}
 	   		html=html.slice(0,-2);
 	   		html = html.concat("</p>");
@@ -118,7 +131,7 @@
      
      
      
-     //////// LAYERSWITCHER
+     //////// DATASET LAYERSWITCHER
      
   	$(document).ready(function(e) {
   		$(document).on('change', '#l_visible', function(e){
@@ -130,10 +143,11 @@
   			
   			dataset_tilelayers.getLayers().forEach(function (lyr) {
   				console.log('length',dataset_tilelayers.getLayers().getArray().length)
-  				console.log('-->',dataset_tilelayers.getLayers().getArray()[1].get('id'))
+  				//console.log('-->',dataset_tilelayers.getLayers().getArray()[1].get('id'))
   				console.log('layer',lyr)
   				console.log(id_, lyr.get('id'))
 		            if (id_.toString() === lyr.get('id').toString()) {
+		            	console
 		                layer_byid = lyr;
 		            }            
 		        });
@@ -146,6 +160,31 @@
         	  }
   	});
   	});
+  	
+  	//window.location.href='download';
+  	
+  	////// DOWNLOAD BUTTON
+  	$(document).ready(function(e) {
+  		$(document).on('click', '#download-layer', function(e){
+  			id_ = $(e.target).prop("value");
+  			console.log('id',id_);
+  			window.location.href=api_link+'/get_file/'+id_;
+  			//window.href('download');
+  			//$fileDownload('download')
+  		    //.done(function () { alert('File download a success!'); })
+  		    //.fail(function () { alert('File download failed!'); });
+  			
+  			
+  			/*$.getJSON('download', function(data) {
+  		    	console.log('DATA1')
+  		    	console.log(data);
+  		    	console.log(typeof data)
+  		    	
+  		    });*/
+  			
+  	});
+  	});
+  	
    
    
      
