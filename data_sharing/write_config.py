@@ -32,11 +32,11 @@ section2 = {
 # @TODO query layer types from database
 config['layers'] = {}
 config['layers']['rawfilename'] = 'raw_input'
-config['layers']['types'] = ['dem', 'rate', 'error']
-config['layers']['exponent'] = [1, 5, 3]
-config['layers']['scale']=[{'min': 0, 'max': 4000},{'min': -2, 'max': 2},{'min': 0, 'max': 3000}]
+config['layers']['types'] = ['dem', 'rate', 'error', 'velocity']
+config['layers']['exponent'] = [1, 5, 3, 2]
+config['layers']['scale']=[{'min': 0, 'max': 4000},{'min': -2, 'max': 2},{'min': 0, 'max': 3000}, {'min': 0, 'max': 3000}]
 
-config['layers']['colours'] = [config['layers']['types'][0]+'.txt', config['layers']['types'][1]+'.txt', config['layers']['types'][2]+'.txt']
+config['layers']['colours'] = [config['layers']['types'][0]+'.txt', config['layers']['types'][1]+'.txt', config['layers']['types'][2]+'.txt', config['layers']['types'][3]+'.txt']
 config['layers']['colpath'] = os.path.join(config['data']['input'], 'colourfiles')
 
 #

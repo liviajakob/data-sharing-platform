@@ -39,6 +39,7 @@ function getTopVisibleLayer(layerarr){
 			return layerarr[i];
 		}
 	}
+	console.log('returning zero');
 	return "";
 }
 

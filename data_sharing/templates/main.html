@@ -55,14 +55,12 @@
 
 	
 	
-	<a id="png" class="btn btn-default">Download view as PNG</a>
 	
 	
-	<div class="text"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer eget laoreet justo. Morbi feugiat purus velit, at feugiat quam vestibulum id. Morbi a finibus orci. Mauris non mi rhoncus, accumsan erat sed, blandit turpis. Fusce tincidunt maximus risus, sit amet fermentum sapien accumsan nec. Donec consequat sollicitudin nisi sit amet cursus. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur ullamcorper condimentum aliquam. Pellentesque volutpat pulvinar enim. Morbi accumsan vestibulum volutpat.
-Vestibulum ut lectus lacus. Sed enim diam, rutrum at maximus suscipit, consequat in metus. Fusce nec ipsum nec nisi mattis porta ac vitae quam. Pellentesque viverra sapien augue, nec tincidunt purus volutpat vitae. Aliquam vitae scelerisque nibh, quis maximus massa. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vivamus vitae felis metus. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras a tortor id arcu sollicitudin aliquet. Ut a accumsan ex. Nullam fermentum quam non odio volutpat rhoncus. Praesent tincidunt, justo at euismod elementum, felis lectus vehicula lectus, vitae dapibus quam odio dictum ex. Morbi imperdiet sem eget risus ultrices, sed cursus sapien pellentesque. Etiam eleifend mattis quam ut posuere. Nullam eget tincidunt nisl.
-Aenean pharetra dignissim est, non placerat massa semper vitae. Duis et est mauris. Proin pretium ut massa ut finibus. Aliquam aliquet sodales magna vel sollicitudin. Etiam interdum, ex in tincidunt fringilla, felis nisl convallis arcu, sed placerat mi nisi vitae neque. Quisque at aliquet enim. Sed ornare ipsum et ligula sagittis, quis vestibulum augue luctus. Nullam id rhoncus ante, at euismod nulla. Quisque consequat ultrices dolor eget tristique. Mauris porta tellus ut tellus aliquet, non pellentesque sem ultrices. Ut pretium, velit in ultricies malesuada, sapien urna tempus velit, sit amet mollis ante enim elementum purus. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Interdum et malesuada fames ac ante ipsum primis in faucibus.
+	<div class="text"><button id="png">Download view as PNG</button>
+	
 
-<div id="attribution">Attribution: </div>
+<div id="attribution"></div>
 	</div>
 
 	
@@ -77,14 +75,19 @@ Aenean pharetra dignissim est, non placerat massa semper vitae. Duis et est maur
    </div>   
    <!-- div id="popup"></div>  -->
    
-   <div id="toolbox">
+   <div id="toolbox" class="maptool">
 	   <div class="content">
 	   	<h6>Toolbox  <span class="info-button" data-toggle="tooltip" data-placement="right" title="Tools to explore this dataset"></span></h6>
 	   	<hr>
 	   	
 	   	<button id="toggle-swipe" data-toggle="tooltip" data-placement="right" title="Enter swipe mode to compare the two top layers">Swipe Tool</button>
+	   	<button id="toggle-explore" data-toggle="tooltip" data-placement="right" title="Enter explore mode to explore layer values">Explore Tool</button>
 	   	
 	   </div>
+   </div>
+   
+   <div id="point-info" class="maptool">
+   	<div id="point-value"><p>Click on the map to query values of the top layer</p></div>
    </div>
    
    <input id="swipe" type="range" class="slider" >
@@ -116,6 +119,7 @@ Aenean pharetra dignissim est, non placerat massa semper vitae. Duis et est maur
  <script src="{{url_for('static', filename='js/sidebar-display.js')}}"></script>
 <script src="{{url_for('static', filename='js/export.js')}}"></script>
 <script src="{{url_for('static', filename='js/swipe.js')}}"></script>
+<script src="{{url_for('static', filename='js/explore.js')}}"></script>
 
 {% endblock %}
 

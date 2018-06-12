@@ -2,17 +2,22 @@
 
 
  #map {
- 	margin-top: 59px;
- 	margin-bottom: 30px;
- height: -moz-calc(100% - 89px);
- height: -webkit-calc(100% - 89px);
- height: calc(100% - 89px);
+ 	top: 58px;
+ 	bottom: 30px;
+ height: -moz-calc(100% - 88px);
+ height: -webkit-calc(100% - 88px);
+ height: calc(100% - 88px);
    /*height: 100vh; *//*500px;*/
  width: -moz-calc(100% - 250px);
  width: -webkit-calc(100% - 250px);
  width: calc(100% - 250px);
    position: absolute;
    margin-left: 250px;
+   
+}
+
+.explore-cursor{
+	cursor: url("../img/cursor.png"), pointer;
 }
 
 
@@ -94,13 +99,14 @@
  	left: calc(100% - 250px);
  	font-size: 12px;
  	padding: 10px; 
- 	background-color: rgba(95,158,160,0.6);
+ 	background-color: rgba(95,158,160,0.8);
  	display:inline;
  	height: 100px;
  	width: 200px;
  	display: none;
  	border-radius: 7px;
  	overflow: hidden;
+ 	//color: white;
 }
 
 #infobox p{
@@ -147,19 +153,22 @@
  
 
 #toolbox{
-	position:absolute;
 	top: 68px;
 	left: 300px;
- 	font-size: 12px;
-
- 	background-clip: padding-box;
  	//height: 100px;
  	width: 170px;
  	display: none;
- 	//border-radius: 7px;
- 	
- 	
-    margin: 0;
+
+    /*fix border opacity*/
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding;
+    background-clip: padding-box;
+}
+
+
+.maptool{
+	position:absolute;
+	margin: 0;
     border: 3px solid rgba(255,255,255,0.5);
     padding: 6px;
     border-radius: 4px;
@@ -170,6 +179,20 @@
     -webkit-background-clip: padding-box;
     -moz-background-clip: padding;
     background-clip: padding-box;
+    font-size: 12px;
+}
+
+#point-info{
+	
+	top: 300px;
+	left: 300px;
+ 	background-clip: padding-box;
+ 	//height: 100px;
+ 	width: 170px;
+ 	display: none;
+ 	//border-radius: 7px;
+ 	font-size: 13px;
+ 	background-color: rgba(93, 62, 60, 0.8);
 }
  
  
@@ -200,7 +223,7 @@
 
 #toggle-swipe{
 	float: left;
-    //width: 110px;
+    width: 130px;
     height: 30px;
     border: 3px solid rgba(255,255,255,0.8);
     background-image: url(../img/compare3.png);
@@ -211,9 +234,33 @@
     border-radius: 4px;
     padding-left: 37px;
     color:white;
+    margin-bottom: 6px;
+    text-align: left;
 }
 
 #toggle-swipe:hover{
+	background-color: rgba(0,60,136,0.9);
+	cursor: pointer;
+}
+
+
+#toggle-explore{
+	float: left;
+    width: 130px;
+    height: 29px;
+    border: 3px solid rgba(255,255,255,0.8);
+    background-image: url(../img/explore.png);
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-position: 7px;
+    background-color: rgba(0,60,136,.5);
+    border-radius: 4px;
+    padding-left: 37px;
+    color:white;
+    text-align: left;
+}
+
+#toggle-explore:hover{
 	background-color: rgba(0,60,136,0.9);
 	cursor: pointer;
 }

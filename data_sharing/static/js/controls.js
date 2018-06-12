@@ -170,6 +170,8 @@
         function resetDatasetMode(){
         	//stop swipe mode
         	stopSwipe(swipelayer);
+        	//stop explore mode
+        	stopExplore();
         	//hide toolbox
         	$('#toolbox').hide();
         	//hide infobox

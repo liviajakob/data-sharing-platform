@@ -26,11 +26,12 @@ var map = new ol.Map({
                         title: 'Open Street Map',
                         source: new ol.source.OSM(),
                         projection: 'EPSG:3857',
-                        type: 'base'
+                        type: 'base',
+                        visible:false
                     }),
                     new ol.layer.Tile({
                         title: 'Aerial Photo',
-                    	visible: false,
+                    	visible: true,
                     	type: 'base',
                         preload: Infinity,
                         source: new ol.source.BingMaps({
@@ -79,6 +80,9 @@ map.setView(new ol.View({
       projection: "EPSG:3413",
       center: [30665.5, -2039176.688] // This is the center of greenland. Could be set automatically...
 }));
+
+
+
  
 var mapextent = map.getView().calculateExtent();     
      
@@ -248,7 +252,7 @@ var hoverFeature = null;
         
         
 
-        var bing = new ol.layer.Tile({
+        /*var bing = new ol.layer.Tile({
             title: 'Aerial Photo',
         	visible: true,
             preload: Infinity,
@@ -259,7 +263,7 @@ var hoverFeature = null;
               // "no photos at this zoom level" tiles
               // maxZoom: 19
             
-         })})
+         })})*/
         
         //map.addLayer(bing);
 

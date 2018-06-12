@@ -6,8 +6,10 @@ Created on 25 Apr 2018
 from display_data.database import Database
 from flask import Flask, render_template, jsonify, request, send_from_directory
 import json
+from flask_cors import CORS
 
 app = Flask(__name__)
+#CORS(app)
     
 @app.route('/', methods=['POST', 'GET'])
 def index():
@@ -97,4 +99,4 @@ def download():
 if __name__ == '__main__':
     print("hi")
     
-    app.run(debug=True)
+    app.run(debug=True, threaded=True, host='0.0.0.0', port=5000)

@@ -9,9 +9,10 @@ import json
 from flask_restful import Resource, Api
 from flask_cors import CORS, cross_origin
 from display_data.system_configuration import ConfigSystem
+from get_data.query_point import retrieve_pixel_value
 
 app = Flask(__name__)
-#CORS(app)
+CORS(app)
 
 #api = Api(app)
 
@@ -51,6 +52,29 @@ def get_file(pid):
     #raster = '/Users/livia/msc_dissertation/CODE/data_sharing/data/output/datasets/'+str(pid)+'/dem/raw_input.tif'
     response = send_file(rasterf)
     return response
+
+@app.route('/get_value/<int:lid>', methods=['GET', 'OPTIONS'])
+def get_value(lid):
+    print('we are here')
+    print(lid)
+    fname=getLayerFilePath(lid)
+    #raster = '/Users/livia/msc_dissertation/CODE/data_sharing/data/output/datasets/'+str(pid)+'/dem/raw_input.tif'
+    #response = send_file(rasterf)
+    x = request.args.get('x')
+    y = request.args.get('y')
+    print(x,y)
+    coords=[float(x),float(y)]
+    #-102834.5, -2151176.688
+    print(coords)
+    print(fname)
+    val=retrieve_pixel_value(coords, fname)
+    try:
+        val = "{:.6f}".format(val)
+    except:
+        pass
+    response={}
+    response['value']=val
+    return jsonify(response)
   
 
 def getLayerFilePath(pid):
@@ -63,6 +87,7 @@ def getLayerFilePath(pid):
     database.closeSession()
     return rasterf
     
+
     
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, threaded=True)

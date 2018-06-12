@@ -18,7 +18,7 @@
     	 displayDataset(feature);
          //console.log(feature.getId());
          //alert("Feature Listener Called");
-    	 clickdatasets=true;
+    	 //clickdatasets=true;
        };
 
        map.on('click', function(event) {
@@ -39,9 +39,12 @@
 	             
 	           }
 	         });
+	         window.setTimeout(function(){clickdatasets=true;}, 1000);
+	         
          }
        });
        
+   
        
        
      function displayDataset(dataset){
