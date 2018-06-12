@@ -62,7 +62,7 @@ class DatabaseIngestion(object):
     def processRaster(self, filename, ltype, dataset_id):
         conf = ConfigSystem(dataset_id=dataset_id)
         rast_proc = RasterLayerProcessor(logger=self.logger)
-        fn, file_extension = os.path.splitext(filename) #extract extension
+        file_extension = os.path.splitext(filename)[1] #extract extension
         srcf = os.path.join(conf.getDataInputPath(), filename)
         #save init file in output folder
         cp = os.path.join(conf.getLayerFolder(ltype, dataset_id), (conf.getRawInputFilename()+file_extension))
@@ -73,9 +73,16 @@ class DatabaseIngestion(object):
         stats = rast_proc.getStatistics()
         print(stats)
         #scale = {'min': stats['min'], 'max': stats['max']}
+        
+        #reproject
+        proj = os.path.join(conf.getLayerFolder(ltype, dataset_id), (conf.getReprojectedFilename()+file_extension))
+        print("REPROJECT", proj)
+        rast_proc.reproject(inputfile=srcf, outputfile=proj)
+        
+        #convert to 8bit
         scale = conf.getLayerScale(ltype)
         bit_8 = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('8bit'+file_extension))
-        rast_proc.to8Bit(inputfile=srcf, outputfile=bit_8, scale=scale, exponent=conf.getExponent(layertype=ltype))
+        rast_proc.to8Bit(inputfile=proj, outputfile=bit_8, scale=scale, exponent=conf.getExponent(layertype=ltype))
         
         ########### PRINT STATS
         rast_proc.readFile(bit_8)
@@ -136,16 +143,23 @@ class DatabaseIngestion(object):
     def addBoundingBox(self, dataset, layers):
         assert len(layers) > 0
         ## for now just take the first layer
-        
+        file_extension = os.path.splitext(layers[0][0])[1]
         conf = ConfigSystem(dataset_id=dataset.id)
         srcf = os.path.join(conf.getDataInputPath(), layers[0][0])
         rast_proc = RasterLayerProcessor(self.logger)
-        rast_proc.readFile(srcf)
+        
+        repr_file = 'reproject.'+file_extension
+        repr_filepath = os.path.join(conf.getDataInputPath(), repr_file)
+        rast_proc.reproject(srcf, repr_filepath)
+        print('reprojected')
+        rast_proc.readFile(repr_filepath)
+        print(rast_proc.getProjection())
         box=rast_proc.getMinBoundingBox()        
         dataset.xmin = box['xmin']
         dataset.xmax = box['xmax']
         dataset.ymin = box['ymin']
         dataset.ymax = box['ymax']
+        os.remove(repr_filepath)
         self.logger.info('ADDED BOUNDING BOX')
         
         

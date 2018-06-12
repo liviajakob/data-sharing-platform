@@ -22,7 +22,7 @@ class RasterTiler(object):
         pass
     
     
-    def createTiles(self, inputfile, outputdir, zoom="0-5"):
+    def createTiles(self, inputfile, outputdir, zoom="2-10"):
         #commandlist=['gdal2tiles.py', '-z', zoom, '-p', 'raster', inputfile, outputdir]
         commandlist=['gdal2tiles.py', '-z', zoom, inputfile, outputdir]
         print(commandlist)
@@ -196,6 +196,11 @@ class RasterLayerProcessor(object):
         subprocess.call(commandlist)
         
     
+    def reproject(self, inputfile, outputfile, projection='EPSG:3413'):
+        commandlist=['gdalwarp', '-t_srs', projection, '-overwrite', inputfile, outputfile]
+        print('reproject...')
+        print(commandlist)
+        subprocess.call(commandlist)
     
     # @TODO not hardcoded!
     def to8Bit(self, inputfile, outputfile, scale, fileformat='GTiff', exponent=2, bits=[1,255], nodata=0):

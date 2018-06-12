@@ -15,6 +15,7 @@ import numpy as np
 
 def retrieve_pixel_value(geo_coord, data_source):
     """Return floating-point value that corresponds to given point."""
+    print(data_source)
     mx, my = geo_coord[0], geo_coord[1]
     src_ds=gdal.Open(data_source) 
     gt=src_ds.GetGeoTransform()

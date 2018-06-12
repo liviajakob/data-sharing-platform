@@ -57,7 +57,7 @@ def get_file(pid):
 def get_value(lid):
     print('we are here')
     print(lid)
-    fname=getLayerFilePath(lid)
+    fname=getLayerFilePath(lid, proj=True)
     #raster = '/Users/livia/msc_dissertation/CODE/data_sharing/data/output/datasets/'+str(pid)+'/dem/raw_input.tif'
     #response = send_file(rasterf)
     x = request.args.get('x')
@@ -77,13 +77,13 @@ def get_value(lid):
     return jsonify(response)
   
 
-def getLayerFilePath(pid):
+def getLayerFilePath(pid, proj=False):
     database = Database()
     database.scopedSession()
     layer = database.getLayerById(pid)[0]
     ltype=database.getLayertypeById(layer.layertype_id).name
     conf = ConfigSystem()
-    rasterf = conf.getLayerRawFile(ltype=ltype, d_id=layer.dataset_id)
+    rasterf = conf.getLayerRawFile(ltype=ltype, d_id=layer.dataset_id, proj=proj)
     database.closeSession()
     return rasterf
     

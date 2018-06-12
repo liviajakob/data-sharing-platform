@@ -50,14 +50,19 @@ class ConfigSystem():
     def getRawInputFilename(self):
         return self.config['layers']['rawfilename']
     
+    def getReprojectedFilename(self):
+        return self.config['layers']['reprojectedfilename']
     
-    
-    def getLayerRawFile(self, ltype, d_id):
+    def getLayerRawFile(self, ltype, d_id, proj=False):
         pth = self.getLayerFolder(ltype, d_id)
         # get file with any extension
         fname=''
-        print(self.getRawInputFilename()+".*")
-        for file in glob.glob(os.path.join(pth,self.getRawInputFilename())+".*"):
+        #print(self.getRawInputFilename()+".*")
+        if proj:
+            fls= glob.glob(os.path.join(pth,self.getReprojectedFilename())+".*")
+        else:
+            fls = glob.glob(os.path.join(pth,self.getRawInputFilename())+".*")
+        for file in fls:
             print(file)
             fname=file
             break

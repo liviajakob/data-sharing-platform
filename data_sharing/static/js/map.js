@@ -70,7 +70,7 @@ map.setView(new ol.View({
       //center: [0, 0],
       zoom: 3, //map resolution
       minZoom: 2,
-      maxZoom: 10,
+      //maxZoom: 20,
       //projection and units,, default mercator and meters
       //maxZoom: (default: 28)
       //zoomFactor: (default:2)
