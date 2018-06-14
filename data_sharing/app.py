@@ -48,6 +48,22 @@ def data():
     database.scopedSession()
     
     filtering = 'hi' #request.args
+    page=0
+    page_size=5
+    try:
+        page=int(request.args.get('page'))
+    except:
+        pass
+    
+    try: 
+        page_size = int(request.args.get('page_size'))
+    except:
+        pass
+    if request.data:
+        page=request.args.get('page')
+    if request.data:
+        page_size = request.args.get('page_size')
+    #rows = 0#request.start
     
     #data = request.data
     #dataDict = json.loads(data)
@@ -55,7 +71,7 @@ def data():
     ##lid = request.args.get('lid')    
     
     
-    datasets=database.getDatasets(filtering=filtering, dic=True)
+    datasets=database.getDatasets(filtering=filtering, dic=True, page=page, page_size=page_size)
     ''''features=[]
     for ds in datasets:
         features.append(ds.asGeoDict())
@@ -83,7 +99,7 @@ def layertypes():
 
  
     
-@app.route('/download', methods=['GET', 'POST'])
+'''@app.route('/download', methods=['GET', 'POST'])
 def download():
     ''''''
     #database = Database()
@@ -91,7 +107,7 @@ def download():
     #layertypes=database.getLayerTypes(dic=True)    
     #database.closeSession()
 
-    return send_from_directory(directory='/Users/livia/msc_dissertation/CODE/data_sharing/data/input', filename='Greenland_1000_error.tif')
+    return send_from_directory(directory='/Users/livia/msc_dissertation/CODE/data_sharing/data/input', filename='Greenland_1000_error.tif')'''
     
 
 

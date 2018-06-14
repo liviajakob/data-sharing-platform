@@ -189,7 +189,7 @@ class Database():
         return self._engine.table_names()
         
         
-    def getDatasets(self, ids=None, filtering={}, dic=False):
+    def getDatasets(self, ids=None, filtering={}, dic=False, page=None, page_size=None):
         """returns a list of all requested datasets.
         
         Input parameter:
@@ -209,6 +209,11 @@ class Database():
             query=query.filter(Dataset.id.in_(ids))
         elif isinstance(ids, int):
             query=query.filter(Dataset.id == ids)
+        #check if page size given   
+        if page_size:
+            query = query.limit(page_size)
+        if page: 
+            query = query.offset(page*page_size)
            
         result=query.all()
         

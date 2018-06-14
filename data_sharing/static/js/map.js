@@ -88,11 +88,11 @@ var mapextent = map.getView().calculateExtent();
      
 /////////////// READ AND DISPLAY POLYGONS FROM DATASET GEOJSON
      
- 	$.getJSON('data', function(data) {
+ 	/*$.getJSON('data', function(data) {
         //data is the JSON string
     	console.log('Make Polygons....')
     	makePolys(data)
-    });
+    });*/
 
  	console.log('Dataproj', ol.dataProjection)
 

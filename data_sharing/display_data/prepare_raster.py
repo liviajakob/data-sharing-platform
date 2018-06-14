@@ -22,7 +22,7 @@ class RasterTiler(object):
         pass
     
     
-    def createTiles(self, inputfile, outputdir, zoom="2-10"):
+    def createTiles(self, inputfile, outputdir, zoom="2-8"):
         #commandlist=['gdal2tiles.py', '-z', zoom, '-p', 'raster', inputfile, outputdir]
         commandlist=['gdal2tiles.py', '-z', zoom, inputfile, outputdir]
         print(commandlist)
@@ -212,7 +212,7 @@ class RasterLayerProcessor(object):
         '''
         print(scale, type(scale))
         self.logger.info('Converting raster to 8 Bit...')
-        commandlist=['gdal_translate', '-ot', 'Byte', '-of', fileformat, '-scale', str(scale['min']), str(scale['max']), str(bits[0]), str(bits[1]),'-exponent', str(exponent), '-a_nodata', str(nodata), inputfile, outputfile]
+        commandlist=['gdal_translate', '-ot', 'Byte', '-of', fileformat, '-scale', str(scale['min']), str(scale['max']), str(bits[0]), str(bits[1]),''''-exponent', str(exponent),''' '-a_nodata', str(nodata), inputfile, outputfile]
         print(commandlist)
         subprocess.call(commandlist)
 

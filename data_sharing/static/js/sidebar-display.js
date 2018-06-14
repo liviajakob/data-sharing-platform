@@ -1,4 +1,8 @@
 
+showData(0,20);
+
+
+
 /*Get JSON*/
 	$.getJSON('layertypes', function(data) {
         //data is the JSON string
@@ -42,16 +46,22 @@ function filterDatasets() {
 
 
 
-
-/*Get JSON*/
-	$.getJSON('data', function(data) {
+function showData(page, page_size){
+	
+	url='data?'+'page='+page+'&'+'page_size='+page_size;
+	console.log('UROLLL',url)
+	/*Get JSON*/
+	$.getJSON(url, function(data) {
         //data is the JSON string
     	console.log('DATAA3')
     	console.log(data);
-    	console.log(data.features[0].properties.id);
     	console.log(typeof data)
-    	displayDatasets(data)
+    	displayDatasets(data);
+    	makePolys(data);
     });
+	
+}
+
 	
 	
 function displayDatasets(datasets){
