@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block head %}
+    
+{% endblock %}
+{% block content %}
+
+<div class="container" style="padding: 100px;">
+<div class="main-content">
+<h1>About</h1>
+<hr class="head">
+<p>The <b>IceExplorer</b> is a prototype developed by <a href="http://livia.geo-blog.com">Livia Jakob</a> 
+together with the Edinburgh Cryosphere & Earth Observation research group. The project is part of the <a href="https://www.esa.int">ESA</a> 
+consortium <a href="https://cryotop-evolution.org/">CryoTop Evolution</a>.</p>
+
+<h1>API</h1>
+<hr class="head">
+
+<p>Data can be queried directly via the API.</p>
+<h3>Query datasets (JSON format):</h3>
+<p>Input Parameter:</p>
+
+<h3>Query data file:</h3>
+<p>Input Parameter:</p>
+
+<h1>Projectpartner</h1>
+<hr class="head">
+<a href="https://www.ed.ac.uk/"><img class="logo" src="{{ url_for('static', filename='img/logo_ed.png') }}" alt="University of Edinburgh"></img></a>
+<a href="https://www.esa.int"><img class="logo" src="{{ url_for('static', filename='img/logo_esa.png') }}" alt="ESA"></img></a>
+<a href="https://cryotop-evolution.org/"><img class="logo" src="{{ url_for('static', filename='img/logo_cryo.png') }}"alt="CryoTop Evolution"></img></a>
+<br>
+<p><b>Special thanks to:</b> Magnus Hagdorn, Noel Gourmelen, Flora Weissgerber and Martin Ewart</p>
+
+</div>
+</div>
+
+{% endblock %}

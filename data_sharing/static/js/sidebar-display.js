@@ -1,24 +1,25 @@
 
-showData(0,20);
+var page_size = 5;
+
+showData(1);
+
+var currentquery;
 
 
 
-/*Get JSON*/
+/*Get Layertype JSON*/
 	$.getJSON('layertypes', function(data) {
         //data is the JSON string
-    	console.log('DATA1')
-    	console.log(data);
-    	console.log(typeof data)
     	displayLayertypes(data)
     });
 	
 
 function displayLayertypes(data){
 	div = document.getElementById('layertypes');
-	layertypes=data.layertypes
-	html=''
+	layertypes=data.layertypes;
+	html='';
 	for (i in layertypes){
-		html = html.concat(layertypes[i].name + ' | ')	
+		html = html.concat(layertypes[i] + ' | ')	
 	}
 	html=html.slice(0,-2);
 	div.append(html)
@@ -46,18 +47,17 @@ function filterDatasets() {
 
 
 
-function showData(page, page_size){
+function showData(page, filter){
+	currentquery=filter;
+	url= 'data?' //TODO add the filters here
+	url=url +'page='+page+'&'+'page_size='+page_size;
 	
-	url='data?'+'page='+page+'&'+'page_size='+page_size;
 	console.log('UROLLL',url)
 	/*Get JSON*/
 	$.getJSON(url, function(data) {
-        //data is the JSON string
-    	console.log('DATAA3')
-    	console.log(data);
-    	console.log(typeof data)
     	displayDatasets(data);
     	makePolys(data);
+    	displayPages(page, data.features.length);
     });
 	
 }
@@ -67,12 +67,10 @@ function showData(page, page_size){
 function displayDatasets(datasets){
 	div = document.getElementById('datasets-content');
 	datasetsarr=datasets.features
-	
-	var results = $("#total-result");
-	results.append("Total results: " + datasetsarr.length)
-	
+
 	
 	var list = $("#datasets-list");
+	list.html(''); //set to empty
 	for (i in datasetsarr){
 	    var id = datasetsarr[i].properties.id;
 		var cite = datasetsarr[i].properties.cite;
@@ -91,10 +89,34 @@ function displayDatasets(datasets){
 		html = html.concat("</tr></td>");
 	    list.append(html);
 	}
+	
 }
 
 
-
+function displayPages(page, displayed_number){
+	pageelement = $("#display-pages");
+	next = page+1
+	prev = page-1
+	nextpage = '<button class="page-button" onclick="showData('+next+ ', '+ currentquery +')" id="next-page">&#8250;</button>';
+	html="";
+	previouspage = '<button class="page-button" onclick="showData('+prev+ ', '+ currentquery +')" id="previous-page">&#8249;</button>';
+	html+=previouspage
+	html+=nextpage;
+	pageelement.html(html)
+	if (page==1){
+		document.getElementById("previous-page").disabled = true;
+	}
+	
+	if (displayed_number<page_size){
+		document.getElementById("next-page").disabled = true;
+	}
+	
+	
+	var results = $("#total-result");
+	results.html("Displaying page: " + page)
+	
+	
+}
 
 
 ////////////////////////////////////////////////////////////////
@@ -125,9 +147,9 @@ $(document).ready(function(e) {
 
 $(document).ready(function($) {
 	$(document).on('mouseenter mouseleave', 'td', function(){
-		console.log('HOVERED');
+		//console.log('HOVERED');
 		id = $(this).attr("value");
-		console.log('ID',id);
+		//console.log('ID',id);
 		var fetbid = polylayer.getSource().getFeatureById(id);
 		console.log(fetbid);
 		

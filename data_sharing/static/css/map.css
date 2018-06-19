@@ -17,7 +17,8 @@
 }
 
 .explore-cursor{
-	cursor: url("../img/cursor.png"), pointer;
+	//cursor: url("../img/cursor.png"), pointer;
+	cursor: pointer;
 }
 
 
@@ -156,7 +157,7 @@
 	top: 68px;
 	left: 300px;
  	//height: 100px;
- 	width: 170px;
+ 	width: 160px;
  	display: none;
 
     /*fix border opacity*/
@@ -184,11 +185,11 @@
 
 #point-info{
 	
-	top: 300px;
+	top: 320px;
 	left: 300px;
  	background-clip: padding-box;
  	//height: 100px;
- 	width: 170px;
+ 	width: 160px;
  	display: none;
  	//border-radius: 7px;
  	font-size: 13px;
@@ -210,7 +211,7 @@
     margin-top: 6px;
     margin-bottom: 0.5em;
     border-width: 0.2px;
-    width: 162px;
+    width: 152px;
     opacity: 0.7;
     margin-left:-11px;
 }
@@ -286,7 +287,7 @@
 }
  
  
-.slider {
+.swipe-slider {
     -webkit-appearance: none;
     height: 15px;
     border-radius: 5px;
@@ -298,7 +299,7 @@
     cursor: pointer;
 }
 
-.slider:hover {
+.swipe-slider:hover {
     opacity: 0.8;
 }
 
@@ -310,11 +311,11 @@ input[type=range] {
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   border: 2px solid rgb(255,255,255);
-  height: 40px;
-  width: 30px;
+  height: 30px;
+  width: 20px;
   border-radius: 10%;
   background-color: rgb(0,60,136);
-  background-size: 30px;
+  background-size: 20px;
   background-image: url(../img/compare3.png);
   background-position: center center;
   background-repeat: no-repeat;
@@ -323,16 +324,17 @@ input[type="range"]::-webkit-slider-thumb {
 
 input[type="range"]::-moz-range-thumb {
   border: 2px solid rgb(255,255,255);
-  height: 40px;
-  width: 30px;
+  height: 30px;
+  width: 20px;
   border-radius: 10%;
   background-color: rgb(0,60,136);
-  background-size: 30px;
+  background-size: 20px;
   background-image: url(../img/compare3.png);
   background-position: center center;
   background-repeat: no-repeat;
   
 }
+
 
 
 /* END STYLE SLIDER */
@@ -404,4 +406,8 @@ input[type="range"]::-moz-range-thumb {
 	cursor: pointer;
 }
 
-
+#legend-content{
+	margin-top: 10px;
+	margin-left: 15px;
+	position: relative;
+}

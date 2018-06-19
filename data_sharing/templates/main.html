@@ -49,8 +49,12 @@
     
     <table id="myTable" class="table table-hover">
     <tbody id="datasets-list" >
-    </tbody></table></div>
+    </tbody></table>
+    
+    <div id="display-pages"></div>
+    </div>
         <div id="scroll-icon">&#8597;</div>
+     
     </div>
 
 	
@@ -83,14 +87,25 @@
 	   	<button id="toggle-swipe" data-toggle="tooltip" data-placement="right" title="Enter swipe mode to compare the two top layers">Swipe Tool</button>
 	   	<button id="toggle-explore" data-toggle="tooltip" data-placement="right" title="Enter explore mode to explore layer values">Explore Tool</button>
 	   	
+	   	<div style="padding-top: 65px">
+	   	<hr>
+	   	<h6>Legend  <span class="info-button" data-toggle="tooltip" data-placement="right" title="Legend of the top visible layer"></span></h6>
+	   	
+	   	   <div id="legend-content">
+		   <canvas width="150px" height=64px id="legend-bar"></canvas>
+		   </div>
+	   	
+	   </div>
 	   </div>
    </div>
+   
+
    
    <div id="point-info" class="maptool">
    	<div id="point-value"><p>Click on the map to query values of the top layer</p></div>
    </div>
    
-   <input id="swipe" type="range" class="slider" >
+   <input id="swipe" type="range" class="swipe-slider" >
    
    
       <div id='infobox'>

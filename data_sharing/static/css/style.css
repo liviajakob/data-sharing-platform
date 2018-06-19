@@ -198,3 +198,70 @@ a{
 	display: none;
 }
 
+.logo{
+	height: 45px;
+	padding-right: 50px;
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+
+.logo:hover{
+	opacity: 0.7;
+}
+
+.head{
+	height: 3px;
+    margin: 0px 0px 30px;
+    background: rgba(61, 100, 102,0.6);//rgb(217, 255, 249);
+    border-radius: 5px;
+    margin-left: -20px;
+}
+
+.main-content{
+	padding-left: 20px;
+	padding-bottom: 20px;
+}
+
+.main-content p{
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+
+.main-content h1{
+	margin-left: -20px;
+}
+
+
+
+
+#next-page{
+	float: right;
+	margin-right: 50px;
+}
+
+#previous-page{
+	margin-left: 50px;
+}
+
+.page-button{
+	font-size: 18px;
+	background-color: rgba(61, 100, 102);
+	cursor: pointer;
+	border-radius: 10%;
+	padding: 1px 10px;
+	margin-top: -3px;
+	color: white;
+}
+
+.page-button:hover{
+	opacity: 0.7;
+}
+
+.page-button:disabled{
+	background-color: darkgrey;
+	cursor: default;
+}
+
+.page-button:disabled:hover{
+	opacity: 1;
+}

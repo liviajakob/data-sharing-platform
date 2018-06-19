@@ -3,7 +3,8 @@ var clickdatasets = true;
 var root_link = 'http://127.0.0.1:8887';
 var projection = 'EPSG:4313';
 var api_link = 'http://localhost:5002'
-
+var polylayer;
+var polylayer_group;
 
 var map = new ol.Map({
     target: 'map',
@@ -83,6 +84,7 @@ map.setView(new ol.View({
 
 
 
+
  
 var mapextent = map.getView().calculateExtent();     
      
@@ -98,6 +100,9 @@ var mapextent = map.getView().calculateExtent();
 
      function makePolys(geojsonObject){
     	 console.log(geojsonObject)
+    	 
+    	 console.log(source)
+    	 
     	 var source = new ol.source.Vector({
        	  //url: 'datasets/1',
        	  //format: new ol.format.GeoJSON()
@@ -109,6 +114,13 @@ var mapextent = map.getView().calculateExtent();
        	 
        	});
         
+    	if (typeof polylayer !== 'undefined'){
+    		console.log('CLEAR')
+    		polylayer.getSource().clear()
+    		
+    	} 
+    	
+    	 
         polylayer = new ol.layer.Vector({
             title: 'Extents',
             source: source,

@@ -1,15 +1,17 @@
 /* All actions when user clicks on a dataset; zoom to extent and display dataset and layer information */
 
 
+var colourvalues;
+
+
   //////////click interaction//////////////////////////////
-     
 
 //TODO: clickdataset assure that can't be false for a long time...
 
 
      /*Zoom to layer on click*/
      var featureListener = function(event, feature) {
-    	 console.log('EVENT',event);
+    	 //console.log('EVENT',event);
     	 map.getView().fit(feature.getGeometry(), {
     		  duration: 1000,
     		  nearest: true
@@ -22,9 +24,9 @@
        };
 
        map.on('click', function(event) {
-    	   console.log('1');
+    	   //console.log('1');
     	 if (clickdatasets){
-    		 console.log('2');
+    		 //console.log('2');
     		 clickdatasets=false;
     		 polyfound=false;
 	         map.forEachFeatureAtPixel(event.pixel,
@@ -33,7 +35,7 @@
 	           if (!polyfound && feature && feature.getGeometry().getType() == 'Polygon') {
 	             //feature.setStyle(listenerStyle);
 		        	 console.log(feature.getId())
-		        	 console.log(feature.getGeometry().getType())
+		        	 //console.log(feature.getGeometry().getType())
 	        	 polyfound = true
 	             featureListener(event, feature);
 	             
@@ -75,12 +77,14 @@
 	    	    	   opacity: 1,
 	    	    	id: dataset.get('layers')[i].id,
 	    	    	visible: (i==0),
+	    	    	layertype: dataset.get('layers')[i].layertype
 	    	     });
 	    	     dataset_tilelayers.getLayers().getArray().push(myLayer); //add it to the group layer
     	 }
 	    	     $('#infobox').hide();
 	    	     $('#toolbox').show();
 	    	     displayDetailedInfo(detailedInfo(dataset));
+	    	     getLegend(myLayer);
 	    	     
      }
      
@@ -103,7 +107,7 @@
   	   $('#info-title').html(info[0]);
          $('#infobox-detailed-content').html(info[1]);
          $('#infobox-detailed').show();
-         $('#infobox-detailed-content').show();
+         //$('#infobox-detailed-content').show();
        }
      
      
@@ -120,13 +124,12 @@
 	   			if (i==0) html=html.concat('checked')
 	   			html=html.concat('> Layer: '+ layers[i].id+ ' | <b>'+layers[i].layertype + ' </b> ')
 	   			html=html.concat('<button class="download" data-toggle="tooltip" data-placement="right" data-original-title="Download this layer" id="download-layer" value="'+layers[i].id+'" >Download </button>')
-	   			html=html.concat('</div>')
+	   			
+	   			//html=html.concat('<br><input id="slider" type="range" min="0" max="1"step="0.1" value="1" oninput="getLayerById('+layers[i].id+').setOpacity(this.value)">')
+	   			html=html.concat('<br></div>')
 	   		}
 	   		html=html.slice(0,-2);
-	   		html = html.concat("</p>");
-  	   
-	   		
-  	   
+	   		html = html.concat("</p>");  	   
   	   return [title, html];
      }
      
@@ -142,7 +145,31 @@
   			console.log('prop',$(e.target).prop('checked'))
   			id_ = $(e.target).prop("value");
   			console.log('id',id_);
-  			var layer_byid;
+
+  			
+  			layer_byid = getLayerById(id_);
+  			
+  			console.log('LAYERBY ID',layer_byid);
+  			
+        	  if (typeof layer_byid !='undefined' && checked !== layer_byid.getVisible()) {
+        	    layer_byid.setVisible(checked);
+        	    //layer_byid.setZIndex(10);
+        	    console.log('SETTING TO', checked);
+        	  }
+        	  
+        	// set legend to toplayer
+      		ll_arr = dataset_tilelayers.getLayers().getArray();
+    		top_l = getTopVisibleLayer(ll_arr);
+    		if (top_l){
+    			getLegend(top_l);
+    		}
+  	});
+  	});
+  	
+  	
+  	/*Returns layer with id id_*/
+  	function getLayerById(id_){
+  			var layer_;
   			
   			dataset_tilelayers.getLayers().forEach(function (lyr) {
   				console.log('length',dataset_tilelayers.getLayers().getArray().length)
@@ -151,18 +178,14 @@
   				console.log(id_, lyr.get('id'))
 		            if (id_.toString() === lyr.get('id').toString()) {
 		            	console
-		                layer_byid = lyr;
+		                layer_ = lyr;
 		            }            
 		        });
-  			console.log(layer_byid);
-  			
-        	  if (typeof layer_byid !='undefined' && checked !== layer_byid.getVisible()) {
-        	    layer_byid.setVisible(checked);
-        	    //layer_byid.setZIndex(10);
-        	    console.log('SETTING TO', checked);
-        	  }
-  	});
-  	});
+  			console.log("LAYERBY IS",layer_);
+  			return layer_
+  	}
+  	
+  	
   	
   	//window.location.href='download';
   	
@@ -187,6 +210,89 @@
   			
   	});
   	});
+  	
+  	
+  	
+  	
+  	
+  	
+  	////// LEGEND
+  	
+  	
+function getLegend(layer){
+	
+	console.log('LAYER',layer);
+	
+	link = 'get_colours?type='+layer.get('layertype');
+	console.log('LINK',link);
+	
+	$.getJSON(link, function(data) {
+		colourvalues=data.values;
+		drawColourLegend(data.rgb, data.min, data.max);
+  	});
+}
+  	
+
+	
+	
+function drawColourLegend(colours, min, max){
+	
+	
+	
+	console.log("MINMAX",min,max,colours)
+	var legend  = document.getElementById('legend-bar'),
+    ctx = legend.getContext('2d');
+	console.log('fill')
+	ctx.clearRect(20, 0, 100, 64);
+	//ctx.clearRect(0, 0, canvas.width, canvas.height);
+	//console.log('COLOURS',colours)
+	
+	
+	
+	for(var i = 0; i <= colours.length; i++) {
+	    ctx.beginPath();
+	    
+	    var color = colours[i];//'rgb(100, ' + i + ', ' + i + ')';
+	    ctx.fillStyle = color;
+	    
+	    //ctx.fillRect(i * 2, 0, 2, 50);
+	    ctx.fillRect(0,i, 20, 1);
+	    
+	    
+	}
+	
+	
+	
+	//ctx.clearRect(0, 0, canvas.width, canvas.height);
+	
+	// Write min max text
+	
+	ctx.fillStyle = "rgb(255,255,255)";
+	
+	ctx.font="13px Raleway";
+
+	ctx.fillText(min, 30,10);
+	maxpos=(colours.length-7)
+	ctx.fillText(max, 30, maxpos);
+}
+
+
+
+
+var legend  = document.getElementById('legend-bar'),
+ctx = legend.getContext('2d');
+
+legend.onclick = function(e) {
+    var x = e.offsetX,
+        y = e.offsetY,
+        p = ctx.getImageData(x, y, 1, 1),
+        d = p.data;
+    console.log('x',e.offsetX,'y',y)
+    if (e.offsetX<=20 && e.offsetY<=colourvalues.length){
+    	alert(colourvalues[e.offsetY]);
+    }
+    
+};
   	
    
    
