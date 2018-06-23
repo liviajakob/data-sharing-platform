@@ -8,7 +8,7 @@ import argparse
 from definitions import CONFIG_PATH
 from configobj import ConfigObj
 from display_data.rollback import Rollback
-from display_data.ingestion import DatabaseIngestion
+from display_data.ingestion import Ingestion, RasterLayerCreator
 import logging
 import os
 import traceback
@@ -21,20 +21,22 @@ def handle_input():
     types = config['layers']['types'] ## read from config file
     
     parser = argparse.ArgumentParser(description='Register a new layer.')
-    parser.add_argument('dataset_id', action='store', nargs=1, type=int,
+    parser.add_argument('dataset_id', action='store', type=int,
                 help='ID of the dataset:')
-    parser.add_argument('layerfile', action='store', nargs=1,
+    parser.add_argument('layerfile', action='store',
                 help='filename of the layer:')
-    parser.add_argument('layertype', action='store', nargs=1, choices=types, metavar='layertype',
+    parser.add_argument('layertype', action='store', choices=types, metavar='layertype',
                 help='choices = {%(choices)s} ||| type of the layer')
     parser.add_argument('--version', action='version', version='Version 1.0, Not released yet.', help="Show program's version number")
 
     args = parser.parse_args()
-    add_layer(layerfile=args.layerfile[0], layertype=args.layertype[0], dataset_id = args.dataset_id[0])
+    print('ARGS',vars(args))
+    #print(args.layertype)
+    add_layer(**vars(args))
         
         
 
-def add_layer(layerfile, layertype, dataset_id):
+def add_layer(**kwargs):
     '''
     
     '''
@@ -44,23 +46,19 @@ def add_layer(layerfile, layertype, dataset_id):
 
     
     try:
-        ing = DatabaseIngestion(rollback, logger)
-        ing.addLayerToDataset(filename=layerfile, ltype=layertype, dataset_id=dataset_id)
-        print('hi')
-        logger.info('Success!!!')
+        ing = Ingestion(rollback, logger)
+        creator = RasterLayerCreator(**kwargs)
+        ing.create(creator)
+        #ing.addLayerToDataset(filename=layerfile, ltype=layertype, dataset_id=dataset_id)
+        logger.info('Success!')
     except Exception as e:
         if hasattr(e, 'message'):
-            print(e.message)
-            print(e)
+            logger.error(e.message)
         else:
-            print(e)
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-        #print(exc_type, fname, exc_tb.tb_lineno)
-        print(traceback.format_exc())
+            logger.error(traceback.format_exc()) 
         logger.info('Rolling back...')
         rollback.rollback()
-        logger.info('Rolled back!!')
+        
 
     
     

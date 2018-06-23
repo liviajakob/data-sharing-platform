@@ -2,7 +2,7 @@
 @author: livia
 '''
 import unittest
-from display_data import Database, Rollback, DatabaseIngestion
+from display_data import Database, Rollback, Ingestion
 import sys, os
 import logging
 
@@ -38,7 +38,7 @@ class DatabaseIngestionTest(unittest.TestCase):
         
         rollback=Rollback(self.logger)
         
-        self.insert=DatabaseIngestion(rollback=rollback, logger=self.logger, database=self.db)
+        self.insert=Ingestion(rollback=rollback, logger=self.logger, database=self.db)
         #self.insert.addDataset(layers=None, cite='hi')
 
         

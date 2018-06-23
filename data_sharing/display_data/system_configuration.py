@@ -20,6 +20,10 @@ class ConfigSystem():
             self.logger = logger
         self.config = ConfigObj(CONFIG_PATH)
         self.dataset_id=dataset_id
+        
+        
+    def setDatasetid(self, dataset_id):
+        self.dataset_id=dataset_id
     
     def getDataInputPath(self):
         return self.config['data']['input']
@@ -141,7 +145,7 @@ class ConfigSystem():
             assert self.dataset_id is not None
             d_id = self.dataset_id
         folder = os.path.join(self.getDatasetFolder(d_id), ltype)
-        assert os.path.exists(folder)
+        #assert os.path.exists(folder)
         return folder
     
     def getTilesFolder(self, ltype, d_id=None):

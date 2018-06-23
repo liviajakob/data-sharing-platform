@@ -22,7 +22,7 @@ class RasterTiler(object):
         pass
     
     
-    def createTiles(self, inputfile, outputdir, zoom="2-8"):
+    def createTiles(self, inputfile, outputdir, zoom="2-5"):
         #commandlist=['gdal2tiles.py', '-z', zoom, '-p', 'raster', inputfile, outputdir]
         commandlist=['gdal2tiles.py', '-z', zoom, inputfile, outputdir]
         print(commandlist)
@@ -49,19 +49,7 @@ class RasterLayerProcessor(object):
         self.logger = logger
         self.raster = None
         self.band = None
-        self.raster_8bit = None
 
-        
-        
-    
-    def layerExists(self):
-        return False
-    
-    
-    def layerUpdated(self):
-        pass
-    
-   
    
     def readFile(self, inputfile, band=1):
         '''read raster file with gdal'''
@@ -203,7 +191,7 @@ class RasterLayerProcessor(object):
         subprocess.call(commandlist)
     
     # @TODO not hardcoded!
-    def to8Bit(self, inputfile, outputfile, scale, fileformat='GTiff', exponent=2, bits=[1,255], nodata=0):
+    def to8Bit(self, inputfile, outputfile, scale, fileformat='GTiff', bits=[1,255], nodata=0):
         '''Converts the raster to 8-bits
         
         Input Params:
