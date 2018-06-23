@@ -9,6 +9,7 @@ from display_data.prepare_raster import RasterLayerProcessor, RasterTiler
 from datetime import datetime
 from display_data.system_configuration import ConfigSystem
 from display_data.database import Database
+from display_data.compute_colours import ColourMaker
 
     
     
@@ -91,13 +92,20 @@ class DatabaseIngestion(object):
         
         #cut raster
         cut = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('cropped'+file_extension))
-        rast_proc.cutRaster(inputfile=proj, outputfile=cut)        
+        rast_proc.cutRaster(inputfile=proj, outputfile=cut)
+        
+        #compute colourfile
+        col_inputfile = conf.getColourFile(ltype)
+        col_outputpath= os.path.join(conf.getLayerFolder(ltype, dataset_id), ('colourfile.txt'))
+        colgen = ColourMaker(col_inputfile, col_outputpath)
+        scale = conf.getLayerScale(ltype)
+        colgen.computeColours(scale['min'], scale['max'])
+                
         #add colour
         col_rast = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('coloured'+file_extension))
-        colourfile = conf.getColourFile(ltype)
-        rast_proc.addColours(inputfile=cut, outputfile=col_rast, colourfile=colourfile) # take the above computed as input
+        rast_proc.addColours(inputfile=cut, outputfile=col_rast, colourfile=col_outputpath) # take the above computed as input
         
-        #TILLEE
+        #TILEE
         tiler = RasterTiler()
         tiler.createTiles(col_rast, conf.getTilesFolder(ltype, d_id = dataset_id))
             
