@@ -1,10 +1,11 @@
     
 var clickdatasets = true;
 var root_link = 'http://127.0.0.1:8887';
-var projection = 'EPSG:4313';
 var api_link = 'http://localhost:5002'
 var polylayer;
 var polylayer_group;
+var projection = "EPSG:3413";
+var mapcenter = [30665.5, -2039176.688];
 
 var map = new ol.Map({
     target: 'map',
@@ -78,14 +79,12 @@ map.setView(new ol.View({
       //maxResolution: ...calculated by default
       extent: [-5194304, -5194304, 5194304, 5194304], //left, bottom ,right, top //minx, miny, maxx, maxy
       //extent: ol.proj.get("EPSG:3413").getExtent(),
-      projection: "EPSG:3413",
-      center: [30665.5, -2039176.688] // This is the center of greenland. Could be set automatically...
+      projection: projection,
+      center: mapcenter // This is the center of greenland. Could be set automatically...
 }));
 
 
 
-
- 
 var mapextent = map.getView().calculateExtent();     
      
 /////////////// READ AND DISPLAY POLYGONS FROM DATASET GEOJSON
@@ -96,51 +95,55 @@ var mapextent = map.getView().calculateExtent();
     	makePolys(data)
     });*/
 
- 	console.log('Dataproj', ol.dataProjection)
 
+ 	
+ 	
+ 	/* Creates the dataset polygons */
      function makePolys(geojsonObject){
     	 console.log(geojsonObject)
     	 
     	 console.log(source)
-    	 
-    	 var source = new ol.source.Vector({
-       	  //url: 'datasets/1',
-       	  //format: new ol.format.GeoJSON()
-       	 features: (new ol.format.GeoJSON()).readFeatures(geojsonObject, {
-   	      dataProjection: 'EPSG:3413',
-	      featureProjection: 'EPSG:3413'
-       	 })
-       	 
-       	 
-       	});
-        
+    	 features = (new ol.format.GeoJSON()).readFeatures(geojsonObject, {
+     	      dataProjection: 'EPSG:3413',
+       	      featureProjection: 'EPSG:3413'
+              	 })
+
     	if (typeof polylayer !== 'undefined'){
     		console.log('CLEAR')
-    		polylayer.getSource().clear()
+    		polylayer.getSource().clear();
+    		polylayer.getSource().addFeatures(features);
+    			
+    	}else{ /*Create vectorlayer and grouplayer*/
     		
-    	} 
+       	 var source = new ol.source.Vector({
+          	 features: features
+          	});
+           
+    		
+            polylayer = new ol.layer.Vector({
+                title: 'Extents',
+                source: source,
+                style: geometryStyle,
+             })
+            
+            polylayer_group = new ol.layer.Group({
+            	title: 'Datasets',
+            	layers: [polylayer]
+            })
+            map.addLayer(polylayer_group);
+    		
+    	}
     	
-    	 
-        polylayer = new ol.layer.Vector({
-            title: 'Extents',
-            source: source,
-            style: geometryStyle,
-         })
-        
-        polylayer_group = new ol.layer.Group({
-        	title: 'Datasets',
-        	layers: [polylayer]
-        })
-        
-        
-        map.addLayer(polylayer_group);
-        
-        for (var i = 0, l = source.getFeatures().length; i < l; i++) {
-            var feat = source.getFeatures()[i];
+        /*Set Layer ID*/
+        for (var i = 0, l = polylayer.getSource().getFeatures().length; i < l; i++) {
+            var feat = polylayer.getSource().getFeatures()[i];
             feat.setId(feat.get('id'));
         }
         
-        }
+        /*Set to visible*/
+        polylayer.setVisible(true);
+        
+     } //End makePolys
      
      
      

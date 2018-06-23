@@ -147,12 +147,8 @@ $(document).ready(function(e) {
 
 $(document).ready(function($) {
 	$(document).on('mouseenter mouseleave', 'td', function(){
-		//console.log('HOVERED');
 		id = $(this).attr("value");
-		//console.log('ID',id);
 		var fetbid = polylayer.getSource().getFeatureById(id);
-		console.log(fetbid);
-		
 		//featureListener(event, fetbid);
 		if (fetbid.getStyle() === hoverstyle){
 			fetbid.setStyle(geometryStyle(fetbid));

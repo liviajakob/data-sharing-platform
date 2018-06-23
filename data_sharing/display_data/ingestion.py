@@ -80,18 +80,18 @@ class DatabaseIngestion(object):
         rast_proc.reproject(inputfile=srcf, outputfile=proj)
         
         #convert to 8bit
-        scale = conf.getLayerScale(ltype)
-        bit_8 = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('8bit'+file_extension))
-        rast_proc.to8Bit(inputfile=proj, outputfile=bit_8, scale=scale, exponent=conf.getExponent(layertype=ltype))
+        #scale = conf.getLayerScale(ltype)
+        #bit_8 = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('8bit'+file_extension))
+        #rast_proc.to8Bit(inputfile=proj, outputfile=bit_8, scale=scale, exponent=conf.getExponent(layertype=ltype))
         
         ########### PRINT STATS
-        rast_proc.readFile(bit_8)
-        print('EXPONENT: ', conf.getExponent(layertype=ltype))
-        print(rast_proc.getStatistics())
+        #print(rast_proc.getStatistics())
+        #rast_proc.readFile(bit_8)
+        #print('EXPONENT: ', conf.getExponent(layertype=ltype))
         
         #cut raster
         cut = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('cropped'+file_extension))
-        rast_proc.cutRaster(inputfile=bit_8, outputfile=cut)        
+        rast_proc.cutRaster(inputfile=proj, outputfile=cut)        
         #add colour
         col_rast = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('coloured'+file_extension))
         colourfile = conf.getColourFile(ltype)

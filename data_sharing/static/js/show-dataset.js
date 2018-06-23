@@ -233,17 +233,19 @@ function getLegend(layer){
 }
   	
 
-	
+
+
+
+var legend  = document.getElementById('legend-bar');
 	
 function drawColourLegend(colours, min, max){
 	
 	
 	
 	console.log("MINMAX",min,max,colours)
-	var legend  = document.getElementById('legend-bar'),
     ctx = legend.getContext('2d');
 	console.log('fill')
-	ctx.clearRect(20, 0, 100, 64);
+	ctx.clearRect(0, 0, 100, 64);
 	//ctx.clearRect(0, 0, canvas.width, canvas.height);
 	//console.log('COLOURS',colours)
 	
@@ -279,15 +281,16 @@ function drawColourLegend(colours, min, max){
 
 
 
-var legend  = document.getElementById('legend-bar'),
-ctx = legend.getContext('2d');
+
+
 
 legend.onclick = function(e) {
-    var x = e.offsetX,
-        y = e.offsetY,
-        p = ctx.getImageData(x, y, 1, 1),
-        d = p.data;
-    console.log('x',e.offsetX,'y',y)
+	ctx = legend.getContext('2d');
+    //var x = e.offsetX,
+        //y = e.offsetY,
+        //p = ctx.getImageData(x, y, 1, 1),
+        //d = p.data;
+    console.log('x',e.offsetX,'y',e.offsetY)
     if (e.offsetX<=20 && e.offsetY<=colourvalues.length){
     	alert(colourvalues[e.offsetY]);
     }
