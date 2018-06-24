@@ -14,25 +14,8 @@ class DatabaseIngestionTest(unittest.TestCase):
 
     def setUp(self):
         '''Sets up a test database'''
-        module_path = sys.modules[__name__].__file__
-        dir_path = os.path.dirname(module_path)
-        path= os.path.join(dir_path, "testdata")
-        dbdict={"name":"test.db",
-              "path":path,
-              "type": "sqlite:///"
-              }
-        self.db = Database(dbSettings=dbdict)
-        self.db.scopedSession()
-        self.db.dropTables('livia')
-        self.db.createTables()
         
-        self.db.newLayerType("dem")
-        self.db.newLayerType("error")
-        self.db.newLayerType("rate")
-        self.db.newProjection("Projection1")
-        self.db.newProjection("Projection2")
-        self.db.closeSession()
-        
+                
         logging.basicConfig(level=logging.INFO) #NOTSET gives all the levels, e.g. INFO only .info
         self.logger = logging.getLogger(__name__)
         
@@ -40,6 +23,27 @@ class DatabaseIngestionTest(unittest.TestCase):
         
         self.insert=Ingestion(rollback=rollback, logger=self.logger, database=self.db)
         #self.insert.addDataset(layers=None, cite='hi')
+        
+        
+        module_path = sys.modules[__name__].__file__
+        dir_path = os.path.dirname(module_path)
+        path= os.path.join(dir_path, "testdata")
+        dbdict={"name":"test.db",
+              "path":path,
+              "type": "sqlite:///"
+              }
+        self.db = Database(dbSettings=dbdict, logger=self.logger)
+        self.db.scopedSession()
+        self.db.dropTables('livia')
+        self.db.createTables()
+        
+        #self.db.newLayerType("dem")
+        #self.db.newLayerType("error")
+        #self.db.newLayerType("rate")
+        #self.db.newProjection("Projection1")
+        #self.db.newProjection("Projection2")
+        self.db.closeSession()
+
 
         
 
@@ -59,4 +63,3 @@ class DatabaseIngestionTest(unittest.TestCase):
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']
     unittest.main()
-    print("FIIIIIIILE",__file__)

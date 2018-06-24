@@ -18,7 +18,7 @@ class Ingestion(object):
     
     def __init__(self, rollback, logger, database=None):
         if database is None:
-            self._db = Database(rollback=rollback) #use the standard settings from the config file
+            self._db = Database(logger=logger) #use the standard settings from the config file
         else:
             self._db = database
         
@@ -45,12 +45,12 @@ class Ingestion(object):
 
         #check if entry already exist and if it should be updated
         self.logger.info('Checking if layer exists...')
-        dupl = self._db.getLayerByAttributes(dataset_id=dataset_id, layertype_name=ltype)
+        dupl = self._db.getRasterLayers(dataset_id=dataset_id, layertype_name=ltype)
         conf = ConfigSystem(dataset_id=dataset_id)
         if len(dupl)==0:
             conf.newLayerFolder(ltype)
             self.rollback.addCommand(conf.removeLayerFolder, {'ltype': ltype})
-            layer = self._db.newLayer(dataset_id=dataset_id, layerTypeName=ltype, commit=False)
+            layer = self._db.newRasterLayer(dataset_id=dataset_id, layerTypeName=ltype, commit=False)
             self.processRaster(filename=filename, ltype=ltype, dataset_id=dataset_id)
         else:
             srcf = os.path.join(conf.getDataInputPath(), filename)
@@ -74,7 +74,7 @@ class Ingestion(object):
         file_extension = os.path.splitext(filename)[1] #extract extension
         srcf = os.path.join(conf.getDataInputPath(), filename)
         #save init file in output folder
-        cp = os.path.join(conf.getLayerFolder(ltype, dataset_id), (conf.getRawInputFilename()+file_extension))
+        cp = os.path.join(conf.getLayerFolderByAttributes(ltype, dataset_id), (conf.getRawInputFilename()+file_extension))
         shutil.copyfile(srcf, cp)
         
         # compute stats
@@ -84,13 +84,13 @@ class Ingestion(object):
         #scale = {'min': stats['min'], 'max': stats['max']}
         
         #reproject
-        proj = os.path.join(conf.getLayerFolder(ltype, dataset_id), (conf.getReprojectedFilename()+file_extension))
+        proj = os.path.join(conf.getLayerFolderByAttributes(ltype, dataset_id), (conf.getReprojectedFilename()+file_extension))
         print("REPROJECT", proj)
         rast_proc.reproject(inputfile=srcf, outputfile=proj)
         
         #convert to 8bit
         #scale = conf.getLayerScale(ltype)
-        #bit_8 = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('8bit'+file_extension))
+        #bit_8 = os.path.join(conf.getLayerFolderByAttributes(ltype, dataset_id), ('8bit'+file_extension))
         #rast_proc.to8Bit(inputfile=proj, outputfile=bit_8, scale=scale, exponent=conf.getExponent(layertype=ltype))
         
         ########### PRINT STATS
@@ -99,18 +99,18 @@ class Ingestion(object):
         #print('EXPONENT: ', conf.getExponent(layertype=ltype))
         
         #cut raster
-        cut = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('cropped'+file_extension))
+        cut = os.path.join(conf.getLayerFolderByAttributes(ltype, dataset_id), ('cropped'+file_extension))
         rast_proc.cutRaster(inputfile=proj, outputfile=cut)
         
         #compute colourfile
-        col_inputfile = conf.getColourFile(ltype)
-        col_outputpath= os.path.join(conf.getLayerFolder(ltype, dataset_id), ('colourfile.txt'))
+        col_inputfile = conf.getSampleColourFile(ltype)
+        col_outputpath= os.path.join(conf.getLayerFolderByAttributes(ltype, dataset_id), ('colourfile.txt'))
         colgen = ColourMaker(col_inputfile, col_outputpath)
         scale = conf.getLayerScale(ltype)
         colgen.computeColours(scale['min'], scale['max'])
                 
         #add colour
-        col_rast = os.path.join(conf.getLayerFolder(ltype, dataset_id), ('coloured'+file_extension))
+        col_rast = os.path.join(conf.getLayerFolderByAttributes(ltype, dataset_id), ('coloured'+file_extension))
         rast_proc.addColours(inputfile=cut, outputfile=col_rast, colourfile=col_outputpath) # take the above computed as input
         
         #TILEE
@@ -137,7 +137,7 @@ class Ingestion(object):
     
     
     
-    def addDataset(self, layers, cite=None):
+    '''def addDataset(self, layers, cite=None):
         self._db.scopedSession()
         self.rollback.addCommand(self._db.closeSession)
         dataset = self._db.newDataset(cite, 1, commit=False)
@@ -176,7 +176,7 @@ class Ingestion(object):
         dataset.ymin = box['ymin']
         dataset.ymax = box['ymax']
         os.remove(repr_filepath)
-        self.logger.info('ADDED BOUNDING BOX')
+        self.logger.info('ADDED BOUNDING BOX')'''
         
         
         
@@ -211,25 +211,25 @@ class DatasetCreator(Creator):
         self.conf = ConfigSystem()
         self.cite = kwargs['cite']
         self.layers = kwargs['layers']
+        self.projection = self.conf.getProjection() #if want to read user input --> check for var in **kwargs
         
-        
-    
-    
+         
     
     def create(self):
-        dataset = self._db.newDataset(self.cite, 1, commit=False)
+        dataset = self._db.newDataset(cite=self.cite, projection=self.projection, commit=False)
         self.conf.setDatasetid(dataset.id)
         self.conf.newDatasetFolder()
         self.rollback.addCommand(self.conf.removeDatasetFolder, {'d_id':dataset.id})
         
         self.addBoundingBox(dataset)
+        self.addArea(dataset)
         
+        # create layers
         for l in self.layers:
             l['dataset_id'] = dataset.id
             creator = RasterLayerCreator(**l)
             creator.addConfiguration(self._db, self.logger, self.rollback)
             creator.create()
-            #self.addLayer(l[0], l[1], dataset.id)
             
         
 
@@ -254,6 +254,9 @@ class DatasetCreator(Creator):
         dataset.ymax = box['ymax']
         os.remove(repr_filepath)
         self.logger.info('ADDED BOUNDING BOX')
+        
+    def addArea(self, dataset):
+        dataset.area=abs((dataset.xmax-dataset.xmin)*(dataset.xmax-dataset.xmin))
 
   
   
@@ -273,10 +276,12 @@ class RasterLayerCreator(Creator):
         self.layertype = kwargs['layertype']
         self.layerfile = kwargs['layerfile']
         self.dataset_id = kwargs['dataset_id']
+        self.date = kwargs['date']
         
+        print('DATE' , self.date, type(self.date))
         
         self.conf = ConfigSystem(dataset_id=self.dataset_id)
-        self.layerfolder = self.conf.getLayerFolder(self.layertype, self.dataset_id)
+        self.layerfolder = self.conf.getLayerFolderByAttributes(self.layertype, self.date, self.dataset_id)
         scale = self.conf.getLayerScale(self.layertype)
         if 'min' in kwargs:
             self.min = kwargs['min']
@@ -300,11 +305,12 @@ class RasterLayerCreator(Creator):
         print('DUPLICTAE',duplicate)
         
         if duplicate is None:
-            self.conf.newLayerFolder(self.layertype)
-            self.rollback.addCommand(self.conf.removeLayerFolder, {'ltype': self.layertype})
             # insert into database
-            self._db.newLayer(dataset_id=self.dataset_id, layerTypeName=self.layertype, commit=False)
+            layer = self._db.newRasterLayer(dataset_id=self.dataset_id, layerType=self.layertype, date=self.date, commit=False)
             #process raster
+            self.conf.newLayerFolder(layer)
+            self.rollback.addCommand(self.conf.removeLayerFolder, {'layer': layer})
+            
             self.processFile()
         elif self.update(duplicate):
             self.processFile()
@@ -344,18 +350,18 @@ class RasterLayerCreator(Creator):
         self.rast_proc.cutRaster(inputfile=proj, outputfile=cut)
         
         # 4. compute colourfile
-        col_inputfile = self.conf.getColourFile(self.layertype)
+        col_inputfile = self.conf.getSampleColourFile(self.layertype)
         col_outputpath= os.path.join(self.layerfolder, ('colourfile.txt'))
         colgen = ColourMaker(col_inputfile, col_outputpath)
         colgen.computeColours(self.min, self.max)
                 
         # 5. add colour
-        col_rast = os.path.join(self.conf.getLayerFolder(self.layertype, self.dataset_id), ('coloured'+file_extension))
+        col_rast = os.path.join(self.conf.getLayerFolderByAttributes(self.layertype, self.date, self.dataset_id), ('coloured'+file_extension))
         self.rast_proc.addColours(inputfile=cut, outputfile=col_rast, colourfile=col_outputpath) # take the above computed as input
         
         # 6. tile
         tiler = RasterTiler()
-        tiler.createTiles(col_rast, self.conf.getTilesFolder(self.layertype, d_id = self.dataset_id))
+        tiler.createTiles(col_rast, self.conf.getTilesFolder(self.layertype, self.date, d_id = self.dataset_id))
             
         print('FILE: ', self.layerfile, ' TYPE: ', self.layertype, ' DATASETID', self.dataset_id)
         
@@ -364,7 +370,7 @@ class RasterLayerCreator(Creator):
     def getDuplicate(self):
         '''Returns true if layer already exists, false otherwise'''
         self.logger.info('Checking if layer exists...')
-        dupl = self._db.getLayerByAttributes(dataset_id=self.dataset_id, layertype_name=self.layertype)
+        dupl = self._db.getRasterLayers(filters={'dataset_id': self.dataset_id, 'layertype': self.layertype, 'date': self.date})
         if len(dupl)==0:
             return None   
         else:

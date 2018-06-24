@@ -15,7 +15,7 @@ Base = declarative_base()
 
 
 
-class Projection(Base):
+"""class Projection(Base):
     '''Represents a Projection table'''
     __tablename__ = 'projection'
     id=Column('id',Integer, primary_key=True)
@@ -23,7 +23,7 @@ class Projection(Base):
 
     
     def __str__(self):
-        return "PROJECTION: id={} name={}".format(self.id, self.name)
+        return "PROJECTION: id={} name={}".format(self.id, self.name)"""
     
 
 
@@ -36,8 +36,9 @@ class Dataset(Base):
     xmax = Column(Float)
     ymin = Column(Float)
     ymax = Column(Float)
-    projection_id=Column(Integer(), ForeignKey("projection.id"))
-    projection = relationship("Projection", backref=backref("dataset"))
+    area = Column(Float)
+    projection=Column(String()) #ForeignKey("projection.id")
+    #projection = relationship("Projection", backref=backref("dataset"))
     
     def getBoundingBox(self):
         return {'xmin':self.xmin,'xmax': self.xmax, 'ymin':self.ymin,'ymax': self.ymax}
@@ -50,7 +51,7 @@ class Dataset(Base):
         dic['properties']={}
         dic['properties']['id']=self.id
         dic['properties']['cite']=self.cite
-        dic['properties']['popupContent']= "Example!"
+        dic['properties']['area']= self.area
         dic['geometry']={}
         dic['geometry']['type']="Polygon"
         dic['geometry']['coordinates']=[[[self.xmin,self.ymin],[self.xmax,self.ymin], [self.xmax,self.ymax], [self.xmin,self.ymax], [self.xmin,self.ymin]]]
@@ -63,30 +64,31 @@ class Dataset(Base):
    
    
    
-class Layer(Base):
+class RasterLayer(Base):
     '''Represents a layerType table'''
-    __tablename__ = 'layer'
+    __tablename__ = 'rasterlayer'
     id = Column('id',Integer, primary_key=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
     dataset_id =Column(Integer(), ForeignKey("dataset.id"))
     dataset = relationship("Dataset", backref=backref("layer"))
-    layertype_id =Column(Integer(), ForeignKey("layerType.id"))
-    layerType = relationship("LayerType", backref=backref("layer"))
+    layertype = Column(String()) # '''ForeignKey("layerType.id")'''
+    date = Column(DateTime(timezone=True))
+    #layerType = relationship("LayerType", backref=backref("layer"))
     
     def asDict(self):
         '''Returns a dict which can be used to convert to a JSON'''
         dic = {}
         dic['id']=self.id
         dic['timestamp']=self.timestamp
-        dic['layertype']=self.layertype_id
+        dic['layertype']=self.layertype
+        dic['date']=str(self.date.strftime("%Y-%m-%d"))
         return dic
     
     def __str__(self):
         return "LAYER: id={} datasetid={}".format(self.id, self.dataset_id)
        
    
-
-class LayerType(Base):
+"""class LayerType(Base):
     '''Represents a layertype table'''
     __tablename__ = 'layerType'
     id = Column('id',Integer, primary_key=True)
@@ -102,7 +104,7 @@ class LayerType(Base):
         dic['id']=self.id
         dic['name']=self.name
         return dic
-    
+    """
  
     
 def createModels(engine):

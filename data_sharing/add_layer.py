@@ -3,15 +3,15 @@ Created on 10 May 2018
 
 @author: livia
 '''
-import sys
 import argparse
 from definitions import CONFIG_PATH
 from configobj import ConfigObj
 from display_data.rollback import Rollback
 from display_data.ingestion import Ingestion, RasterLayerCreator
 import logging
-import os
 import traceback
+from numpy.lib.tests.test_io import strptime
+
 
 
 def handle_input():
@@ -26,14 +26,26 @@ def handle_input():
     parser.add_argument('layerfile', action='store',
                 help='filename of the layer:')
     parser.add_argument('layertype', action='store', choices=types, metavar='layertype',
-                help='choices = {%(choices)s} ||| type of the layer')
+                help='choices = {%(choices)s} ||| type of the layer') 
+    parser.add_argument('date', action='store', metavar='date', type=valid_date,
+                help='date of the layer - format YYYY-MM-DD') 
+    parser.add_argument('-min', action='store', metavar='min', type=float,
+                help='saturation minimum for colouring the raster file ||| if not provided the default for this layertype is used')
+    parser.add_argument('-max', action='store', metavar='max', type=float,
+                help='saturation maximum for colouring the raster file ||| if not provided the default for this layertype is used')
+    
     parser.add_argument('--version', action='version', version='Version 1.0, Not released yet.', help="Show program's version number")
 
     args = parser.parse_args()
     print('ARGS',vars(args))
+    
+    print(args.date)
+    
+    
     #print(args.layertype)
     add_layer(**vars(args))
-        
+    
+    
         
 
 def add_layer(**kwargs):
@@ -60,11 +72,6 @@ def add_layer(**kwargs):
         rollback.rollback()
         
 
-    
-    
-
-
-
 def typeConstraintMet(inp, types):
     '''Checks if type constraint is met
     
@@ -75,6 +82,14 @@ def typeConstraintMet(inp, types):
         if i[1] not in types:
             return False
     return True
+
+
+def valid_date(s):
+    try:
+        return strptime(s, "%Y-%m-%d")
+    except ValueError:
+        msg = "Not a valid date: '{0}'.".format(s)
+        raise argparse.ArgumentTypeError(msg)
 
 
 if __name__ == '__main__':

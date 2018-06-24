@@ -23,10 +23,18 @@ class ConfigSystem():
         
         
     def setDatasetid(self, dataset_id):
+        '''Sets self.datasetid'''
         self.dataset_id=dataset_id
+    
+    
+    def getProjection(self):
+        return self.config['data']['projection']
     
     def getDataInputPath(self):
         return self.config['data']['input']
+    
+    def getDataOutputPath(self):
+        return self.config['data']['output']
     
     
     def dbPath(self):
@@ -36,7 +44,7 @@ class ConfigSystem():
     def dbEngine(self):
         return self.config['db']['type']
     
-    def getColourFile(self, layertype):
+    def getSampleColourFile(self, layertype):
         '''Returns name and path to the colourfile for a given layer'''
         assert layertype in self.config['layers']['types']
         i = self.config['layers']['types'].index(layertype)
@@ -57,8 +65,8 @@ class ConfigSystem():
     def getReprojectedFilename(self):
         return self.config['layers']['reprojectedfilename']
     
-    def getLayerRawFile(self, ltype, d_id, proj=False):
-        pth = self.getLayerFolder(ltype, d_id)
+    def getLayerRawFile(self, ltype, d_id, date, proj=False):
+        pth = self.getLayerFolderByAttributes(ltype, date, d_id=d_id)
         # get file with any extension
         fname=''
         #print(self.getRawInputFilename()+".*")
@@ -67,19 +75,10 @@ class ConfigSystem():
         else:
             fls = glob.glob(os.path.join(pth,self.getRawInputFilename())+".*")
         for file in fls:
-            print(file)
             fname=file
             break
-        #fname = self.getRawInputFilename()+'.tif'
-        print(fname)
-        print(os.path.join(pth,fname))
         return os.path.join(pth,fname)
     
-      
-    def getExponent(self, layertype):
-        assert layertype in self.config['layers']['types']
-        i = self.config['layers']['types'].index(layertype)
-        return float(self.config['layers']['exponent'][i])
         
     def newDatasetFolder(self, d_id=None):
         if d_id is None:
@@ -92,24 +91,21 @@ class ConfigSystem():
         else:
             self.logger.info('Path already exists')
             
-    def newLayerFolder(self, ltype, d_id=None):
-        if d_id is None:
-            assert self.dataset_id is not None
-            d_id = self.dataset_id
-        folder = os.path.join(self.getDatasetFolder(d_id), ltype)
+    def newLayerFolder(self, layer):
+        d_id = layer.dataset_id
+        folder = os.path.join(self.getDatasetFolder(d_id), layer.layertype, self.dateToString(layer.date))
         if not os.path.exists(folder):
             os.makedirs(folder)
         else:
             self.logger.info('Path already exists')
+        print('FOLDER')
             
             
             
-    def removeLayerFolder(self, ltype, d_id=None):
+    def removeLayerFolder(self, layer):
         '''Removes the layer directory'''
-        if d_id is None:
-            assert self.dataset_id is not None
-            d_id = self.dataset_id
-        folder = os.path.join(self.getDatasetFolder(d_id), ltype)
+        d_id = layer.dataset_id
+        folder = os.path.join(self.getDatasetFolder(d_id), layer.layertype, self.dateToString(layer.date))
         if os.path.exists(folder):
             shutil.rmtree(folder)
             self.logger.info("folder '{}' removed.".format(folder))
@@ -140,17 +136,49 @@ class ConfigSystem():
         assert os.path.exists(folder)
         return folder
  
-    def getLayerFolder(self, ltype, d_id=None):
+    def getLayerFolderByAttributes(self, ltype, date, d_id=None):
         if d_id is None:
             assert self.dataset_id is not None
             d_id = self.dataset_id
-        folder = os.path.join(self.getDatasetFolder(d_id), ltype)
+        date = self.dateToString(date)
+        folder = os.path.join(self.getDatasetFolder(d_id), ltype, date)
         #assert os.path.exists(folder)
         return folder
     
-    def getTilesFolder(self, ltype, d_id=None):
-        folder = os.path.join(self.getLayerFolder(ltype=ltype, d_id=d_id), self.config['data']['tiles'])
+    
+    def getLayerFolder(self, layer):
+        d_id = layer.dataset_id
+        print(type(layer.date))
+        print('Layer',layer.date)
+        date = self.dateToString(layer.date)
+        folder = os.path.join(self.getDatasetFolder(d_id), layer.layertype, date)
+        #assert os.path.exists(folder)
         return folder
+    
+    
+    def getTilesFolder(self, ltype, date, d_id=None):
+        folder = os.path.join(self.getLayerFolderByAttributes(ltype=ltype, date=date, d_id=d_id), self.config['data']['tiles'])
+        return folder
+    
+    def getLayersColourfile(self, layer):
+        '''Returns a relative path'''
+        path = os.path.join(self.getLayerFolder(layer), 'colourfile.txt')
+        return path
+    
+    def getRelativeTilesFolder(self, layer):
+        abs_path = self.getTilesFolder(layer.layertype, layer.date, layer.dataset_id)
+        prefix = self.getDataOutputPath()
+        rel_path = os.path.relpath(abs_path, prefix)
+        return rel_path
+    
     
     def getLayerTypes(self):
         return self.config['layers']['types']
+    
+    
+    def dateToString(self, date):
+        print('DATE+', date, type(date))
+        
+        
+        print('DATE: ', str(date.strftime("%Y-%m-%d")))
+        return str(date.strftime("%Y-%m-%d"))

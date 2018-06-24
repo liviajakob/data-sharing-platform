@@ -62,30 +62,42 @@ var colourvalues;
     	 console.log(d_layers);
     	 for (var i = d_layers.length-1; i >= 0; i--){
     		 /* TODO: CONFIGURE URL */
-	    	 url= root_link+ '/'+ dataset.getId() + '/'+dataset.get('layers')[i].layertype + '/tiles/{z}/{x}/{-y}.png';
+    		 layer=dataset.get('layers')[i]
+    		 console.log('id',i)
+    		 tileurl = root_link+ '/'+ layer.tileurl +'/{z}/{x}/{-y}.png';
+    		 console.log(tileurl);
+   			var myLayer = generateLayer(tileurl, layer, i);
+	    	 url= root_link+ '/'+ dataset.getId() + '/'+dataset.get('layers')[i].layertype +'/'+dataset.get('layers')[i].date + '/tiles/{z}/{x}/{-y}.png';
 	    	 console.log('URL',url);
 	    	 
-	    	     var source = new ol.source.OSM({
-	    	                 url: url, //'http://127.0.0.1:8887/14/dem/tiles/{z}/{x}/{-y}.png',
-	    	                 crossOrigin: null //hack file
-	    	         })
-	     
-	    	     var myLayer = new ol.layer.Tile({
-	    	       source: source,
-	    	       projection: 'EPSG:4326',
-	    	    	   extent: polyext, 
-	    	    	   opacity: 1,
-	    	    	id: dataset.get('layers')[i].id,
-	    	    	visible: (i==0),
-	    	    	layertype: dataset.get('layers')[i].layertype
-	    	     });
-	    	     dataset_tilelayers.getLayers().getArray().push(myLayer); //add it to the group layer
+
     	 }
 	    	     $('#infobox').hide();
 	    	     $('#toolbox').show();
 	    	     displayDetailedInfo(detailedInfo(dataset));
 	    	     getLegend(myLayer);
 	    	     
+     }
+     
+     
+     function generateLayer(url, layer, i){
+	     var source = new ol.source.OSM({
+             url: url, //'http://127.0.0.1:8887/14/dem/tiles/{z}/{x}/{-y}.png',
+             crossOrigin: null //hack file
+		     })
+		
+		 myLayer = new ol.layer.Tile({
+		   source: source,
+		   projection: 'EPSG:4326',
+			   extent: polyext, 
+			   opacity: 1,
+			id: layer.id,
+			visible: (i==0),
+			layertype: layer.layertype,
+		 });
+		 dataset_tilelayers.getLayers().getArray().push(myLayer); //add it to the group layer
+    	 return myLayer;
+    	 
      }
      
      
@@ -201,12 +213,7 @@ var colourvalues;
   		    //.fail(function () { alert('File download failed!'); });
   			
   			
-  			/*$.getJSON('download', function(data) {
-  		    	console.log('DATA1')
-  		    	console.log(data);
-  		    	console.log(typeof data)
-  		    	
-  		    });*/
+
   			
   	});
   	});
@@ -223,13 +230,14 @@ function getLegend(layer){
 	
 	console.log('LAYER',layer);
 	
-	link = 'get_colours?type='+layer.get('layertype');
-	console.log('LINK',link);
+	link = 'get_colours?layer_id='+layer.get('id');
 	
 	$.getJSON(link, function(data) {
 		colourvalues=data.values;
 		drawColourLegend(data.rgb, data.min, data.max);
   	});
+	$('#legend-bar')
+	.attr("data-original-title", "Click on the legend to see the exact value represented by the clicked colour")
 }
   	
 
@@ -239,18 +247,10 @@ function getLegend(layer){
 var legend  = document.getElementById('legend-bar');
 	
 function drawColourLegend(colours, min, max){
-	
-	
-	
-	console.log("MINMAX",min,max,colours)
     ctx = legend.getContext('2d');
-	console.log('fill')
 	ctx.clearRect(0, 0, 100, 64);
 	//ctx.clearRect(0, 0, canvas.width, canvas.height);
 	//console.log('COLOURS',colours)
-	
-	
-	
 	for(var i = 0; i <= colours.length; i++) {
 	    ctx.beginPath();
 	    
@@ -292,7 +292,11 @@ legend.onclick = function(e) {
         //d = p.data;
     console.log('x',e.offsetX,'y',e.offsetY)
     if (e.offsetX<=20 && e.offsetY<=colourvalues.length){
-    	alert(colourvalues[e.offsetY]);
+    	//alert(colourvalues[e.offsetY]);
+    	$('#legend-bar')
+    		.tooltip('hide')
+    		.attr("data-original-title", 'Clicked value: '+colourvalues[e.offsetY])
+    		.tooltip('show');
     }
     
 };

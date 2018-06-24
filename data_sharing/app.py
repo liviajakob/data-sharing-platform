@@ -27,12 +27,15 @@ def index():
  
 @app.route('/get_colours', methods=['POST', 'GET'])
 def get_colours():
+    layer_id = request.args.get('layer_id')
+    database = Database()
+    database.scopedSession()
+    layer=database.getLayers({'id': layer_id})[0]
+    database.closeSession()
     
-    l_type = request.args.get('type')
-    
+
     conf= ConfigSystem()
-    pth = conf.config['layers']['colpath']
-    pth= os.path.join(pth,conf.getColourFile(l_type))
+    pth = conf.getLayersColourfile(layer)
     file_o = open(pth, 'r')
     lines = file_o.readlines()
     rgbarr=[]
@@ -43,7 +46,7 @@ def get_colours():
             rgb='rgb('+split[1]+', ' + split[2] + ', ' + split[3] + ')'
             rgbarr.append(rgb)
             vals.append(split[0])
-    minmax = conf.getLayerScale(l_type)
+    minmax = {'min': "{0:.1f}".format(float(vals[0])), 'max': "{0:.1f}".format(float(vals[-1]))}
     dic={'rgb': rgbarr, 'max': minmax['max'], 'min': minmax['min'], 'values': vals}
 
     return jsonify(dic)
@@ -56,7 +59,7 @@ def datasets(dataset_id):
     database = Database()
     database.scopedSession()
     
-    dataset=database.getDatasets(dataset_id)[0]
+    dataset=database.getDatasets({'id': dataset_id})[0]
     geoDict=dataset.asGeoDict()
     print(geoDict)
     geoCollection = {}
@@ -74,7 +77,7 @@ def data():
     database = Database()
     database.scopedSession()
     
-    filtering = 'hi' #request.args
+    filters = {} #request.args
     page=1
     page_size=5
     try:
@@ -94,7 +97,7 @@ def data():
     ##lid = request.args.get('lid')    
     
     
-    datasets=database.getDatasets(filtering=filtering, dic=True, page=page, page_size=page_size)
+    datasets=database.getDatasets(filters=filters, dic=True, page=page, page_size=page_size, orderbyarea=True)
     ''''features=[]
     for ds in datasets:
         features.append(ds.asGeoDict())
@@ -124,7 +127,20 @@ def layertypes():
 
     return jsonify(dic)
 
- 
+
+"""@app.route('/tileurl/<int:layer_id>')
+def tileurl(layer_id):
+    database = Database()
+    database.scopedSession()
+    layer=database.getLayers({'id': layer_id})[0]    
+    database.closeSession()
+    
+    conf = ConfigSystem()
+    abs_path = conf.getTilesFolder(layer.layertype, layer.date, layer.dataset_id)
+    prefix = conf.getDataOutputPath()
+    rel_path = os.path.relpath(abs_path, prefix)
+    return jsonify({'rel_url' : rel_path, 'abs_url' : abs_path})"""
+    
     
 '''@app.route('/download', methods=['GET', 'POST'])
 def download():

@@ -80,14 +80,14 @@ def get_value(lid):
 def getLayerFilePath(pid, proj=False):
     database = Database()
     database.scopedSession()
-    layer = database.getLayerById(pid)[0]
-    ltype=database.getLayertypeById(layer.layertype_id).name
+    layer = database.getLayers({'id': pid})[0]
+    #ltype=database.getLayertypeById(layer.layertype).name
     conf = ConfigSystem()
-    rasterf = conf.getLayerRawFile(ltype=ltype, d_id=layer.dataset_id, proj=proj)
+    rasterf = conf.getLayerRawFile(ltype=layer.layertype, d_id=layer.dataset_id, date=layer.date, proj=proj)
     database.closeSession()
     return rasterf
     
 
     
 if __name__ == '__main__':
-    app.run(debug=True, threaded=True)
+    app.run(debug=True, threaded=True, port=5002)

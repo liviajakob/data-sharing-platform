@@ -7,9 +7,6 @@ config = ConfigObj()
 
 config.filename = "config.conf"
 #
-config['keyword1'] = 'value1'
-config['keyword2'] = 'value2'
-#
 
 config['db'] = {}
 config['db']['name'] = 'metadata.db'
@@ -20,16 +17,10 @@ config['data'] = {}
 config['data']['input'] = '/Users/livia/msc_dissertation/CODE/data_sharing/data/input'
 config['data']['output'] = os.path.join(config['db']['path'],'datasets')
 config['data']['tiles'] = 'tiles'
-#
-section2 = {
-    'keyword5': 'value5',
-    'keyword6': 'value6',
-    'sub-section': {
-        'keyword7': 'value7'
-        }
-}
+config['data']['projection'] = 'EPSG:3413' #this is the projection all the data is converted to for display
 
-# @TODO query layer types from database
+#
+
 config['layers'] = {}
 config['layers']['rawfilename'] = 'raw_input'
 config['layers']['reprojectedfilename'] = 'reproject'

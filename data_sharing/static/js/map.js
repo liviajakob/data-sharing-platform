@@ -1,7 +1,7 @@
     
 var clickdatasets = true;
-var root_link = 'http://127.0.0.1:8887';
-var api_link = 'http://localhost:5002'
+var root_link = 'http://127.0.0.1:8887'; //folder where the datasets are in! /datasets
+var api_link = 'http://localhost:5002';
 var polylayer;
 var polylayer_group;
 var projection = "EPSG:3413";
