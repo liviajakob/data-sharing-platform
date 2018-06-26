@@ -40,14 +40,6 @@ function startExplore(){
 	//change cursor
 	document.getElementById('map').classList.add('explore-cursor');
 	$('#point-info').show();
-
-      /*swipe.addEventListener('input', function() {
-        map.render();
-      }, false);*/
-      
-      /*Render new display*/
-    //document.getElementById('map').addEventListener('click')
-	
 }
 
 
@@ -63,14 +55,21 @@ function getValue(evt){
 		console.log(j_url);
 		
         $.getJSON(j_url, function(result) {
-        	console.info(result.value);
-            $('#point-value').html('<p> <strong>Value: </strong>' + result.value + '</p>');
-            
+        	console.info(result.data);
+        	if (result.data.length<=1){
+        		$('#point-value').html('<h6>Value of clicked position:</h6><hr>'
+        				+'<p> <strong>Date: </strong>' + result.data[0].x + '<br>'
+        				+'<strong>Value: </strong>' + result.data[0].y + '<br>' 
+        				+'No timeseries for this layer available</p>');
+        	}else{
+        		$('#point-value').html('<h6>Timeseries – Value of clicked position over time</h6><hr>'
+        				+'<canvas id="chart" style="height: 150px; width: 100%;"></canvas>');
+        		displayChart(result.data);
+        	} 
          });
 		
        
 	}else{
-		console.log('oops');
 		$('#point-value').html('<p>No dataset layer displayed</p>');
 	}
 }
@@ -94,4 +93,67 @@ function stopExplore(){
 		//$('#map').unbind('click');
 	}
 }
+
+
+
+////// CHART
+
+function displayChart(data){
+	
+	ctx = document.getElementById('chart').getContext('2d');
+	
+	Chart.defaults.global.defaultFontColor = 'white';
+	Chart.defaults.global.defaultFontFamily = 'Raleway, sans-serif';
+	var scatterChart = new Chart(ctx, {
+	    type: 'line',
+	    data: {
+	        datasets: [{
+	            label: ' Value',
+	            data: data,
+	            borderColor : "#fff",
+	            borderWidth : "3",
+	            hoverBorderColor : "#000",
+	            showLine: false,
+	            borderColor: '#fff',//"#3d6466",
+	            backgroundColor: "#fff"
+	        }]
+	    },
+	    options: {
+	    	  legend: {
+	    		    display: false
+	    		  },
+	        scales: {
+	            xAxes: [{
+	            	type: 'time',
+	                //distribution: 'series',
+	                time: {
+	                	tooltipFormat: ' MM/DD/YY',
+	                	displayFormat:'MM/DD/YY'
+	                },
+	                ticks:{
+	                    fontColor : "#fff",
+	                  },
+	                gridLines: {
+		        		zeroLineColor: "#fff"
+		        	}
+	            }],
+	            yAxes: [{
+	                ticks:{
+	                    fontColor : "#fff",
+	                  },
+	                  gridLines: {
+	  	        		zeroLineColor: "#fff"
+	  	        	}
+	            }]
+	        }
+	    }
+	});	
+}
+	
+	
+
+
+
+
+
 

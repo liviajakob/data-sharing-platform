@@ -39,7 +39,7 @@ def handle_input():
     args = parser.parse_args()
     print('ARGS',vars(args))
     
-    print(args.date)
+    print(args.enddate)
     
     
     #print(args.layertype)

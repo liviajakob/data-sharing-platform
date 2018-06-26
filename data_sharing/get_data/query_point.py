@@ -36,7 +36,7 @@ def retrieve_pixel_value(geo_coord, data_source):
 if __name__ == '__main__':
     #queryPoint()
     conf=ConfigSystem()
-    fname = conf.getLayerRawFile('dem', 17)
+    fname = conf.getLayerTimeRawFile('dem', 17)
     coords=[-102834.5, -2151176.688]
     coords2=[34,235]
     retrieve_pixel_value(coords2, fname)

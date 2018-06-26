@@ -10,6 +10,7 @@ from flask_restful import Resource, Api
 from flask_cors import CORS, cross_origin
 from display_data.system_configuration import ConfigSystem
 from get_data.query_point import retrieve_pixel_value
+import os, glob
 
 app = Flask(__name__)
 CORS(app)
@@ -48,7 +49,7 @@ def index():
 
 @app.route('/get_file/<int:pid>', methods=['GET'])
 def get_file(pid):
-    rasterf=getLayerFilePath(pid)
+    rasterf=getLayetRawFilePaths(pid)
     #raster = '/Users/livia/msc_dissertation/CODE/data_sharing/data/output/datasets/'+str(pid)+'/dem/raw_input.tif'
     response = send_file(rasterf)
     return response
@@ -56,36 +57,52 @@ def get_file(pid):
 @app.route('/get_value/<int:lid>', methods=['GET', 'OPTIONS'])
 def get_value(lid):
     print('we are here')
-    print(lid)
-    fname=getLayerFilePath(lid, proj=True)
+    fnames=getLayetRawFilePaths(lid)
+    
+    
     #raster = '/Users/livia/msc_dissertation/CODE/data_sharing/data/output/datasets/'+str(pid)+'/dem/raw_input.tif'
     #response = send_file(rasterf)
+    print('filenames: ', fnames)
     x = request.args.get('x')
     y = request.args.get('y')
     print(x,y)
     coords=[float(x),float(y)]
     #-102834.5, -2151176.688
-    print(coords)
-    print(fname)
-    val=retrieve_pixel_value(coords, fname)
-    try:
-        val = "{:.6f}".format(val)
-    except:
-        pass
+    pixelvalues=[]
+    print(fnames)
+    for fname in fnames:
+        val=retrieve_pixel_value(coords, fname)
+        try:
+            val = round(val,4) #"{:.6f}".format(val)
+            pass
+        except:
+            pass
+        date = os.path.basename(os.path.dirname(fname)) #folder name
+        pixelvalues.append({'y': val, 'x': date})
+    
     response={}
-    response['value']=val
+    response['data']=pixelvalues
     return jsonify(response)
   
 
-def getLayerFilePath(pid, proj=False):
+def getLayetRawFilePaths(layer_id):
+    '''Returns reprojected raw file path of all the rime series files of a layer'''
     database = Database()
     database.scopedSession()
-    layer = database.getLayers({'id': pid})[0]
+    layer = database.getLayers({'id': layer_id})[0]
     #ltype=database.getLayertypeById(layer.layertype).name
     conf = ConfigSystem()
-    rasterf = conf.getLayerRawFile(ltype=layer.layertype, d_id=layer.dataset_id, date=layer.date, proj=proj)
+    files = conf.getTimeseriesFolders(layer)
     database.closeSession()
-    return rasterf
+    raw = conf.getReprojectedFilename()
+    for i, f in enumerate(files): ## add the raw file to the path
+        f = os.path.join(f,raw)
+        for file in glob.glob(f+'.*'): #get files with any extension
+            f=file
+            break
+        files[i] = f
+        
+    return files
     
 
     

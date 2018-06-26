@@ -65,8 +65,8 @@ class ConfigSystem():
     def getReprojectedFilename(self):
         return self.config['layers']['reprojectedfilename']
     
-    def getLayerRawFile(self, ltype, d_id, date, proj=False):
-        pth = self.getLayerFolderByAttributes(ltype, date, d_id=d_id)
+    def getLayerTimeRawFile(self, ltype, d_id, date, proj=False):
+        pth = self.getLayerTimeFolderByAttributes(ltype, date, d_id=d_id)
         # get file with any extension
         fname=''
         #print(self.getRawInputFilename()+".*")
@@ -91,21 +91,31 @@ class ConfigSystem():
         else:
             self.logger.info('Path already exists')
             
-    def newLayerFolder(self, layer):
+    def newLayerTimeFolder(self, layer, date):
         d_id = layer.dataset_id
-        folder = os.path.join(self.getDatasetFolder(d_id), layer.layertype, self.dateToString(layer.date))
+        folder = os.path.join(self.getDatasetFolder(d_id), layer.layertype, self.dateToString(date))
         if not os.path.exists(folder):
             os.makedirs(folder)
         else:
             self.logger.info('Path already exists')
-        print('FOLDER')
-            
-            
-            
-    def removeLayerFolder(self, layer):
-        '''Removes the layer directory'''
+        print('FOLDER', folder)
+        
+        
+    def newLayerFolder(self, layer):
+        print('LAYR', layer)
         d_id = layer.dataset_id
-        folder = os.path.join(self.getDatasetFolder(d_id), layer.layertype, self.dateToString(layer.date))
+        folder = os.path.join(self.getDatasetFolder(d_id), layer.layertype)
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        else:
+            self.logger.info('Path already exists')
+        
+        print('FOLDER', folder)
+            
+            
+            
+    def removeFolder(self, folder):
+        '''Removes the layer directory'''
         if os.path.exists(folder):
             shutil.rmtree(folder)
             self.logger.info("folder '{}' removed.".format(folder))
@@ -136,7 +146,7 @@ class ConfigSystem():
         assert os.path.exists(folder)
         return folder
  
-    def getLayerFolderByAttributes(self, ltype, date, d_id=None):
+    def getLayerTimeFolderByAttributes(self, ltype, date, d_id=None):
         if d_id is None:
             assert self.dataset_id is not None
             d_id = self.dataset_id
@@ -145,19 +155,44 @@ class ConfigSystem():
         #assert os.path.exists(folder)
         return folder
     
-    
-    def getLayerFolder(self, layer):
-        d_id = layer.dataset_id
-        print(type(layer.date))
-        print('Layer',layer.date)
-        date = self.dateToString(layer.date)
-        folder = os.path.join(self.getDatasetFolder(d_id), layer.layertype, date)
+    def getLayerFolderByAttributes(self, ltype, d_id=None):
+        if d_id is None:
+            assert self.dataset_id is not None
+            d_id = self.dataset_id
+        folder = os.path.join(self.getDatasetFolder(d_id), ltype)
         #assert os.path.exists(folder)
         return folder
     
     
+    def getLayerTimeFolder(self, layer):
+        d_id = layer.dataset_id
+        date = self.dateToString(layer.enddate)
+        folder = os.path.join(self.getDatasetFolder(d_id), layer.layertype, date)
+        #assert os.path.exists(folder)
+        return folder
+    
+    def getLayerFolder(self, layer):
+        d_id = layer.dataset_id
+        folder = os.path.join(self.getDatasetFolder(d_id), layer.layertype)
+        #assert os.path.exists(folder)
+        return folder
+    
+    
+    
+    
+    # TODO: ensure this works
+    def getTimeseriesFolders(self, layer):
+        #paths = []
+        wkdir = self.getLayerFolder(layer)
+        content = next(os.walk(wkdir))
+        folders=[]
+        for folder in content[1]:
+            folders.append(os.path.join(content[0], folder))
+        return folders
+    
+    
     def getTilesFolder(self, ltype, date, d_id=None):
-        folder = os.path.join(self.getLayerFolderByAttributes(ltype=ltype, date=date, d_id=d_id), self.config['data']['tiles'])
+        folder = os.path.join(self.getLayerTimeFolderByAttributes(ltype=ltype, date=date, d_id=d_id), self.config['data']['tiles'])
         return folder
     
     def getLayersColourfile(self, layer):
@@ -166,7 +201,7 @@ class ConfigSystem():
         return path
     
     def getRelativeTilesFolder(self, layer):
-        abs_path = self.getTilesFolder(layer.layertype, layer.date, layer.dataset_id)
+        abs_path = self.getTilesFolder(layer.layertype, layer.enddate, layer.dataset_id)
         prefix = self.getDataOutputPath()
         rel_path = os.path.relpath(abs_path, prefix)
         return rel_path

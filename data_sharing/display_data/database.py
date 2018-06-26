@@ -127,7 +127,9 @@ class Database():
             #layer.type_id = layerType.id
             layer.dataset_id = dataset.id
             layer.layertype = layerType
-            layer.date = date
+            layer.startdate = date
+            layer.enddate = date
+            
             self.Session.add(layer)
             if commit:
                 self.Session.commit()
@@ -291,6 +293,19 @@ class Database():
         time = datetime.utcnow() 
         
         layer.timestamp = time
+        if commit:
+            self.Session.commit()
+        else:
+            self.Session.flush()
+            
+            
+    def updateTimeSeries(self, layer, startdate=None, enddate=None, commit=True):
+        
+        assert self.Session is not None
+        if enddate is not None:
+            layer.enddate = enddate
+        if startdate is not None:
+            layer.startdate = startdate
         if commit:
             self.Session.commit()
         else:

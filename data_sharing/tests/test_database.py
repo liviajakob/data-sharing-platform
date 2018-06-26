@@ -68,7 +68,7 @@ class DatabaseTest(unittest.TestCase):
         #self.assertEquals(self.db.getRasterLayers()[0].layertype, 'dem', "couldnt insert dem layer")
         filters={'dataset_id' : 1, 'layertype' : 'dem'}
         self.assertEquals(self.db.getRasterLayers(filters)[0].layertype, 'dem', "couldnt insert dem layer")
-        self.assertEquals(self.db.getRasterLayers(filters)[0].date, datetime(2017, 6, 26, 0, 0), "couldnt insert dem layer")
+        self.assertEquals(self.db.getRasterLayers(filters)[0].enddate, datetime(2017, 6, 26, 0, 0), "couldnt insert dem layer")
 
 
 

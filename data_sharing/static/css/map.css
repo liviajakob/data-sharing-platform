@@ -36,16 +36,18 @@
 
 #mouse-position{
 	position:absolute;
-	top: -moz-calc(100% - 58px);
- 	top: -webkit-calc(100% - 58px);
- 	top: calc(100% - 58px);
-	left: -moz-calc(100% - 250px);
- 	left: -webkit-calc(100% - 250px);
- 	left: calc(100% - 250px);
+	top: -moz-calc(100% - 63px);
+ 	top: -webkit-calc(100% - 63px);
+ 	top: calc(100% - 63px);
+	left: 412px;
  	font-size: 10px;
- 	padding: 2px; 
- 	background-color: rgba(255,255,255,0.5);
+ 	padding: 2px;
+ 	padding-left: 5px; 
+ 	padding-right: 5px; 
  	display:inline;
+ 	border-radius: 4px;
+ 	border: 2px solid rgba(255,255,255,0.5);
+    background-color: rgba(32,85,153,0.4);
 }
 
 .custom-mouse-position{
@@ -118,12 +120,12 @@
  
 #infobox-detailed{
 	position:absolute;
-	top: -moz-calc(100% - 370px);
- 	top: -webkit-calc(100% - 370px);
- 	top: calc(100% - 370px);
-	left: -moz-calc(100% - 340px);
- 	left: -webkit-calc(100% - 340px);
- 	left: calc(100% - 340px);
+	top: -moz-calc(100% - 340px);
+ 	top: -webkit-calc(100% - 340px);
+ 	top: calc(100% - 340px);
+	left: -moz-calc(100% - 320px);
+ 	left: -webkit-calc(100% - 320px);
+ 	left: calc(100% - 320px);
  	font-size: 12px;
  	padding: 10px; 
  	background-color: rgba(95,158,160,0.6);
@@ -184,17 +186,27 @@
 }
 
 #point-info{
-	
-	top: 320px;
-	left: 300px;
+	//top: 320px;
+	//left: 300px;
+	bottom: 95px;
+	left: 270px;
  	background-clip: padding-box;
  	//height: 100px;
- 	width: 160px;
+ 	width: 300px;
  	display: none;
  	//border-radius: 7px;
  	font-size: 13px;
  	background-color: rgba(93, 62, 60, 0.8);
 }
+
+#point-value{
+	//background-color: rgba(93, 62, 60, 0.8);
+	padding: 7px;
+	padding-bottom: 0px;
+	margin-right: 8px;
+	margin-left: -5px;
+}
+
  
  
 #toolbox .content {

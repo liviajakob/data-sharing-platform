@@ -48,8 +48,8 @@ class Ingestion(object):
         dupl = self._db.getRasterLayers(dataset_id=dataset_id, layertype_name=ltype)
         conf = ConfigSystem(dataset_id=dataset_id)
         if len(dupl)==0:
-            conf.newLayerFolder(ltype)
-            self.rollback.addCommand(conf.removeLayerFolder, {'ltype': ltype})
+            conf.newLayerTimeFolder(ltype)
+            self.rollback.addCommand(conf.removeLayerTimeFolder, {'ltype': ltype})
             layer = self._db.newRasterLayer(dataset_id=dataset_id, layerTypeName=ltype, commit=False)
             self.processRaster(filename=filename, ltype=ltype, dataset_id=dataset_id)
         else:
@@ -74,7 +74,7 @@ class Ingestion(object):
         file_extension = os.path.splitext(filename)[1] #extract extension
         srcf = os.path.join(conf.getDataInputPath(), filename)
         #save init file in output folder
-        cp = os.path.join(conf.getLayerFolderByAttributes(ltype, dataset_id), (conf.getRawInputFilename()+file_extension))
+        cp = os.path.join(conf.getLayerTimeFolderByAttributes(ltype, dataset_id), (conf.getRawInputFilename()+file_extension))
         shutil.copyfile(srcf, cp)
         
         # compute stats
@@ -84,13 +84,13 @@ class Ingestion(object):
         #scale = {'min': stats['min'], 'max': stats['max']}
         
         #reproject
-        proj = os.path.join(conf.getLayerFolderByAttributes(ltype, dataset_id), (conf.getReprojectedFilename()+file_extension))
+        proj = os.path.join(conf.getLayerTimeFolderByAttributes(ltype, dataset_id), (conf.getReprojectedFilename()+file_extension))
         print("REPROJECT", proj)
         rast_proc.reproject(inputfile=srcf, outputfile=proj)
         
         #convert to 8bit
         #scale = conf.getLayerScale(ltype)
-        #bit_8 = os.path.join(conf.getLayerFolderByAttributes(ltype, dataset_id), ('8bit'+file_extension))
+        #bit_8 = os.path.join(conf.getLayerTimeFolderByAttributes(ltype, dataset_id), ('8bit'+file_extension))
         #rast_proc.to8Bit(inputfile=proj, outputfile=bit_8, scale=scale, exponent=conf.getExponent(layertype=ltype))
         
         ########### PRINT STATS
@@ -99,18 +99,18 @@ class Ingestion(object):
         #print('EXPONENT: ', conf.getExponent(layertype=ltype))
         
         #cut raster
-        cut = os.path.join(conf.getLayerFolderByAttributes(ltype, dataset_id), ('cropped'+file_extension))
+        cut = os.path.join(conf.getLayerTimeFolderByAttributes(ltype, dataset_id), ('cropped'+file_extension))
         rast_proc.cutRaster(inputfile=proj, outputfile=cut)
         
         #compute colourfile
         col_inputfile = conf.getSampleColourFile(ltype)
-        col_outputpath= os.path.join(conf.getLayerFolderByAttributes(ltype, dataset_id), ('colourfile.txt'))
+        col_outputpath= os.path.join(conf.getLayerTimeFolderByAttributes(ltype, dataset_id), ('colourfile.txt'))
         colgen = ColourMaker(col_inputfile, col_outputpath)
         scale = conf.getLayerScale(ltype)
         colgen.computeColours(scale['min'], scale['max'])
                 
         #add colour
-        col_rast = os.path.join(conf.getLayerFolderByAttributes(ltype, dataset_id), ('coloured'+file_extension))
+        col_rast = os.path.join(conf.getLayerTimeFolderByAttributes(ltype, dataset_id), ('coloured'+file_extension))
         rast_proc.addColours(inputfile=cut, outputfile=col_rast, colourfile=col_outputpath) # take the above computed as input
         
         #TILEE
@@ -270,18 +270,15 @@ class RasterLayerCreator(Creator):
         
         print('KWARGS', kwargs)
         print(kwargs['dataset_id'])
-    
-
         
         self.layertype = kwargs['layertype']
         self.layerfile = kwargs['layerfile']
         self.dataset_id = kwargs['dataset_id']
         self.date = kwargs['date']
-        
-        print('DATE' , self.date, type(self.date))
-        
+            
         self.conf = ConfigSystem(dataset_id=self.dataset_id)
-        self.layerfolder = self.conf.getLayerFolderByAttributes(self.layertype, self.date, self.dataset_id)
+        self.layertimefolder = self.conf.getLayerTimeFolderByAttributes(self.layertype, self.date, self.dataset_id)
+        self.layerfolder = self.conf.getLayerFolderByAttributes(self.layertype, self.dataset_id)
         scale = self.conf.getLayerScale(self.layertype)
         if 'min' in kwargs:
             self.min = kwargs['min']
@@ -292,36 +289,45 @@ class RasterLayerCreator(Creator):
             self.max = kwargs['max']
         else:
             self.max = scale['max']
-     
-     
+        
+        if 'forceupdate' in kwargs:
+            self.forceUpdate = True
+        else:
+            self.forceUpdate = False
      
                 
         
     
     def create(self):
         '''Creates the raster layer'''        
-        duplicate = self.getDuplicate()
-        
-        print('DUPLICTAE',duplicate)
-        
-        if duplicate is None:
-            # insert into database
-            layer = self._db.newRasterLayer(dataset_id=self.dataset_id, layerType=self.layertype, date=self.date, commit=False)
-            #process raster
+        layer = self.getExistingLayer()
+        if layer is None:
+            layer = self._db.newRasterLayer(dataset_id=self.dataset_id, layerType=self.layertype, date = self.date, commit=False)
             self.conf.newLayerFolder(layer)
-            self.rollback.addCommand(self.conf.removeLayerFolder, {'layer': layer})
+            self.rollback.addCommand(self.conf.removeFolder, {'folder': self.layerfolder})
+            self.conf.newLayerTimeFolder(layer, self.date)
+            self.processFile(layer)
             
-            self.processFile()
-        elif self.update(duplicate):
-            self.processFile()
-            self._db.updateTimestamp(duplicate, commit=False)
+        elif not os.path.isdir(self.layertimefolder):
+            self.logger.info('Adding new time layer.')
+            self.conf.newLayerTimeFolder(layer, self.date)
+            self.rollback.addCommand(self.conf.removeFolder, {'folder': self.layertimefolder})
+            self.processFile(layer)
+            #update the time series dates
+            self.updateTimeSeries(layer)
+        elif self.forceUpdate: #self.update(duplicate):
+            self.logger.info('Time Layer will be updated.')
+            self.processFile(layer)
+            #self.processFile()
+            #self._db.updateTimestamp(duplicate, commit=False)
         else:
+            self.logger.info('Duplicate discovered; Update is not forced.')
             msg = 'Layer with file={} , type={} datasetid={} is up to date.'.format(self.layerfile, self.layertype, self.dataset_id)
             self.logger.info(msg)
         
         
         
-    def processFile(self):
+    def processFile(self, layer):
         '''Processes the layer input file and prepares it for display
         
         Steps are:
@@ -338,54 +344,63 @@ class RasterLayerCreator(Creator):
         srcf = os.path.join(self.conf.getDataInputPath(), self.layerfile)
         
         # 1. save init file in output folder
-        cp = os.path.join(self.layerfolder, (self.conf.getRawInputFilename()+file_extension))
+        cp = os.path.join(self.layertimefolder, (self.conf.getRawInputFilename()+file_extension))
         shutil.copyfile(srcf, cp)
         
         # 2. reproject
-        proj = os.path.join(self.layerfolder, (self.conf.getReprojectedFilename()+file_extension))
+        proj = os.path.join(self.layertimefolder, (self.conf.getReprojectedFilename()+file_extension))
         self.rast_proc.reproject(inputfile=srcf, outputfile=proj)
         
         # 3. cut raster
-        cut = os.path.join(self.layerfolder, ('cropped'+file_extension))
+        cut = os.path.join(self.layertimefolder, ('cropped'+file_extension))
         self.rast_proc.cutRaster(inputfile=proj, outputfile=cut)
         
         # 4. compute colourfile
-        col_inputfile = self.conf.getSampleColourFile(self.layertype)
-        col_outputpath= os.path.join(self.layerfolder, ('colourfile.txt'))
-        colgen = ColourMaker(col_inputfile, col_outputpath)
-        colgen.computeColours(self.min, self.max)
+        colfile = self.conf.getLayersColourfile(layer)
+        if not os.path.isfile(colfile): 
+            col_inputfile = self.conf.getSampleColourFile(self.layertype)
+            colgen = ColourMaker(col_inputfile, colfile)
+            colgen.computeColours(self.min, self.max)
                 
         # 5. add colour
-        col_rast = os.path.join(self.conf.getLayerFolderByAttributes(self.layertype, self.date, self.dataset_id), ('coloured'+file_extension))
-        self.rast_proc.addColours(inputfile=cut, outputfile=col_rast, colourfile=col_outputpath) # take the above computed as input
+        col_rast = os.path.join(self.conf.getLayerTimeFolderByAttributes(self.layertype, self.date, self.dataset_id), ('coloured'+file_extension))
+        self.rast_proc.addColours(inputfile=cut, outputfile=col_rast, colourfile=colfile) # take the above computed as input
         
         # 6. tile
         tiler = RasterTiler()
         tiler.createTiles(col_rast, self.conf.getTilesFolder(self.layertype, self.date, d_id = self.dataset_id))
             
         print('FILE: ', self.layerfile, ' TYPE: ', self.layertype, ' DATASETID', self.dataset_id)
+       
         
     
+    def updateTimeSeries(self, layer):
+        '''Updates start and end date of a layer within the database'''
+        if self.date < layer.startdate:
+            self._db.updateTimeSeries(layer, startdate=self.date, commit=False)
+        elif self.date > layer.enddate:
+            self._db.updateTimeSeries(layer, enddate=self.date, commit=False)
     
-    def getDuplicate(self):
-        '''Returns true if layer already exists, false otherwise'''
-        self.logger.info('Checking if layer exists...')
-        dupl = self._db.getRasterLayers(filters={'dataset_id': self.dataset_id, 'layertype': self.layertype, 'date': self.date})
+        
+    def getExistingLayer(self):
+        '''Returns duplicate if layer with same layertyoe already exists, false otherwise'''
+        self.logger.info('Checking if layer with same layertype exists...')
+        dupl = self._db.getRasterLayers(filters={'dataset_id': self.dataset_id, 'layertype': self.layertype})
         if len(dupl)==0:
             return None   
         else:
-            self.logger.info('Duplicate discovered...')
+            self.logger.info('Layertype already exists...')
             return dupl[0]
         
         
-    def update(self, duplicate):
-        '''Returns true if layer should be updated, false otherwise'''
+        
+    """def update(self, duplicate):
+        '''Returns true if time layer should be updated, false otherwise'''
         self.logger.info('Checking for updates...')
         srcf = os.path.join(self.conf.getDataInputPath(), self.layerfile)
         timestamp = time.ctime(os.path.getmtime(srcf))
         timestamp = datetime.strptime(timestamp, "%a %b %d %H:%M:%S %Y")
-        print(type(timestamp),timestamp, type(duplicate.timestamp), duplicate.timestamp)
         if timestamp >= duplicate.timestamp: 
             return True
         else:
-            return False
+            return False"""

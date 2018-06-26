@@ -72,7 +72,8 @@ class RasterLayer(Base):
     dataset_id =Column(Integer(), ForeignKey("dataset.id"))
     dataset = relationship("Dataset", backref=backref("layer"))
     layertype = Column(String()) # '''ForeignKey("layerType.id")'''
-    date = Column(DateTime(timezone=True))
+    startdate = Column(DateTime(timezone=True))
+    enddate = Column(DateTime(timezone=True))
     #layerType = relationship("LayerType", backref=backref("layer"))
     
     def asDict(self):
@@ -81,7 +82,9 @@ class RasterLayer(Base):
         dic['id']=self.id
         dic['timestamp']=self.timestamp
         dic['layertype']=self.layertype
-        dic['date']=str(self.date.strftime("%Y-%m-%d"))
+        dic['startdate']=str(self.startdate.strftime("%Y-%m-%d"))
+        dic['enddate']=str(self.enddate.strftime("%Y-%m-%d"))
+        
         return dic
     
     def __str__(self):
