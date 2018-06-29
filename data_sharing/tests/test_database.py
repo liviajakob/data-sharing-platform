@@ -55,6 +55,7 @@ class DatabaseTest(unittest.TestCase):
         self.db.newDataset("this is how you cite", 'EPSG:3413')
         self.db.newRasterLayer(1, "dem", strptime('2017-06-26', "%Y-%m-%d"))
         self.db.newRasterLayer(1, "error", strptime('2017-06-29', "%Y-%m-%d"))
+        self.db.newRasterLayer(2, "dem", strptime('2017-06-26', "%Y-%m-%d"))
         
         self.db.commit()
         
@@ -63,13 +64,18 @@ class DatabaseTest(unittest.TestCase):
         filters={'id' : 2}
         self.assertEquals(self.db.getDatasets(filters=filters)[0].id, 2, "Error in get Datasets")
         self.assertEquals(len(self.db.getDatasets()), 3, "Error in get Datasets")
+        self.assertEquals(len(self.db.getDatasets(filters={'layertype':'dem'})), 2, "Error in get Datasets")
+        self.assertEquals(len(self.db.getDatasets(filters={'layertype':'error'})), 1, "Error in get Datasets")
+        self.assertEquals(len(self.db.getDatasets(filters={'startdate':'2017-06-26'})), 2, "Error in get Datasets")
         #self.assertEquals(len(self.db.getLayerTypes()), 3, "couldnt insert all layer types")
         #self.assertEquals(self.db.getLayerById(1)[0].layertype, 'dem', "couldnt insert dem layer")
         #self.assertEquals(self.db.getRasterLayers()[0].layertype, 'dem', "couldnt insert dem layer")
         filters={'dataset_id' : 1, 'layertype' : 'dem'}
         self.assertEquals(self.db.getRasterLayers(filters)[0].layertype, 'dem', "couldnt insert dem layer")
         self.assertEquals(self.db.getRasterLayers(filters)[0].enddate, datetime(2017, 6, 26, 0, 0), "couldnt insert dem layer")
-
+        
+        
+        
 
 
 if __name__ == "__main__":

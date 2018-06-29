@@ -84,6 +84,7 @@ a{
     overflow-y: scroll;
     //background-color: darkgrey;
     padding: 5px;
+    padding-top: 0px;
     font-size: 13px;
 	direction:ltr;
 	
@@ -140,6 +141,7 @@ a{
 
 #datasets-bar{
 	margin: 4px;
+	margin-bottom: 10px;
 }
 
 #myTable td:hover { 
@@ -205,6 +207,17 @@ a{
 	margin-bottom: 20px;
 }
 
+.logo-small{
+	height: 23px;
+	padding-right: 20px;
+	margin-top: 3px;
+	margin-bottom: 10px;
+}
+
+.logo-small:hover{
+	opacity: 0.7;
+}
+
 .logo:hover{
 	opacity: 0.7;
 }
@@ -266,4 +279,135 @@ a{
 	opacity: 1;
 }
 
+#timerange{
+	//display: inline;
+	//hight: 30px;
+	//width: 80px;
+	margin-bottom: -5px;
+	opacity: 0.3;
+}
 
+#timerange-outer{
+	margin-bottom: 10px;
+	padding: 3px;
+	background-color: darkgrey;
+	border: 2px solid #fff;
+	border-radius: 4px;
+}
+
+
+
+#filterby{
+	background-color: grey;
+	padding-bottom: 5px;
+	border-radius: 4px;
+	margin-top: 2px;
+	padding-top: 5px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+#collapse-btn{
+	font-size: 16px;
+	position: absolute;
+	top: 24px;
+	right: 15px;
+	//float: right;
+}
+
+#collapse-btn button{
+	color: white;
+	cursor: pointer;
+    border: 2px solid rgba(255,255,255,0.8);
+    background-color: rgba(0,60,136,.7);
+    border-radius: 50%;
+    color:white;
+   	padding-left: 8px;
+   	padding-right: 8px;
+   	padding-bottom: 0px;
+   	padding-top: 0px;
+   	display: inline;
+   	margin: 0px;
+}
+
+#collapse-btn button:hover{
+	opacity: 0.7;
+}
+
+
+
+select {
+   //-webkit-appearance: none; 
+   //-moz-appearance: none;
+   //appearance: none;       /* remove default arrow */
+    border: 2px solid rgba(255,255,255,0.8);
+    background-color: rgb(61, 100, 102);
+    color: white;
+}
+
+select:hover{
+	opacity: 0.7;
+	cursor: pointer;
+}
+
+#filterDatasets{
+	//float: right;
+	cursor: pointer;
+	border: 2px solid rgba(255,255,255,0.8);
+    background-color: rgba(93, 62, 60, 0.8);// rgba(0,60,136,.5);
+    color: white;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+#filterDatasets:hover{
+	opacity: 0.7;
+}
+
+
+/*Overwrite Timeslider CSS*/
+
+.ui-rangeSlider-label{
+	font-size: 11px !important;
+	padding: 3px 6px;
+}
+
+.ui-rangeSlider-container{
+	height: 18px;
+	border: 2px solid rgba(255,255,255,0.8);
+}
+.ui-rangeSlider-noArrow .ui-rangeSlider-container{
+	border: 2px solid rgba(255,255,255,0.8);
+}
+
+.ui-rangeSlider-bar{
+	height: 15px;	
+}
+
+.ui-rangeSlider-container:hover{
+	opacity: 0.8;
+}
+
+
+.ui-rangeSlider-label{
+	background: none;
+	background-color: rgba(061, 100, 102,0.9);
+	border-color: none;
+	box-shadow: none;
+}
+.ui-rangeSlider-label-inner{
+	border-top: 10px solid rgba(61, 100, 102,0.9);
+}
+
+.ui-rangeSlider-innerBar{
+	background-color: rgba(0,60,136,.2);
+}
+
+.ui-rangeSlider-bar{
+	background-color: rgb(61, 100, 102);
+	margin-top: 2px;
+}
+
+.ui-rangeSlider{
+	padding-top: 37px;
+}

@@ -3,12 +3,13 @@
 @author: livia
 '''
 
-from sqlalchemy import create_engine, and_
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from display_data.models import *
 import os
 from datetime import datetime
 from display_data.system_configuration import ConfigSystem
+from numpy.lib.tests.test_io import strptime
 
 
 
@@ -108,14 +109,7 @@ class Database():
             
         
     def newRasterLayer(self, dataset_id, layerType, date, commit=True):
-        """Adds a new dataset layer to a data set"""
-        
-        '''try:
-            layerType = self.Session.query(LayerType).filter(LayerType.name==layerType).one() 
-        except:
-            print("input '{}' is NO valid layertype".format(layerType))
-            raise'''
-        
+        """Adds a new dataset layer to a data set"""        
         try:
             dataset = self.Session.query(Dataset).filter(Dataset.id==dataset_id).one() 
         except Exception as e:
@@ -174,10 +168,47 @@ class Database():
         """
         query = self.Session.query(Dataset)
         
+        print('FILETRS', filters)
+        
+        #calculate time period
+        if 'startdate' in filters or 'enddate' in filters:
+            print(filters['startdate'])
+            value = strptime(filters['startdate'], "%Y-%m-%d")
+            print(value)
+            query=query.outerjoin(RasterLayer).filter(getattr(RasterLayer, 'startdate') <= value, getattr(RasterLayer, 'enddate')>= value).filter(RasterLayer.dataset_id == Dataset.id)
+            value = strptime(filters['enddate'], "%Y-%m-%d")
+            query=query.outerjoin(RasterLayer).filter(getattr(RasterLayer, 'startdate') <= value, getattr(RasterLayer, 'enddate')>= value).filter(RasterLayer.dataset_id == Dataset.id)
+            print(value)
+            print('QUERYYYYYYYYYYYYYYYYYY')
+            del filters['startdate']
+            del filters['enddate']
+        
         #add filters
         for attr, value in filters.items():
-            query = query.filter(getattr(Dataset, attr) == value)
-        
+            if hasattr(Dataset, attr):
+                query = query.filter(getattr(Dataset, attr) == value)
+            elif hasattr(RasterLayer, attr): #join tables
+                print('JOIN TABLES')
+                #query.filter(RasterLayer.dataset_id.any(RasterLayer.dataset_id == 'dem'))
+                #pass            
+                #query2=self.Session.query(RasterLayer.dataset_id)
+                '''try:
+                    rasterlayer= query2.filter(getattr(RasterLayer, attr) == value)
+                except:
+                    rasterlayer = []
+                print(rasterlayer.all())
+                print(rasterlayer)'''
+                query=query.outerjoin(RasterLayer).filter(getattr(RasterLayer, attr) == value).filter(RasterLayer.dataset_id == Dataset.id)
+                #query.filter(Dataset.id.in_(rasterlayer))
+                
+                #return rasterlayer
+                
+                #filtered = query.join(RasterLayer.dataset_id, aliased=True)\
+                    #.filter_by(getattr(RasterLayer, attr) == value)
+                #print('fil',filtered)
+                #query2 = self.Session.query(RasterLayer)
+                #query2 = query2.filter(RasterLayer.dataset_id.has(getattr(RasterLayer, attr) == value)) #Patient.mother.has(phenoscore=10)
+
         #if isinstance(ids, list):
             #query=query.filter(Dataset.id.in_(ids))
         #elif isinstance(ids, int):
@@ -185,10 +216,12 @@ class Database():
         #check if page size given   
         if page_size:
             query = query.limit(page_size)
+            
         if page: 
             query = query.offset(page*page_size)
+    
         
-           
+          
         if not dic:
             try:
                 result=query.all()   
@@ -204,7 +237,11 @@ class Database():
                     result.sort(key=lambda x: x.area, reverse=True)
                 return self.asDictionary(result) 
             except:
-                return {}
+                print('No results found')
+                geoCollection = {}
+                geoCollection['type']= 'FeatureCollection'
+                geoCollection['features'] = []
+                return geoCollection
     
 
     

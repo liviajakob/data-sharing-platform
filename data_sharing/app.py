@@ -8,6 +8,7 @@ from flask import Flask, render_template, jsonify, request, send_from_directory
 import json, os
 from flask_cors import CORS
 from display_data.system_configuration import ConfigSystem
+import ast
 
 app = Flask(__name__)
 #CORS(app)
@@ -76,37 +77,32 @@ def data():
     '''Returns a JSON of the datasets, including filteroptions'''
     database = Database()
     database.scopedSession()
-    
-    filters = {} #request.args
-    page=1
+    filters = {}
+    print('requestargs', request.args)
+    if 'filter' in request.args:
+        try: 
+            print('TRY TO CENVERT', request.args.get('filter'))
+            filters = ast.literal_eval(request.args.get('filter'))
+        except Exception as e:
+            print('NOT POSSIBLE')
+            print(e)
+            pass
+        
+    print('FILTERRRR   ',filters, type(filters), 'ARGS: ', request.args.get('filter'), type(request.args.get('filter')), str(request.args.get('filter')))
+    page=0
     page_size=5
     try:
         page=int(request.args.get('page'))-1
     except:
         pass
     
-    try: 
-        page_size = int(request.args.get('page_size'))
-    except:
-        pass
-    #rows = 0#request.start
-    
-    #data = request.data
-    #dataDict = json.loads(data)
-    
-    ##lid = request.args.get('lid')    
-    
+    if 'page_size' in request.args:
+        try:
+            page_size = int(request.args.get('page_size'))
+        except:
+            pass #wrong input, just default is used
     
     datasets=database.getDatasets(filters=filters, dic=True, page=page, page_size=page_size, orderbyarea=True)
-    ''''features=[]
-    for ds in datasets:
-        features.append(ds.asGeoDict())
-        
-    #print(geoDict)
-    geoCollection = {}
-    geoCollection['type']= 'FeatureCollection'
-    geoCollection['features'] = features'''
-    
     database.closeSession()
 
     return jsonify(datasets)
@@ -163,6 +159,4 @@ def about():
 
 
 if __name__ == '__main__':
-    print("hi")
-    
     app.run(debug=True, threaded=True, host='0.0.0.0', port=5000)

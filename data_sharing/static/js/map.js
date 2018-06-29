@@ -1,6 +1,6 @@
     
 var clickdatasets = true;
-var root_link = 'http://127.0.0.1:8887'; //folder where the datasets are in! /datasets
+var root_link = 'http://127.0.0.1:8887'; //folder where the datasets are in!
 var api_link = 'http://localhost:5002';
 var polylayer;
 var polylayer_group;
@@ -62,8 +62,14 @@ proj4.defs('EPSG:3413', '+proj=stere +lat_0=90 +lat_ts=70 +lon_0=-45 +k=1 ' +
     '+x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs');
 
 var proj3413 = ol.proj.get('EPSG:3413');
+console.log(proj3413)
     proj3413.setExtent([-5194304, -5194304, 5194304, 5194304]);
 
+proj4.defs('EPSG:3413', '+proj=stere +lat_0=90 +lat_ts=70 +lon_0=-45 +k=1 ' +
+'+x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs');
+
+//const proj3413 = ol.proj.get("EPSG:3413");
+//proj3413.setExtent([-4194304, -4194304, 4194304, 4194304]);
     
     
 /* Set Map view */
@@ -79,7 +85,7 @@ map.setView(new ol.View({
       //maxResolution: ...calculated by default
       extent: [-5194304, -5194304, 5194304, 5194304], //left, bottom ,right, top //minx, miny, maxx, maxy
       //extent: ol.proj.get("EPSG:3413").getExtent(),
-      projection: projection,
+      projection: "EPSG:3413",
       center: mapcenter // This is the center of greenland. Could be set automatically...
 }));
 

@@ -3,7 +3,7 @@ var page_size = 5;
 
 showData(1);
 
-var currentquery;
+var currentquery = {};
 
 
 
@@ -17,12 +17,13 @@ var currentquery;
 function displayLayertypes(data){
 	div = document.getElementById('layertypes');
 	layertypes=data.layertypes;
-	html='';
+	html='<option selected value="">Layertype</option>';
 	for (i in layertypes){
-		html = html.concat(layertypes[i] + ' | ')	
+		html = html.concat('<option value="'+layertypes[i]+'">'+layertypes[i]+'</option>')	
 	}
-	html=html.slice(0,-2);
-	div.append(html)
+	console.log(html)
+	//html=html.slice(0,-2);
+	div.innerHTML =html
 }
 
 
@@ -48,13 +49,19 @@ function filterDatasets() {
 
 
 function showData(page, filter){
-	currentquery=filter;
+	console.info('Filter', filter)
+	if (typeof filter !== 'undefined'){
+		currentquery=filter;
+	}
+	console.info('Filter', currentquery)
+	param= JSON.stringify(currentquery)
 	url= 'data?' //TODO add the filters here
-	url=url +'page='+page+'&'+'page_size='+page_size;
+	url=url +'page='+page+'&'+'page_size='+page_size+'&filter='+param;
 	
 	console.log('UROLLL',url)
 	/*Get JSON*/
 	$.getJSON(url, function(data) {
+		console.log(data);
     	displayDatasets(data);
     	makePolys(data);
     	displayPages(page, data.features.length);
@@ -97,9 +104,9 @@ function displayPages(page, displayed_number){
 	pageelement = $("#display-pages");
 	next = page+1
 	prev = page-1
-	nextpage = '<button class="page-button" onclick="showData('+next+ ', '+ currentquery +')" id="next-page">&#8250;</button>';
+	nextpage = '<button class="page-button" onclick="showData('+next+')" id="next-page">&#8250;</button>';
 	html="";
-	previouspage = '<button class="page-button" onclick="showData('+prev+ ', '+ currentquery +')" id="previous-page">&#8249;</button>';
+	previouspage = '<button class="page-button" onclick="showData('+prev+')" id="previous-page">&#8249;</button>';
 	html+=previouspage
 	html+=nextpage;
 	pageelement.html(html)
@@ -129,14 +136,8 @@ $(document).ready(function(e) {
 	console.log('ID',id);
 	var fetbid = polylayer.getSource().getFeatureById(id);
 	console.log(fetbid);
-	featureListener(e, fetbid);
-	//fetbid.setStyle(stylecoll);
-					
-	}//,
-	//function(){
-    //var fetbid = polylayer.getFeatureById($(this).attr("id"));
-    //fetbid.setStyle(cStyle);
-	//}
+	featureListener(e, fetbid);			
+	}
 	);
 });
 
@@ -167,3 +168,63 @@ $(document).ready(function($) {
 
 
 
+$("#filterDatasets").click( function()
+        {
+          console.log('buttonclicked');
+          console.log($( "#layertypes" ).val());
+          filter={}
+          console.log('type', typeof $( "#layertypes" ).val())
+          if ($( "#layertypes" ).val().length > 0){
+        	  filter = {'layertype': $( "#layertypes" ).val()}
+          }
+          console.log('CHECKED', $("#bytime").is(':checked'))
+          if ($("#bytime").is(':checked')){
+        	  var dates = $("#timerange").dateRangeSlider("values");
+              console.log(dates.min + " " + dates.max);
+              maxdate=formatDate(dates.max)
+              mindate = formatDate(dates.min)
+              filter.startdate = mindate
+              filter.enddate = maxdate
+          }
+          console.log(filter)
+          showData(1, filter);
+        }
+     );
+
+function formatDate(date){
+	datefm = new Date(date);
+    formdate = date.getFullYear().toString()+'-' + (date.getMonth() + 1) + '-' + date.getDate();
+	return formdate
+}
+
+
+
+
+
+//////////// Time range slider
+
+$("#timerange").dateRangeSlider({
+	range:{
+	    min: {days: 1}
+	  },
+
+	  bounds:{
+		    min: new Date(2016, 0, 1),
+		    max: new Date(2019, 1, 31)
+	},
+	defaultValues:{
+	    min: new Date(2017, 0, 1),
+	    max: new Date(2018, 11, 31)
+	  },
+		arrows:false
+});
+
+
+$("#bytime").change( function(){
+	if (this.checked){
+		$("#timerange").fadeTo(100, 1);
+	}
+	else{
+		$("#timerange").fadeTo(100, 0.5);
+	}
+})
