@@ -7,6 +7,7 @@ import logging, os, ast
 from definitions import CONFIG_PATH
 from configobj import ConfigObj
 import shutil, glob
+import datetime
     
 
 class ConfigSystem():
@@ -150,7 +151,8 @@ class ConfigSystem():
         if d_id is None:
             assert self.dataset_id is not None
             d_id = self.dataset_id
-        date = self.dateToString(date)
+        if isinstance(date, datetime.date):
+            date = self.dateToString(date)
         folder = os.path.join(self.getDatasetFolder(d_id), ltype, date)
         #assert os.path.exists(folder)
         return folder
@@ -190,6 +192,13 @@ class ConfigSystem():
             folders.append(os.path.join(content[0], folder))
         return folders
     
+    def getTimeseries(self, layer):
+        wkdir = self.getLayerFolder(layer)
+        content = next(os.walk(wkdir))
+        dates=[]
+        for folder in content[1]:
+            dates.append(folder)
+        return dates
     
     def getTilesFolder(self, ltype, date, d_id=None):
         folder = os.path.join(self.getLayerTimeFolderByAttributes(ltype=ltype, date=date, d_id=d_id), self.config['data']['tiles'])
@@ -200,8 +209,8 @@ class ConfigSystem():
         path = os.path.join(self.getLayerFolder(layer), 'colourfile.txt')
         return path
     
-    def getRelativeTilesFolder(self, layer):
-        abs_path = self.getTilesFolder(layer.layertype, layer.enddate, layer.dataset_id)
+    def getRelativeTilesFolder(self, layer, date):
+        abs_path = self.getTilesFolder(layer.layertype, date, layer.dataset_id)
         prefix = self.getDataOutputPath()
         rel_path = os.path.relpath(abs_path, prefix)
         return rel_path
@@ -215,5 +224,8 @@ class ConfigSystem():
         print('DATE+', date, type(date))
         
         
-        print('DATE: ', str(date.strftime("%Y-%m-%d")))
-        return str(date.strftime("%Y-%m-%d"))
+        #print('DATE: ', str(date.strftime("%Y-%m-%d")))
+        
+        if isinstance(date, datetime.date):
+            date = str(date.strftime("%Y-%m-%d"))
+        return date

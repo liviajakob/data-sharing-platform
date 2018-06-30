@@ -17,7 +17,7 @@ var currentquery = {};
 function displayLayertypes(data){
 	div = document.getElementById('layertypes');
 	layertypes=data.layertypes;
-	html='<option selected value="">Layertype</option>';
+	html='<option selected value="">Choose Layertype</option>';
 	for (i in layertypes){
 		html = html.concat('<option value="'+layertypes[i]+'">'+layertypes[i]+'</option>')	
 	}
@@ -228,3 +228,9 @@ $("#bytime").change( function(){
 		$("#timerange").fadeTo(100, 0.5);
 	}
 })
+
+setTimeout(function() {
+	document.getElementById("collapse-btn-inner").click()
+}, 1000)
+
+

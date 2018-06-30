@@ -10,6 +10,7 @@ import os
 from datetime import datetime
 from display_data.system_configuration import ConfigSystem
 from numpy.lib.tests.test_io import strptime
+from pandas.util.testing import getTimeSeriesData
 
 
 
@@ -40,6 +41,7 @@ class Database():
 
         self.rollback = rollback
         self.logger = logger
+        self.conf = ConfigSystem()
 
         
         #self._engine = create_engine(self._db['type']+os.path.join(self._db['path'],self._db['name']), echo=True)
@@ -154,7 +156,7 @@ class Database():
         return self._engine.table_names()
         
         
-    def getDatasets(self, filters={}, dic=False, page=None, page_size=None, orderbyarea=False):
+    def getDatasets(self, filters={}, dic=False, page=None, page_size=None, orderbyarea=False, timelayers=False):
         """returns a list of all requested datasets.
         
         Input parameter:
@@ -200,20 +202,7 @@ class Database():
                 print(rasterlayer)'''
                 query=query.outerjoin(RasterLayer).filter(getattr(RasterLayer, attr) == value).filter(RasterLayer.dataset_id == Dataset.id)
                 #query.filter(Dataset.id.in_(rasterlayer))
-                
-                #return rasterlayer
-                
-                #filtered = query.join(RasterLayer.dataset_id, aliased=True)\
-                    #.filter_by(getattr(RasterLayer, attr) == value)
-                #print('fil',filtered)
-                #query2 = self.Session.query(RasterLayer)
-                #query2 = query2.filter(RasterLayer.dataset_id.has(getattr(RasterLayer, attr) == value)) #Patient.mother.has(phenoscore=10)
 
-        #if isinstance(ids, list):
-            #query=query.filter(Dataset.id.in_(ids))
-        #elif isinstance(ids, int):
-            #query=query.filter(Dataset.id == ids)
-        #check if page size given   
         if page_size:
             query = query.limit(page_size)
             
@@ -235,8 +224,9 @@ class Database():
                 result=query.all() 
                 if orderbyarea:
                     result.sort(key=lambda x: x.area, reverse=True)
-                return self.asDictionary(result) 
-            except:
+                return self.asDictionary(result, timelayers=timelayers) 
+            except Exception as e:
+                print('Exception ',e)
                 print('No results found')
                 geoCollection = {}
                 geoCollection['type']= 'FeatureCollection'
@@ -293,18 +283,20 @@ class Database():
     
     
     
-    def asDictionary(self, datasets):
+    def asDictionary(self, datasets, timelayers=False):
         '''Returns a list of datasets as dictionary in GeoJSON format'''
         features=[]
-        conf = ConfigSystem()
         for ds in datasets:
             geodic = ds.asGeoDict()
             layers = self.getLayers({'dataset_id' : ds.id})
             layers_dict=[]
             for l in layers:
                 l_dict=l.asDict()
-                tile_url = conf.getRelativeTilesFolder(l)
-                l_dict['tileurl'] = tile_url
+                #tile_url = self.conf.getRelativeTilesFolder(l)
+                #l_dict['tileurl'] = tile_url
+                if timelayers:
+                    print('yeah')
+                    l_dict['timeseries'] = self.getTimeSeriesDict(l)
                 #l_dict['layertype']=self.getLayertypeById(l.layertype).name
                 layers_dict.append(l_dict)
                 
@@ -319,7 +311,13 @@ class Database():
         return geoCollection
     
    
-    
+    def getTimeSeriesDict(self, layer):
+        timeseries = []
+        dates = self.conf.getTimeseries(layer)
+        for val in reversed(dates):
+            tile = self.conf.getRelativeTilesFolder(layer, val)
+            timeseries.append({'date': val, 'tileurl': tile})
+        return timeseries
     
     
     
@@ -337,7 +335,7 @@ class Database():
             
             
     def updateTimeSeries(self, layer, startdate=None, enddate=None, commit=True):
-        
+        '''Updates a layers start if the new time layer is not within the old time span'''
         assert self.Session is not None
         if enddate is not None:
             layer.enddate = enddate

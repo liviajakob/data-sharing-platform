@@ -307,15 +307,24 @@ a{
 	padding-right: 10px;
 }
 
-#collapse-btn{
+.filterby-outer{
+	background-color: grey;
+	margin-top: 2px;
+	border-radius: 4px;
+	padding: 3.5px;
+	padding-left: 5px;
+	font-size: 14px;
+}
+
+.collapse-btn{
 	font-size: 16px;
 	position: absolute;
-	top: 24px;
+	top: 35px;
 	right: 15px;
 	//float: right;
 }
 
-#collapse-btn button{
+.collapse-btn button{
 	color: white;
 	cursor: pointer;
     border: 2px solid rgba(255,255,255,0.8);
@@ -330,7 +339,7 @@ a{
    	margin: 0px;
 }
 
-#collapse-btn button:hover{
+.collapse-btn button:hover{
 	opacity: 0.7;
 }
 
@@ -341,8 +350,9 @@ select {
    //-moz-appearance: none;
    //appearance: none;       /* remove default arrow */
     border: 2px solid rgba(255,255,255,0.8);
-    background-color: rgb(61, 100, 102);
-    color: white;
+    //background-color: rgb(61, 100, 102);
+    //color: white;
+    margin-bottom: 7px;
 }
 
 select:hover{
@@ -357,8 +367,18 @@ select:hover{
     background-color: rgba(93, 62, 60, 0.8);// rgba(0,60,136,.5);
     color: white;
     border-radius: 4px;
-    margin-bottom: 5px;
+    margin-top: 5px;
+    margin-bottom: 1px;
+    background-image: url(../img/filter.png);
+    background-size: 20px;
+    background-repeat: no-repeat;
+    background-position: 6px;
+    padding-top: 4px;
+    padding-left: 30px;
+    font-size: 13px;
 }
+
+
 
 #filterDatasets:hover{
 	opacity: 0.7;

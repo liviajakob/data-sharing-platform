@@ -47,9 +47,9 @@ def index():
     return response
 
 
-@app.route('/get_file/<int:pid>', methods=['GET'])
-def get_file(pid):
-    rasterf=getLayetRawFilePaths(pid)
+@app.route('/get_file/<int:pid>/<string:date>', methods=['GET'])
+def get_file(pid, date):
+    rasterf=getLayerRawfileFilePath(pid, date)
     #raster = '/Users/livia/msc_dissertation/CODE/data_sharing/data/output/datasets/'+str(pid)+'/dem/raw_input.tif'
     response = send_file(rasterf)
     return response
@@ -57,7 +57,7 @@ def get_file(pid):
 @app.route('/get_value/<int:lid>', methods=['GET', 'OPTIONS'])
 def get_value(lid):
     print('we are here')
-    fnames=getLayetRawFilePaths(lid)
+    fnames=getLayerProjectedFilePaths(lid)
     
     
     #raster = '/Users/livia/msc_dissertation/CODE/data_sharing/data/output/datasets/'+str(pid)+'/dem/raw_input.tif'
@@ -83,9 +83,22 @@ def get_value(lid):
     response={}
     response['data']=pixelvalues
     return jsonify(response)
+ 
+def getLayerRawfileFilePath(layer_id, date):
+    '''Returns one raw file (unprojected) path'''
+    database = Database()
+    database.scopedSession()
+    layer = database.getLayers({'id': layer_id})[0]
+    #ltype=database.getLayertypeById(layer.layertype).name
+    conf = ConfigSystem()
+    file = conf.getLayerTimeRawFile( ltype=layer.layertype, d_id=layer.dataset_id, date=date)
+    
+    database.closeSession()
+    return file
+     
   
 
-def getLayetRawFilePaths(layer_id):
+def getLayerProjectedFilePaths(layer_id):
     '''Returns reprojected raw file path of all the rime series files of a layer'''
     database = Database()
     database.scopedSession()

@@ -50,7 +50,7 @@ function getValue(evt){
 	ll_arr = dataset_tilelayers.getLayers().getArray();
 	top_l = getTopVisibleLayer(ll_arr);
 	if (top_l){
-		j_url=api_link +'/get_value/'+top_l.get('id')+'?x='+coords[0]+'&y='+coords[1];
+		j_url=api_link +'/get_value/'+top_l.get('layerid')+'?x='+coords[0]+'&y='+coords[1];
 		console.log('TOP',top_l)
 		console.log(j_url);
 		

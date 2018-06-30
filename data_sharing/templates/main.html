@@ -4,7 +4,7 @@
 
 
     <script src="{{url_for('static', filename='js/proj4.js')}}"></script>
-    <link rel="stylesheet" href="https://openlayers.org/en/v4.6.4/css/ol.css" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.css" type="text/css">
 	
 	<!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->
     <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>
@@ -42,15 +42,21 @@
     Datasets   
     <div class="info-button" data-toggle="tooltip" data-placement="top" title="Filter datasets in the box below."></div>
     
-
+	<div class="filterby-outer">
+	<div data-toggle="collapse" data-target="#filterby" style="cursor: pointer;">
+	Filter Datasets
+	</div>
     <div id="filterby" class="collapse show">
+    
     	<div class="small" id="timerange-outer"><div id="timerange"></div>
     	<input data-toggle="tooltip" data-placement="bottom" title="Click here to enable or disable filter by time functionality" id="bytime" type="checkbox" name="filterbytime" value="Time"> Filter by Time</div>
     	<div class="small"><select id="layertypes"></select>
-    	<button id='filterDatasets' data-toggle="tooltip" data-placement="top" title="Filter datasets by layertype and time.">Filter Datasets</button></div>
+    	<hr>
+    	<div style="text-align: center;"><button id='filterDatasets'>Goooo!</button></div></div>
     
     </div>
-    <div id="collapse-btn"><button data-toggle="collapse" data-target="#filterby">&times;</button></div>
+    </div>
+    <div class="collapse-btn" data-toggle="collapse" data-target="#filterby"><button id="collapse-btn-inner">&times;</button></div>
     
     </div>
     <hr><hr>

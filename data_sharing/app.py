@@ -60,15 +60,15 @@ def datasets(dataset_id):
     database = Database()
     database.scopedSession()
     
-    dataset=database.getDatasets({'id': dataset_id})[0]
-    geoDict=dataset.asGeoDict()
-    print(geoDict)
-    geoCollection = {}
-    geoCollection['type']= 'FeatureCollection'
-    geoCollection['features'] = [geoDict]
-    
+    dataset=database.getDatasets(filters={'id': int(dataset_id)}, dic=True, timelayers=True)
+    #geoDict=dataset.asGeoDict()
+    #print(geoDict)
+    #geoCollection = {}
+    #geoCollection['type']= 'FeatureCollection'
+    #geoCollection['features'] = [geoDict]
+    print('DATSET', dataset)
     database.closeSession()
-    return jsonify(geoCollection)
+    return jsonify(dataset)
 
  
   
