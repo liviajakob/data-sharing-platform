@@ -30,6 +30,10 @@ def handle_input():
                 help='choices = {%(choices)s} ||| type of the layer')
     parser.add_argument('date1', action='store', metavar='date', type=valid_date,
                 help='date of the first layer - format YYYY-MM-DD') 
+    parser.add_argument('-min', action='store', metavar='min', type=float,
+                help='saturation minimum for colouring the raster file of layer1 ||| if not provided the default for this layertype is used')
+    parser.add_argument('-max', action='store', metavar='max', type=float,
+                help='saturation maximum for colouring the raster file of layer1 ||| if not provided the default for this layertype is used')
     parser.add_argument('-a', dest='additional', action='append',nargs=len(layer_metavar), metavar=layer_metavar,
                 help='Additional Layer: [filename, filetype, date] with filetype choices = {} ||| Any number of additional layers can be given as input'.format(types))
     parser.add_argument('-c', dest="cite", action='store', 
@@ -39,9 +43,8 @@ def handle_input():
     args = parser.parse_args()
     
     
-    firstlayer = {layer_metavar[0] : args.layerfile1, layer_metavar[1] : args.layertype1, layer_metavar[2] : args.date1}
+    firstlayer = {layer_metavar[0] : args.layerfile1, layer_metavar[1] : args.layertype1, layer_metavar[2] : args.date1, 'min' : args.min, 'max' : args.max}
     kwargs={'cite': args.cite}
-    
     
     
     if args.additional is None:

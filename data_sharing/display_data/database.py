@@ -172,36 +172,22 @@ class Database():
         
         print('FILETRS', filters)
         
-        #calculate time period
-        if 'startdate' in filters or 'enddate' in filters:
-            print(filters['startdate'])
-            value = strptime(filters['startdate'], "%Y-%m-%d")
-            print(value)
-            query=query.outerjoin(RasterLayer).filter(getattr(RasterLayer, 'startdate') <= value, getattr(RasterLayer, 'enddate')>= value).filter(RasterLayer.dataset_id == Dataset.id)
-            value = strptime(filters['enddate'], "%Y-%m-%d")
-            query=query.outerjoin(RasterLayer).filter(getattr(RasterLayer, 'startdate') <= value, getattr(RasterLayer, 'enddate')>= value).filter(RasterLayer.dataset_id == Dataset.id)
-            print(value)
-            print('QUERYYYYYYYYYYYYYYYYYY')
-            del filters['startdate']
-            del filters['enddate']
         
         #add filters
         for attr, value in filters.items():
             if hasattr(Dataset, attr):
-                query = query.filter(getattr(Dataset, attr) == value)
+                if attr == "startdate" or attr == "enddate": #start and enddate
+                    print('startdate----enddate')
+                    value = strptime(filters[attr], "%Y-%m-%d")
+                    query = query.filter(getattr(Dataset, 'startdate') <= value, getattr(Dataset, 'enddate') >= value) #, getattr(RasterLayer, 'enddate')>= value
+                    print (query)
+                    print(value)
+                    print(getattr(RasterLayer, 'startdate') <= value, getattr(RasterLayer, 'enddate')>= value)
+                else: 
+                    query = query.filter(getattr(Dataset, attr) == value)
             elif hasattr(RasterLayer, attr): #join tables
                 print('JOIN TABLES')
-                #query.filter(RasterLayer.dataset_id.any(RasterLayer.dataset_id == 'dem'))
-                #pass            
-                #query2=self.Session.query(RasterLayer.dataset_id)
-                '''try:
-                    rasterlayer= query2.filter(getattr(RasterLayer, attr) == value)
-                except:
-                    rasterlayer = []
-                print(rasterlayer.all())
-                print(rasterlayer)'''
                 query=query.outerjoin(RasterLayer).filter(getattr(RasterLayer, attr) == value).filter(RasterLayer.dataset_id == Dataset.id)
-                #query.filter(Dataset.id.in_(rasterlayer))
 
         if page_size:
             query = query.limit(page_size)
@@ -321,7 +307,7 @@ class Database():
     
     
     
-    def updateTimestamp(self, layer, commit=True):
+    '''def updateTimestamp(self, layer, commit=True):
         
         assert self.Session is not None
         
@@ -331,7 +317,7 @@ class Database():
         if commit:
             self.Session.commit()
         else:
-            self.Session.flush()
+            self.Session.flush()'''
             
             
     def updateTimeSeries(self, layer, startdate=None, enddate=None, commit=True):
@@ -347,7 +333,19 @@ class Database():
             self.Session.flush()
         
 
-
+            
+    def updateDatasetDates(self, dataset, startdate=None, enddate=None, commit=True):
+        '''Updates a layers start if the new time layer is not within the old time span'''
+        assert self.Session is not None
+        if enddate is not None:
+            dataset.enddate = enddate
+        if startdate is not None:
+            dataset.startdate = startdate
+        if commit:
+            self.Session.commit()
+        else:
+            self.Session.flush()
+       
     
     
     

@@ -44,12 +44,6 @@ class DatabaseTest(unittest.TestCase):
     
     def test_dbInsert(self):
         '''Test insert values into database'''
-        #insert 2 projections
-        #self.db.newLayerType("dem")
-        #self.db.newLayerType("error")
-        #self.db.newLayerType("rate")
-        #self.db.newProjection("Projection1")
-        #self.db.newProjection("Projection2")
         self.db.newDataset("this is how", 'EPSG:3413')
         self.db.newDataset("cite...", 'EPSG:3413')
         self.db.newDataset("this is how you cite", 'EPSG:3413')
@@ -60,16 +54,10 @@ class DatabaseTest(unittest.TestCase):
         self.db.commit()
         
         self.assertEqual(len(self.db.getDatasets()), 3, "couldnt insert all datasets")
-        #self.assertEquals(len(self.db.getProjections()), 2, "couldnt insert all projections")
-        filters={'id' : 2}
-        self.assertEquals(self.db.getDatasets(filters=filters)[0].id, 2, "Error in get Datasets")
+        self.assertEquals(self.db.getDatasets(filters={'id' : 2})[0].id, 2, "Error in get Datasets")
         self.assertEquals(len(self.db.getDatasets()), 3, "Error in get Datasets")
         self.assertEquals(len(self.db.getDatasets(filters={'layertype':'dem'})), 2, "Error in get Datasets")
         self.assertEquals(len(self.db.getDatasets(filters={'layertype':'error'})), 1, "Error in get Datasets")
-        self.assertEquals(len(self.db.getDatasets(filters={'startdate':'2017-06-26'})), 2, "Error in get Datasets")
-        #self.assertEquals(len(self.db.getLayerTypes()), 3, "couldnt insert all layer types")
-        #self.assertEquals(self.db.getLayerById(1)[0].layertype, 'dem', "couldnt insert dem layer")
-        #self.assertEquals(self.db.getRasterLayers()[0].layertype, 'dem', "couldnt insert dem layer")
         filters={'dataset_id' : 1, 'layertype' : 'dem'}
         self.assertEquals(self.db.getRasterLayers(filters)[0].layertype, 'dem', "couldnt insert dem layer")
         self.assertEquals(self.db.getRasterLayers(filters)[0].enddate, datetime(2017, 6, 26, 0, 0), "couldnt insert dem layer")

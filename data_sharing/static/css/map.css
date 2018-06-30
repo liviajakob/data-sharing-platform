@@ -120,9 +120,9 @@
  
 #infobox-detailed{
 	position:absolute;
-	top: -moz-calc(100% - 340px);
- 	top: -webkit-calc(100% - 340px);
- 	top: calc(100% - 340px);
+	top: -moz-calc(100% - 360px);
+ 	top: -webkit-calc(100% - 360px);
+ 	top: calc(100% - 360px);
 	left: -moz-calc(100% - 320px);
  	left: -webkit-calc(100% - 320px);
  	left: calc(100% - 320px);
@@ -449,7 +449,10 @@ input[type="range"]::-moz-range-thumb {
 	float: right;
 	border-radius: 50%;
 	cursor: pointer;
-	margin-top: -3px;
+	margin-top: -5px;
+	color: white;
+    border: 2px solid rgba(255,255,255,0.8);
+    background-color: rgba(0,60,136,.7);
 }
 
 input{

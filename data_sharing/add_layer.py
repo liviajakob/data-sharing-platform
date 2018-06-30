@@ -33,13 +33,14 @@ def handle_input():
                 help='saturation minimum for colouring the raster file ||| if not provided the default for this layertype is used')
     parser.add_argument('-max', action='store', metavar='max', type=float,
                 help='saturation maximum for colouring the raster file ||| if not provided the default for this layertype is used')
+    parser.add_argument('-u', dest='forceupdate', action='store_true', help='forces an update in case the time layer already exists')
     
     parser.add_argument('--version', action='version', version='Version 1.0, Not released yet.', help="Show program's version number")
 
     args = parser.parse_args()
     print('ARGS',vars(args))
     
-    print(args.enddate)
+    print(args.date)
     
     
     #print(args.layertype)

@@ -37,6 +37,8 @@ class Dataset(Base):
     ymin = Column(Float)
     ymax = Column(Float)
     area = Column(Float)
+    startdate = Column(DateTime(timezone=True))
+    enddate = Column(DateTime(timezone=True))
     projection=Column(String()) #ForeignKey("projection.id")
     #projection = relationship("Projection", backref=backref("dataset"))
     
@@ -52,6 +54,8 @@ class Dataset(Base):
         dic['properties']['id']=self.id
         dic['properties']['cite']=self.cite
         dic['properties']['area']= self.area
+        dic['startdate']=str(self.startdate.strftime("%Y-%m-%d"))
+        dic['enddate']=str(self.enddate.strftime("%Y-%m-%d"))
         dic['geometry']={}
         dic['geometry']['type']="Polygon"
         dic['geometry']['coordinates']=[[[self.xmin,self.ymin],[self.xmax,self.ymin], [self.xmax,self.ymax], [self.xmin,self.ymax], [self.xmin,self.ymin]]]
@@ -68,7 +72,7 @@ class RasterLayer(Base):
     '''Represents a layerType table'''
     __tablename__ = 'rasterlayer'
     id = Column('id',Integer, primary_key=True)
-    timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    #timestamp = Column(DateTime(timezone=True), server_default=func.now())
     dataset_id =Column(Integer(), ForeignKey("dataset.id"))
     dataset = relationship("Dataset", backref=backref("layer"))
     layertype = Column(String()) # '''ForeignKey("layerType.id")'''
@@ -80,7 +84,7 @@ class RasterLayer(Base):
         '''Returns a dict which can be used to convert to a JSON'''
         dic = {}
         dic['id']=self.id
-        dic['timestamp']=self.timestamp
+        #dic['timestamp']=self.timestamp
         dic['layertype']=self.layertype
         dic['startdate']=str(self.startdate.strftime("%Y-%m-%d"))
         dic['enddate']=str(self.enddate.strftime("%Y-%m-%d"))

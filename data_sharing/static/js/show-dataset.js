@@ -270,6 +270,7 @@ function getLegend(layer){
 var legend  = document.getElementById('legend-bar');
 	
 function drawColourLegend(colours, min, max){
+	console.log(colours);
     ctx = legend.getContext('2d');
 	ctx.clearRect(0, 0, 100, 64);
 	//ctx.clearRect(0, 0, canvas.width, canvas.height);

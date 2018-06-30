@@ -6,7 +6,7 @@
 
 import subprocess
 import gdal
-import osr
+import osr, math
 import numpy as np
 
 class RasterTiler(object):
@@ -29,9 +29,29 @@ class RasterTiler(object):
         subprocess.call(commandlist)
     
     
+    def calculateZoom(self, area, minzoom=2, e0=6424000.0):
+        '''area in metre'''
+        #8 -- 2400722068.95274
+        #one line --> sqrt(area)
+        
+        #0.3 m on screen --> line (conv)
+        ## reference
+        
+        length=math.sqrt(area)
+        
+        arr=[]
+        for i in range(0,23):
+            x = e0/(2**(i))
+            arr.append(x)
+        topzoom = min(range(len(arr)), key=lambda i: abs(arr[i]-length))
+        bottomzoom = topzoom + 6
+        
+        zooms=str(topzoom)+'-'+str(bottomzoom)
+        print('ZOOMS ---- ', zooms)
+        return zooms
     
     
-    
+
     
 ###################################################    
     

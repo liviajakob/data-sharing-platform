@@ -35,155 +35,6 @@ class Ingestion(object):
         self._db.closeSession()
         
         
-    '''def addLayer(self, filename, ltype, dataset_id):
-        
-        print('Adding layer', filename)
-        
-        if self._db.Session is None:
-            self._db.scopedSession()
-            self.rollback.addCommand(self._db.closeSession)
-
-        #check if entry already exist and if it should be updated
-        self.logger.info('Checking if layer exists...')
-        dupl = self._db.getRasterLayers(dataset_id=dataset_id, layertype_name=ltype)
-        conf = ConfigSystem(dataset_id=dataset_id)
-        if len(dupl)==0:
-            conf.newLayerTimeFolder(ltype)
-            self.rollback.addCommand(conf.removeLayerTimeFolder, {'ltype': ltype})
-            layer = self._db.newRasterLayer(dataset_id=dataset_id, layerTypeName=ltype, commit=False)
-            self.processRaster(filename=filename, ltype=ltype, dataset_id=dataset_id)
-        else:
-            srcf = os.path.join(conf.getDataInputPath(), filename)
-            timestamp = time.ctime(os.path.getmtime(srcf))
-            timestamp = datetime.strptime(timestamp, "%a %b %d %H:%M:%S %Y")
-            print(type(timestamp),timestamp, type(dupl[0].timestamp), dupl[0].timestamp)
-            if timestamp >= dupl[0].timestamp: ##update layer
-                print('UPDATE LAYER....')
-                self.processRaster(filename=filename, ltype=ltype, dataset_id=dataset_id)
-                self._db.updateTimestamp(dupl[0], commit=False)
-            else:
-                msg = 'Layer with file={} , type={} datasetid={} is up to date.'.format(filename, ltype, dataset_id)
-                self.logger.info(msg)
-            ## check timestamps
-            ## at the end update timestamp'''
-    
-    
-    '''def processRaster(self, filename, ltype, dataset_id):
-        conf = ConfigSystem(dataset_id=dataset_id)
-        rast_proc = RasterLayerProcessor(logger=self.logger)
-        file_extension = os.path.splitext(filename)[1] #extract extension
-        srcf = os.path.join(conf.getDataInputPath(), filename)
-        #save init file in output folder
-        cp = os.path.join(conf.getLayerTimeFolderByAttributes(ltype, dataset_id), (conf.getRawInputFilename()+file_extension))
-        shutil.copyfile(srcf, cp)
-        
-        # compute stats
-        rast_proc.readFile(srcf)
-        stats = rast_proc.getStatistics()
-        print(stats)
-        #scale = {'min': stats['min'], 'max': stats['max']}
-        
-        #reproject
-        proj = os.path.join(conf.getLayerTimeFolderByAttributes(ltype, dataset_id), (conf.getReprojectedFilename()+file_extension))
-        print("REPROJECT", proj)
-        rast_proc.reproject(inputfile=srcf, outputfile=proj)
-        
-        #convert to 8bit
-        #scale = conf.getLayerScale(ltype)
-        #bit_8 = os.path.join(conf.getLayerTimeFolderByAttributes(ltype, dataset_id), ('8bit'+file_extension))
-        #rast_proc.to8Bit(inputfile=proj, outputfile=bit_8, scale=scale, exponent=conf.getExponent(layertype=ltype))
-        
-        ########### PRINT STATS
-        #print(rast_proc.getStatistics())
-        #rast_proc.readFile(bit_8)
-        #print('EXPONENT: ', conf.getExponent(layertype=ltype))
-        
-        #cut raster
-        cut = os.path.join(conf.getLayerTimeFolderByAttributes(ltype, dataset_id), ('cropped'+file_extension))
-        rast_proc.cutRaster(inputfile=proj, outputfile=cut)
-        
-        #compute colourfile
-        col_inputfile = conf.getSampleColourFile(ltype)
-        col_outputpath= os.path.join(conf.getLayerTimeFolderByAttributes(ltype, dataset_id), ('colourfile.txt'))
-        colgen = ColourMaker(col_inputfile, col_outputpath)
-        scale = conf.getLayerScale(ltype)
-        colgen.computeColours(scale['min'], scale['max'])
-                
-        #add colour
-        col_rast = os.path.join(conf.getLayerTimeFolderByAttributes(ltype, dataset_id), ('coloured'+file_extension))
-        rast_proc.addColours(inputfile=cut, outputfile=col_rast, colourfile=col_outputpath) # take the above computed as input
-        
-        #TILEE
-        tiler = RasterTiler()
-        tiler.createTiles(col_rast, conf.getTilesFolder(ltype, d_id = dataset_id))
-            
-        print('FILE: ', filename, ' TYPE: ', ltype, ' DATASETID', dataset_id)'''
-    
-    
-    
-    '''def addLayerToDataset(self, filename, ltype, dataset_id):
-        
-        print('Adding layer', filename)
-        
-        if self._db.Session is None:
-            self._db.scopedSession()
-            self.rollback.addCommand(self._db.closeSession)
-            
-        self.addLayer(filename, ltype, dataset_id)   
-            
-        self.logger.info('Commit')  
-        self._db.commit()
-        self._db.closeSession()'''
-    
-    
-    
-    '''def addDataset(self, layers, cite=None):
-        self._db.scopedSession()
-        self.rollback.addCommand(self._db.closeSession)
-        dataset = self._db.newDataset(cite, 1, commit=False)
-        conf = ConfigSystem(dataset_id=dataset.id)
-        conf.newDatasetFolder()
-        self.rollback.addCommand(conf.removeDatasetFolder, {'d_id':dataset.id})
-        
-        self.addBoundingBox(dataset, layers)
-        
-        for l in layers:
-            self.addLayer(l[0], l[1], dataset.id)
-            
-        self.logger.info('Commit...')
-        self._db.commit()
-        self._db.closeSession()
-        
-        
-        
-    def addBoundingBox(self, dataset, layers):
-        assert len(layers) > 0
-        ## for now just take the first layer
-        file_extension = os.path.splitext(layers[0][0])[1]
-        conf = ConfigSystem(dataset_id=dataset.id)
-        srcf = os.path.join(conf.getDataInputPath(), layers[0][0])
-        rast_proc = RasterLayerProcessor(self.logger)
-        
-        repr_file = 'reproject.'+file_extension
-        repr_filepath = os.path.join(conf.getDataInputPath(), repr_file)
-        rast_proc.reproject(srcf, repr_filepath)
-        print('reprojected')
-        rast_proc.readFile(repr_filepath)
-        print(rast_proc.getProjection())
-        box=rast_proc.getMinBoundingBox()        
-        dataset.xmin = box['xmin']
-        dataset.xmax = box['xmax']
-        dataset.ymin = box['ymin']
-        dataset.ymax = box['ymax']
-        os.remove(repr_filepath)
-        self.logger.info('ADDED BOUNDING BOX')'''
-        
-        
-        
-        
-
-
-
 
 
 
@@ -219,6 +70,7 @@ class DatasetCreator(Creator):
         dataset = self._db.newDataset(cite=self.cite, projection=self.projection, commit=False)
         self.conf.setDatasetid(dataset.id)
         self.conf.newDatasetFolder()
+        #self.layers[0]['date']
         self.rollback.addCommand(self.conf.removeDatasetFolder, {'d_id':dataset.id})
         
         self.addBoundingBox(dataset)
@@ -227,6 +79,7 @@ class DatasetCreator(Creator):
         # create layers
         for l in self.layers:
             l['dataset_id'] = dataset.id
+            l['dataset'] = dataset
             creator = RasterLayerCreator(**l)
             creator.addConfiguration(self._db, self.logger, self.rollback)
             creator.create()
@@ -275,23 +128,28 @@ class RasterLayerCreator(Creator):
         self.layerfile = kwargs['layerfile']
         self.dataset_id = kwargs['dataset_id']
         self.date = kwargs['date']
+        
+        self.dataset = None
+        if 'dataset' in kwargs:
+            self.dataset = kwargs['dataset']
+            
             
         self.conf = ConfigSystem(dataset_id=self.dataset_id)
         self.layertimefolder = self.conf.getLayerTimeFolderByAttributes(self.layertype, self.date, self.dataset_id)
         self.layerfolder = self.conf.getLayerFolderByAttributes(self.layertype, self.dataset_id)
         scale = self.conf.getLayerScale(self.layertype)
-        if 'min' in kwargs:
+        if 'min' in kwargs and kwargs['min'] is not None:
             self.min = kwargs['min']
         else:
             self.min = scale['min']
             
-        if 'max' in kwargs:
+        if 'max' in kwargs and kwargs['max'] is not None:
             self.max = kwargs['max']
         else:
             self.max = scale['max']
         
         if 'forceupdate' in kwargs:
-            self.forceUpdate = True
+            self.forceUpdate = kwargs['forceupdate']
         else:
             self.forceUpdate = False
      
@@ -307,6 +165,7 @@ class RasterLayerCreator(Creator):
             self.rollback.addCommand(self.conf.removeFolder, {'folder': self.layerfolder})
             self.conf.newLayerTimeFolder(layer, self.date)
             self.processFile(layer)
+            self.updateDatasetDates()
             
         elif not os.path.isdir(self.layertimefolder):
             self.logger.info('Adding new time layer.')
@@ -316,13 +175,13 @@ class RasterLayerCreator(Creator):
             #update the time series dates
             self.updateTimeSeries(layer)
         elif self.forceUpdate: #self.update(duplicate):
-            self.logger.info('Time Layer will be updated.')
+            self.logger.info('Time Layer will be updated: Update forced.')
             self.processFile(layer)
-            #self.processFile()
-            #self._db.updateTimestamp(duplicate, commit=False)
         else:
             self.logger.info('Duplicate discovered; Update is not forced.')
-            msg = 'Layer with file={} , type={} datasetid={} is up to date.'.format(self.layerfile, self.layertype, self.dataset_id)
+            msg = 'Layer with file={} , type={}, date={}, datasetid={} is not updated.'.format(self.layerfile, self.layertype, self.date, self.dataset_id)
+            self.logger.info(msg)
+            msg = 'Use the "-u" flag to update the layer'
             self.logger.info(msg)
         
         
@@ -368,7 +227,10 @@ class RasterLayerCreator(Creator):
         
         # 6. tile
         tiler = RasterTiler()
-        tiler.createTiles(col_rast, self.conf.getTilesFolder(self.layertype, self.date, d_id = self.dataset_id))
+        if self.dataset is None:
+            self.dataset = self._db.getDatasets(filters={'id': self.dataset_id})
+        zoom = tiler.calculateZoom(self.dataset.area)
+        tiler.createTiles(col_rast, self.conf.getTilesFolder(self.layertype, self.date, d_id = self.dataset_id), zoom=zoom)
             
         print('FILE: ', self.layerfile, ' TYPE: ', self.layertype, ' DATASETID', self.dataset_id)
        
@@ -380,7 +242,17 @@ class RasterLayerCreator(Creator):
             self._db.updateTimeSeries(layer, startdate=self.date, commit=False)
         elif self.date > layer.enddate:
             self._db.updateTimeSeries(layer, enddate=self.date, commit=False)
+        self.updateDatasetDates()
     
+    def updateDatasetDates(self):
+        '''Updates the datasets dates (self.dataset) within the database'''
+        if self.dataset is None:
+            self.dataset = self._db.getDatasets(filters={'id': self.dataset_id})
+        if self.dataset.startdate is None or self.date < self.dataset.startdate:
+            self._db.updateDatasetDates(self.dataset, startdate=self.date, commit=False)
+        if self.dataset.enddate is None or self.date > self.dataset.enddate:
+            self._db.updateDatasetDates(self.dataset, enddate=self.date, commit=False)
+        
         
     def getExistingLayer(self):
         '''Returns duplicate if layer with same layertyoe already exists, false otherwise'''

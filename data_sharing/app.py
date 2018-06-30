@@ -9,6 +9,7 @@ import json, os
 from flask_cors import CORS
 from display_data.system_configuration import ConfigSystem
 import ast
+from string import Formatter
 
 app = Flask(__name__)
 #CORS(app)
@@ -44,7 +45,10 @@ def get_colours():
     for line in lines:
         split=line.split()
         if split[0] != 'nan':
-            rgb='rgb('+split[1]+', ' + split[2] + ', ' + split[3] + ')'
+            c1= MyFormatter().format("{0} {1:t}", '', split[1])
+            c2= MyFormatter().format("{0} {1:t}", '', split[2])
+            c3= MyFormatter().format("{0} {1:t}", '', split[3])
+            rgb='rgb('+c1+', ' + c2 + ', ' + c3 + ')'
             rgbarr.append(rgb)
             vals.append(split[0])
     minmax = {'min': "{0:.1f}".format(float(vals[0])), 'max': "{0:.1f}".format(float(vals[-1]))}
@@ -153,6 +157,21 @@ def download():
 def about():
     '''Returns an about page'''
     return render_template('about.html', error=False)
+
+
+
+class MyFormatter(Formatter):
+    '''Extends the Formatter class
+    
+    Use: 
+        MyFormatter().format("{0} {1:t}", "Hello", 4.567)
+        -- returns "Hello 4"
+    
+    '''
+    def format_field(self, value, format_spec):
+        if format_spec == 't':  # Truncate and render as int
+            return str(int(float(value)))
+        return super(MyFormatter, self).format_field(value, format_spec)
 
 
 

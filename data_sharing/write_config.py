@@ -1,7 +1,7 @@
 """This script writes a configuration file"""
 
 from configobj import ConfigObj
-import os
+import os, math
 config = ConfigObj()
 
 
@@ -30,6 +30,13 @@ config['layers']['scale']=[{'min': 0, 'max': 3000},{'min': -1, 'max': 1},{'min':
 
 config['layers']['colours'] = [config['layers']['types'][0]+'.txt', config['layers']['types'][1]+'.txt', config['layers']['types'][2]+'.txt', config['layers']['types'][3]+'.txt']
 config['layers']['colpath'] = os.path.join(config['data']['input'], 'colourfiles')
+
+
+
+# calculate tile reference
+
+
+
 
 #
 config.write()
