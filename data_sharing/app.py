@@ -4,8 +4,7 @@ Created on 25 Apr 2018
 @author: livia
 '''
 from display_data.database import Database
-from flask import Flask, render_template, jsonify, request, send_from_directory
-import json, os
+from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 from display_data.system_configuration import ConfigSystem
 import ast
@@ -27,8 +26,8 @@ def index():
     except:
         return render_template('main.html', data=query.getBoundingBox(), error=True)
  
-@app.route('/get_colours', methods=['POST', 'GET'])
-def get_colours():
+@app.route('/colours', methods=['GET'])
+def colours():
     layer_id = request.args.get('layer_id')
     database = Database()
     database.scopedSession()
@@ -56,27 +55,8 @@ def get_colours():
 
     return jsonify(dic)
  
- 
- 
-@app.route('/datasets/<int:dataset_id>')
-def datasets(dataset_id):
-    '''Returns a JSON of the dataset'''
-    database = Database()
-    database.scopedSession()
-    
-    dataset=database.getDatasets(filters={'id': int(dataset_id)}, dic=True, timelayers=True)
-    #geoDict=dataset.asGeoDict()
-    #print(geoDict)
-    #geoCollection = {}
-    #geoCollection['type']= 'FeatureCollection'
-    #geoCollection['features'] = [geoDict]
-    print('DATSET', dataset)
-    database.closeSession()
-    return jsonify(dataset)
-
- 
   
-@app.route('/data')
+@app.route('/datasets')
 def data():
     '''Returns a JSON of the datasets, including filteroptions'''
     database = Database()
@@ -106,7 +86,11 @@ def data():
         except:
             pass #wrong input, just default is used
     
-    datasets=database.getDatasets(filters=filters, dic=True, page=page, page_size=page_size, orderbyarea=True)
+    timelayers=False
+    if 'timelayers' in request.args:
+        timelayers=booleanConverter(request.args.get('timelayers'))
+    
+    datasets=database.getDatasets(filters=filters, dic=True, page=page, page_size=page_size, orderbyarea=True, timelayers=timelayers)
     database.closeSession()
 
     return jsonify(datasets)
@@ -115,7 +99,7 @@ def data():
    
 @app.route('/layertypes')
 def layertypes():
-    '''Returns a JSON of the datasets, including filteroptions'''
+    '''Returns the available layertypes'''
     #database = Database()
     #database.scopedSession()
     #layertypes=database.getLayerTypes(dic=True)    
@@ -128,36 +112,24 @@ def layertypes():
     return jsonify(dic)
 
 
-"""@app.route('/tileurl/<int:layer_id>')
-def tileurl(layer_id):
-    database = Database()
-    database.scopedSession()
-    layer=database.getLayers({'id': layer_id})[0]    
-    database.closeSession()
-    
-    conf = ConfigSystem()
-    abs_path = conf.getTilesFolder(layer.layertype, layer.date, layer.dataset_id)
-    prefix = conf.getDataOutputPath()
-    rel_path = os.path.relpath(abs_path, prefix)
-    return jsonify({'rel_url' : rel_path, 'abs_url' : abs_path})"""
-    
-    
-'''@app.route('/download', methods=['GET', 'POST'])
-def download():
-    ''''''
-    #database = Database()
-    #database.scopedSession()
-    #layertypes=database.getLayerTypes(dic=True)    
-    #database.closeSession()
-
-    return send_from_directory(directory='/Users/livia/msc_dissertation/CODE/data_sharing/data/input', filename='Greenland_1000_error.tif')'''
     
 
 @app.route('/about')
 def about():
-    '''Returns an about page'''
-    return render_template('about.html', error=False)
+    '''Returns the about page HTML'''
+    return render_template('about.html', error=False, root="localhost:5002")
 
+
+
+
+
+def booleanConverter(value):
+    if value.lower() == 'true':
+        return True
+    elif value.lower() == 'false':
+        return False
+    else:
+            raise Exception
 
 
 class MyFormatter(Formatter):

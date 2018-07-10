@@ -55,7 +55,7 @@ function showData(page, filter){
 	}
 	console.info('Filter', currentquery)
 	param= JSON.stringify(currentquery)
-	url= 'data?' //TODO add the filters here
+	url= 'datasets?' //TODO add the filters here
 	url=url +'page='+page+'&'+'page_size='+page_size+'&filter='+param;
 	
 	console.log('UROLLL',url)
@@ -80,20 +80,23 @@ function displayDatasets(datasets){
 	list.html(''); //set to empty
 	for (i in datasetsarr){
 	    var id = datasetsarr[i].properties.id;
-		var cite = datasetsarr[i].properties.cite;
 		var layers = datasetsarr[i].properties.layers;
+		var startdate = datasetsarr[i].properties.startdate;
+		var enddate = datasetsarr[i].properties.enddate;
 
 		/*Sort by name so that they have the same order*/
 		layers.sort(function(a, b) {
 		    return a.layertype.localeCompare(b.layertype);
 		});
 
-		html= "<tr><td value='" + id + "'>" + "<b>"+ "Dataset: " + id + "</b> -- Cite this dataset as: " + cite + "<br> " + "<b>Layers: </b>"
+		html= "<tr><td value='" + id + "'>" + "<b>"+ "Dataset | </b> id: " + id + "<br>" 
+		html=html.concat(startdate + ' - ' + enddate)
+		html=html.concat("<br> " + "<b>Available Layers: </b><span class='upper'>")
 		for (l in layers){
-			html=html.concat(layers[l].layertype + ' | ')
+			html=html.concat(layers[l].layertype + ', ')
 		}
 		html=html.slice(0,-2);
-		html = html.concat("</tr></td>");
+		html = html.concat("</span></tr></td>");
 	    list.append(html);
 	}
 	

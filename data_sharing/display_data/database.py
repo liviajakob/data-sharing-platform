@@ -176,13 +176,13 @@ class Database():
         #add filters
         for attr, value in filters.items():
             if hasattr(Dataset, attr):
-                if attr == "startdate" or attr == "enddate": #start and enddate
-                    print('startdate----enddate')
+                if attr == "startdate": #startdate
                     value = strptime(filters[attr], "%Y-%m-%d")
-                    query = query.filter(getattr(Dataset, 'startdate') <= value, getattr(Dataset, 'enddate') >= value) #, getattr(RasterLayer, 'enddate')>= value
+                    print('startdate ',value)
+                    query = query.filter(value <= getattr(Dataset, 'startdate')) #, getattr(RasterLayer, 'enddate')>= value
                     print (query)
-                    print(value)
-                    print(getattr(RasterLayer, 'startdate') <= value, getattr(RasterLayer, 'enddate')>= value)
+                elif attr == "enddate":
+                    query = query.filter(value >= getattr(Dataset, 'enddate'))
                 else: 
                     query = query.filter(getattr(Dataset, attr) == value)
             elif hasattr(RasterLayer, attr): #join tables

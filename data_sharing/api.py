@@ -1,25 +1,21 @@
 '''
-Created on 2 Jun 2018
+API for accessing the data of the IceExplorer
 
 @author: livia
 '''
 from display_data.database import Database
-from flask import Flask, render_template, jsonify, request, send_file, send_from_directory, make_response
-import json
+from flask import Flask, jsonify, request, send_file, Response
 from flask_restful import Resource, Api
 from flask_cors import CORS, cross_origin
 from display_data.system_configuration import ConfigSystem
 from get_data.query_point import retrieve_pixel_value
-import os, glob
+import os, glob, ast
+from dicttoxml import dicttoxml
 
 app = Flask(__name__)
-CORS(app)
+CORS(app) #allow cross origin
 
 #api = Api(app)
-
-class HelloWorld(Resource):
-    def get(self):
-        return {'hello': 'world'}
 
 
 '''class Download(Resource):
@@ -31,7 +27,7 @@ api.add_resource(HelloWorld, '/')
 api.add_resource(HelloWorld, '/')'''
 
 
-@app.route('/', methods=['GET'])
+'''@app.route('/', methods=['GET'])
 def index():
     ###
     dic = {}
@@ -44,32 +40,54 @@ def index():
     #response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     #response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     
-    return response
+    return response'''
 
-
-@app.route('/get_file/<int:pid>/<string:date>', methods=['GET'])
-def get_file(pid, date):
+# TODO: more flexible
+@app.route('/v1/file', methods=['GET'])
+def file():
+    
+    pid=request.args.get('layer_id')
+    date = request.args.get('date')
+    
     rasterf=getLayerRawfileFilePath(pid, date)
     #raster = '/Users/livia/msc_dissertation/CODE/data_sharing/data/output/datasets/'+str(pid)+'/dem/raw_input.tif'
     response = send_file(rasterf)
     return response
 
-@app.route('/get_value/<int:lid>', methods=['GET', 'OPTIONS'])
-def get_value(lid):
-    print('we are here')
+@app.route('/v1/values', methods=['GET'])
+def values():
+    '''Returns date and value pairs of the time layers of a given layer and x and y coordinates
+    
+    Input parameter -
+        layer_id - the id of the queried layer
+        x - x-Coordinate
+        y - y-Coordinate
+    
+    
+    Response type: JSON
+        containes an array with x and y value pairs of dates and values
+    
+    Example Response:
+    
+    {data: [{
+            x: 2012-07-27,
+            y: 20
+        }, {
+            x: 2013-07-27,
+            y: 10
+        }]
+    }
+    
+    '''
+    
+    # TODO: Error handling
+    
+    lid=request.args.get('layer_id')
     fnames=getLayerProjectedFilePaths(lid)
-    
-    
-    #raster = '/Users/livia/msc_dissertation/CODE/data_sharing/data/output/datasets/'+str(pid)+'/dem/raw_input.tif'
-    #response = send_file(rasterf)
-    print('filenames: ', fnames)
     x = request.args.get('x')
     y = request.args.get('y')
-    print(x,y)
     coords=[float(x),float(y)]
-    #-102834.5, -2151176.688
     pixelvalues=[]
-    print(fnames)
     for fname in fnames:
         val=retrieve_pixel_value(coords, fname)
         try:
@@ -83,9 +101,51 @@ def get_value(lid):
     response={}
     response['data']=pixelvalues
     return jsonify(response)
+
+
+# TODO: Error handling 
+@app.route('/v1/datasets', methods=['GET'])
+def datasets():
+    '''Returns a JSON of the datasets, including filteroptions'''
+    database = Database()
+    database.scopedSession()
+    
+    protocol = 'json'
+    if 'protocol' in request.args:
+        protocol = request.args.get('protocol')
+            
+    print(request.args)
+    
+    datasets=database.getDatasets(request.args.to_dict(), dic=True, orderbyarea=False, timelayers=True)
+    database.closeSession()
+    
+    if protocol.lower() == 'json':
+        return jsonify(datasets) #jsonify is flask function, so header is set automatically
+    elif protocol.lower() == 'xml':
+        xml=dicttoxml(datasets)
+        return Response(xml, mimetype='text/xml')
+    else:
+        return protocol +' is not a valid protocol type'
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return "<h1>404</h1><p>The resource could not be found.</p>", 404
+
+
+
+
+###### Helper Methods
+
  
 def getLayerRawfileFilePath(layer_id, date):
-    '''Returns one raw file (unprojected) path'''
+    '''Returns one raw file (unprojected) path
+    
+    Input Parameter:
+        layer_id - ID of the layer
+        date - date of the time layer
+    
+    '''
     database = Database()
     database.scopedSession()
     layer = database.getLayers({'id': layer_id})[0]
@@ -99,7 +159,11 @@ def getLayerRawfileFilePath(layer_id, date):
   
 
 def getLayerProjectedFilePaths(layer_id):
-    '''Returns reprojected raw file path of all the rime series files of a layer'''
+    '''Returns reprojected raw file path of all the time series files of a layer
+    
+    Input Parameter:
+        layer_id - ID of the layer
+    '''
     database = Database()
     database.scopedSession()
     layer = database.getLayers({'id': layer_id})[0]

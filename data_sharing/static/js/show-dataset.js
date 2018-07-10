@@ -18,7 +18,9 @@ var colourvalues;
     		});
     	 polylayer.setVisible(false);
     	 console.log('FID', feature.getId())
-    	 link='datasets/'+ feature.getId()
+    	 filter={'id': feature.getId()}
+    	 filter =JSON.stringify(filter)
+    	 link='datasets?timelayers=true&filter='+ filter
     	 	$.getJSON(link, function(data) {
 				console.log('data', data.features[0].properties);
 				displayDataset(feature, data.features[0].properties);
@@ -105,7 +107,7 @@ var colourvalues;
 		idcom = layer.layertype+series.date
 		 myLayer = new ol.layer.Tile({
 		   source: source,
-		   projection: 'EPSG:4326',
+		   projection: projection,
 			   extent: polyext, 
 			   opacity: 1,
 			id: idcom,
@@ -153,14 +155,18 @@ var colourvalues;
      /*Returns html for info showed when exploring a dataset*/
      function detailedInfo(dataset){
   	   title = '<h5>Dataset: '+dataset.id+'</h5>'
-  	   html = '<p>'+"</b>Cite this dataset as: " + dataset.cite + "<br></p><hr><hr> " + "<h6>Layers: </h6>";
+  	   html='';
+  	   html=html.concat('<b>Time span:</b> ' + dataset.startdate + ' - ' + dataset.enddate + '<br>')
+  	   html=html.concat('<b>Projection:</b> ' + dataset.projection + '<br>')
+  	   html=html.concat('<b>Covered area (extent): </b>' + dataset.area + ' km<sup>2</sup>')
+  	   html=html.concat("<hr><hr>" + "<h6>Available Layers: </h6>")
   	   layers=dataset.layers;
 	   		for (i = 0; i < layers.length; i++){
 	   			layer= layers[i]
 	   			
 	   			html=html.concat('<div class="layer-outer"><div class="collapse-title" data-toggle="collapse" data-target="#l'+layer.layertype+'" aria-expanded="false" class="collapsed">')
 	   			
-	   			html=html.concat('<b style="text-transform: uppercase;"> '+layers[i].layertype + ' </b> | (Layer id: '+ layers[i].id+ ')')
+	   			html=html.concat('<b class="upper"> '+layers[i].layertype + ' </b> | (Layer id: '+ layers[i].id+ ')')
 	   			html=html.concat('<button class="collapse-button">&times;</button>')
 	   			
 	   			//html=html.concat('<br><input id="slider" type="range" min="0" max="1"step="0.1" value="1" oninput="getLayerById('+layers[i].id+').setOpacity(this.value)">')
@@ -173,13 +179,14 @@ var colourvalues;
 	   				html=html.concat('<div style="padding-bottom: 10px; padding-left: 10px;"><input type="checkbox" value="'+sid+'" id="l_visible" ')
 	   				if (i==0 && e==0) html=html.concat('checked')
 	   				html=html.concat('>  <b>Date: </b>'+ series. date)
-	   				html=html.concat('<button class="download" data-toggle="tooltip" data-placement="right" data-original-title="Download this layer" id="download-layer" value="'+layer.id+'/'+series.date+'">Download </button>')
+	   				html=html.concat('<button class="download" data-toggle="tooltip" data-placement="right" data-original-title="Download this layer" id="download-layer" value="'+'layer_id='+layer.id+'&date='+series.date+'">Download </button>')
 	   				html=html.concat('<br></div>')
 	   			}
 	   			html = html.concat("</div></div>"); 
 	   		}
 	   		//html=html.slice(0,-2);
-	   		html = html.concat("</div>");  	   
+	   		html = html.concat("</div>");  
+	   		html = html.concat("<hr><hr><b>Cite this dataset as: </b>" + dataset.cite + "<br>");
   	   return [title, html];
      }
      
@@ -236,100 +243,6 @@ var colourvalues;
   			return layer_
   	}
   	
-  	
-  	
-  	//window.location.href='download';
-  	
 
-  	
-  	
-  	
-  	
-  	
-  	////// LEGEND
-  	
-  	
-function getLegend(layer){
-	
-	console.log('LAYER',layer);
-	
-	link = 'get_colours?layer_id='+layer.get('layerid');
-	
-	$.getJSON(link, function(data) {
-		colourvalues=data.values;
-		drawColourLegend(data.rgb, data.min, data.max);
-  	});
-	$('#legend-bar')
-	.attr("data-original-title", "Click on the legend to see the exact value represented by the clicked colour")
-}
-  	
-
-
-
-
-var legend  = document.getElementById('legend-bar');
-	
-function drawColourLegend(colours, min, max){
-	console.log(colours);
-    ctx = legend.getContext('2d');
-	ctx.clearRect(0, 0, 100, 64);
-	//ctx.clearRect(0, 0, canvas.width, canvas.height);
-	//console.log('COLOURS',colours)
-	for(var i = 0; i <= colours.length; i++) {
-	    ctx.beginPath();
-	    
-	    var color = colours[i];//'rgb(100, ' + i + ', ' + i + ')';
-	    ctx.fillStyle = color;
-	    
-	    //ctx.fillRect(i * 2, 0, 2, 50);
-	    ctx.fillRect(0,i, 20, 1);
-	    
-	    
-	}
-	
-	
-	
-	//ctx.clearRect(0, 0, canvas.width, canvas.height);
-	
-	// Write min max text
-	
-	ctx.fillStyle = "rgb(255,255,255)";
-	
-	ctx.font="13px Raleway";
-
-	ctx.fillText(min, 30,10);
-	maxpos=(colours.length-7)
-	ctx.fillText(max, 30, maxpos);
-}
-
-
-
-
-
-
-
-legend.onclick = function(e) {
-	ctx = legend.getContext('2d');
-    //var x = e.offsetX,
-        //y = e.offsetY,
-        //p = ctx.getImageData(x, y, 1, 1),
-        //d = p.data;
-    console.log('x',e.offsetX,'y',e.offsetY)
-    if (e.offsetX<=20 && e.offsetY<=colourvalues.length){
-    	//alert(colourvalues[e.offsetY]);
-    	$('#legend-bar')
-    		.tooltip('hide')
-    		.attr("data-original-title", 'Clicked value: '+colourvalues[e.offsetY])
-    		.tooltip('show');
-    }
-    
-};
-  	
-   
-   
-     
-     
-     
-     
      
      

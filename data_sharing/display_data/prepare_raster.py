@@ -29,7 +29,7 @@ class RasterTiler(object):
         subprocess.call(commandlist)
     
     
-    def calculateZoom(self, area, minzoom=2, e0=6424000.0):
+    def calculateZoom(self, area, minzoom=2, e0=5224000.0):
         '''area in metre'''
         #8 -- 2400722068.95274
         #one line --> sqrt(area)
@@ -41,7 +41,7 @@ class RasterTiler(object):
         
         arr=[]
         for i in range(0,23):
-            x = e0/(2**(i))
+            x = e0/(1.8**(i))
             arr.append(x)
         topzoom = min(range(len(arr)), key=lambda i: abs(arr[i]-length))
         bottomzoom = topzoom + 6
@@ -210,7 +210,7 @@ class RasterLayerProcessor(object):
         print(commandlist)
         subprocess.call(commandlist)
     
-    # @TODO not hardcoded!
+    # @TODO delete not hardcoded!
     def to8Bit(self, inputfile, outputfile, scale, fileformat='GTiff', bits=[1,255], nodata=0):
         '''Converts the raster to 8-bits
         

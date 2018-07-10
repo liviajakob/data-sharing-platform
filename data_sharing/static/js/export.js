@@ -24,7 +24,8 @@ document.querySelector('#png').addEventListener('click', function() {
 	$(document).ready(function(e) {
 		$(document).on('click', '#download-layer', function(e){
 			val1 = $(e.target).prop("value");
-			window.location.href=api_link+'/get_file/'+val1;
+			window.location.href=api_link+'/v1/file?'+val1;
+			console.log(api_link+'/v1/file?'+val1)
 			//window.href('download');
 			//$fileDownload('download')
 		    //.done(function () { alert('File download a success!'); })

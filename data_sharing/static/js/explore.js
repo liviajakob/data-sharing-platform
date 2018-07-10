@@ -1,61 +1,80 @@
-exploremode=false;
+/* IceExplorer - Explore Tool
+ * 
+ * This code handles the explore mode in the toolbox
+ * Author: Livia Jakob
+ * */
 
+
+exploremode=false; // set explore mode initially to false
+
+
+/*Add EventListener*/
 map.on('click', function(evt){
-	//$('#map').css( 'cursor', '');
-	//$('#map').cursor('wait');
 	if (exploremode){
-		getValue(evt);
+		getValues(evt); //get values and display results
 	}
-	
 });
 
 
-
+/*Add click EventListener to explore button*/
 var explorebutton = document.getElementById('toggle-explore');
 explorebutton.addEventListener('click', function(){
-	if (exploremode){
+	if (exploremode){ //exploremode is a global variable keeping track of the modus
 		stopExplore();
 	}else{
 		startExplore();
-		//toplayer=arr[arr.length-1];
-		
 	}
-	
 })
 
 
-
-
+/*Start Explore Mode*/
 function startExplore(){
-	console.log('START EXPLORING');
-	//swipelayer=layer;
-	exploremode=true;
-	document.getElementById('map').style.cursor="pointer";
-	//$('selector').css({'cursor': 'url(../img/logo.png), pointer'});
-	console.log(dataset_tilelayers.getLayers().getArray().length)
+	exploremode=true; // set global variable
+	//document.getElementById('map').style.cursor="pointer"; //change cursor
 	
-	explorebutton.style.backgroundColor = "rgba(93, 62, 60, 0.8)";
+	explorebutton.style.backgroundColor = "rgba(93, 62, 60, 0.8)"; // change button style
+	// change tooltip text
 	$('#toggle-explore').tooltip('hide').attr('data-original-title', 'Stop explore mode')
 	
 	//change cursor
 	document.getElementById('map').classList.add('explore-cursor');
-	$('#point-info').show();
+	$('#point-info').show(); // display window with results
+}
+
+/*Stop Explore Mode*/
+function stopExplore(){
+	if (exploremode){	
+		$("#map").off('click');
+		//change cursor
+		document.getElementById('map').classList.remove('explore-cursor');
+		explorebutton.style.backgroundColor = "";
+		// change tooltip
+		$('#toggle-explore').tooltip('hide').attr('data-original-title', 'Enter explore mode to explore layer values')
+		exploremode=false; //set global variable
+		//change and hide result box
+		$('#point-value').html('Click on the map to query values of the top layer');
+		$('#point-info').hide(); //hide result box
+	}
 }
 
 
-
-function getValue(evt){
+/* Gets and displays values of a clicked point in the map
+ * 
+ * evt - the click event
+ * */
+function getValues(evt){
+	//clicked coordinates
 	coords=map.getCoordinateFromPixel(evt.pixel);
-	
+	console.log(coords[0], coords[1])
+	// get top visible layer
 	ll_arr = dataset_tilelayers.getLayers().getArray();
 	top_l = getTopVisibleLayer(ll_arr);
+	
 	if (top_l){
-		j_url=api_link +'/get_value/'+top_l.get('layerid')+'?x='+coords[0]+'&y='+coords[1];
-		console.log('TOP',top_l)
-		console.log(j_url);
+		j_url=api_link +'/v1/values?layer_id='+top_l.get('layerid')+'&x='+coords[0]+'&y='+coords[1];
 		
         $.getJSON(j_url, function(result) {
-        	console.info(result.data);
+        	console.info(result);
         	if (result.data.length<=1){
         		$('#point-value').html('<h6>Value of clicked position:</h6><hr>'
         				+'<p> <strong>Date: </strong>' + result.data[0].x + '<br>'
@@ -75,33 +94,24 @@ function getValue(evt){
 }
 
 
-function stopExplore(){
-	console.log('STOP EXPLORING');
-	if (exploremode){
-		
-		$("#map").off('click');
-		
-		document.getElementById('map').classList.remove('explore-cursor');
-		explorebutton.style.backgroundColor = "";
-		$('#toggle-explore').tooltip('hide').attr('data-original-title', 'Enter explore mode to explore layer values')
-		exploremode=false;
-		$('#point-value').html('Click on the map to query values of the top layer');
-		$('#point-info').hide();
-		/*Remove Event Listeners*/
-		//map.removeEventListener('click');
-		//layer.removeEventListener('precompose');
-		//$('#map').unbind('click');
-	}
-}
+////// DISPLAY CHART ////////////////////////////////////////////////////
 
-
-
-////// CHART
-
+/* Display the data in a Chart.js chart
+ * Data is expected in the following format: 
+ * 
+ * 	[{
+ * 		x: 2012-07-27,
+ * 		y: 20
+ * 	}, {
+ * 		x: 2013-07-27,
+ * 		y: 10
+ * 	}]
+ * 
+ * */
 function displayChart(data){
-	
+	//canvas element
 	ctx = document.getElementById('chart').getContext('2d');
-	
+	//set global styles
 	Chart.defaults.global.defaultFontColor = 'white';
 	Chart.defaults.global.defaultFontFamily = 'Raleway, sans-serif';
 	var scatterChart = new Chart(ctx, {
@@ -114,11 +124,11 @@ function displayChart(data){
 	            borderWidth : "3",
 	            hoverBorderColor : "#000",
 	            showLine: false,
-	            borderColor: '#fff',//"#3d6466",
+	            borderColor: '#fff',
 	            backgroundColor: "#fff"
 	        }]
 	    },
-	    options: {
+	    options: { // setting styles and display options
 	    	  legend: {
 	    		    display: false
 	    		  },
@@ -151,9 +161,3 @@ function displayChart(data){
 }
 	
 	
-
-
-
-
-
-

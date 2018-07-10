@@ -39,7 +39,8 @@ class Dataset(Base):
     area = Column(Float)
     startdate = Column(DateTime(timezone=True))
     enddate = Column(DateTime(timezone=True))
-    projection=Column(String()) #ForeignKey("projection.id")
+    projection=Column(String()) # this is the projection the dataset xmin, xmax etc. are in
+    #ForeignKey("projection.id")
     #projection = relationship("Projection", backref=backref("dataset"))
     
     def getBoundingBox(self):
@@ -53,9 +54,10 @@ class Dataset(Base):
         dic['properties']={}
         dic['properties']['id']=self.id
         dic['properties']['cite']=self.cite
-        dic['properties']['area']= self.area
-        dic['startdate']=str(self.startdate.strftime("%Y-%m-%d"))
-        dic['enddate']=str(self.enddate.strftime("%Y-%m-%d"))
+        dic['properties']['area']= self.area/1000000 # in km2
+        dic['properties']['startdate']=str(self.startdate.strftime("%Y-%m-%d"))
+        dic['properties']['enddate']=str(self.enddate.strftime("%Y-%m-%d"))
+        dic['properties']['projection']=self.projection
         dic['geometry']={}
         dic['geometry']['type']="Polygon"
         dic['geometry']['coordinates']=[[[self.xmin,self.ymin],[self.xmax,self.ymin], [self.xmax,self.ymax], [self.xmin,self.ymax], [self.xmin,self.ymin]]]
