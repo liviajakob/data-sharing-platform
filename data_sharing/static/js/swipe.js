@@ -25,18 +25,6 @@ swipebutton.addEventListener('click', function(){
 })
 
 
-/*Returns the top visible layer in layerarr, an empty string when no visible layer is found*/
-function getTopVisibleLayer(layerarr){
-	/*Iterate backwards because highest layer is at the back*/
-	for (var i = layerarr.length - 1; i >= 0; --i) {
-		if (layerarr[i].getVisible()){ //check if visible
-			return layerarr[i]; //return if visible
-		}
-	}
-	return ""; // when no layer is visible or array is empty
-}
-
-
 /*Start Swipe Mode
  * 
  * layer - the top visible layer the swipe mode will be bound to
@@ -103,4 +91,21 @@ function stopSwipe(layer){
 		map.render(); //render new display
 	}
 }
+
+
+/* HELPER METHOD: Returns the top visible layer in layerarr, 
+ * an empty string when no visible layer is found
+ * 
+ * layerarr - array with all layers
+ * */
+function getTopVisibleLayer(layerarr){
+	/*Iterate backwards because highest layer is at the back*/
+	for (var i = layerarr.length - 1; i >= 0; --i) {
+		if (layerarr[i].getVisible()){ //check if visible
+			return layerarr[i]; //return if visible
+		}
+	}
+	return ""; // when no layer is visible or array is empty
+}
+
 
