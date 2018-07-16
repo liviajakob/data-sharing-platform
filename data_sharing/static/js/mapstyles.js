@@ -1,4 +1,5 @@
 /* IceExplorer - Map Geometry Style
+ * Filename: mapstyles.js
  * 
  * This defines the style of geometries on the map
  * Author: Livia Jakob

@@ -1,4 +1,5 @@
 /* IceExplorer - Interactive Legend
+ * Filename: legend.js
  * 
  * This code created and updates the interactive legend in the toolbox
  * Author: Livia Jakob
@@ -65,7 +66,6 @@ function drawColourLegend(colours, min, max){
  * */
 legend.onclick = function(e) {
 	ctx = legend.getContext('2d');
-    console.log('x',e.offsetX,'y',e.offsetY)
     if (e.offsetX<=20 && e.offsetY<=colourvalues.length){
     	$('#legend-bar')
     		.tooltip('hide')

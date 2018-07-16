@@ -39,7 +39,7 @@ class DatabaseTest(unittest.TestCase):
         
     def test_noEntries(self):
         self.assertEqual(len(self.db.getDatasets()), 0, "No table entries for projections should exist")
-        self.assertEqual(len(self.db.getRasterLayers()), 0, "No table entries for layers should exist")
+        self.assertEqual(len(self.db.getRasterLayerGroups()), 0, "No table entries for layers should exist")
     
     
     def test_dbInsert(self):
@@ -47,9 +47,9 @@ class DatabaseTest(unittest.TestCase):
         self.db.newDataset("this is how", 'EPSG:3413')
         self.db.newDataset("cite...", 'EPSG:3413')
         self.db.newDataset("this is how you cite", 'EPSG:3413')
-        self.db.newRasterLayer(1, "dem", strptime('2017-06-26', "%Y-%m-%d"))
-        self.db.newRasterLayer(1, "error", strptime('2017-06-29', "%Y-%m-%d"))
-        self.db.newRasterLayer(2, "dem", strptime('2017-06-26', "%Y-%m-%d"))
+        self.db.newRasterLayerGroup(1, "dem", strptime('2017-06-26', "%Y-%m-%d"))
+        self.db.newRasterLayerGroup(1, "error", strptime('2017-06-29', "%Y-%m-%d"))
+        self.db.newRasterLayerGroup(2, "dem", strptime('2017-06-26', "%Y-%m-%d"))
         
         self.db.commit()
         
@@ -59,8 +59,8 @@ class DatabaseTest(unittest.TestCase):
         self.assertEquals(len(self.db.getDatasets(filters={'layertype':'dem'})), 2, "Error in get Datasets")
         self.assertEquals(len(self.db.getDatasets(filters={'layertype':'error'})), 1, "Error in get Datasets")
         filters={'dataset_id' : 1, 'layertype' : 'dem'}
-        self.assertEquals(self.db.getRasterLayers(filters)[0].layertype, 'dem', "couldnt insert dem layer")
-        self.assertEquals(self.db.getRasterLayers(filters)[0].enddate, datetime(2017, 6, 26, 0, 0), "couldnt insert dem layer")
+        self.assertEquals(self.db.getRasterLayerGroups(filters)[0].layertype, 'dem', "couldnt insert dem layer")
+        self.assertEquals(self.db.getRasterLayerGroups(filters)[0].enddate, datetime(2017, 6, 26, 0, 0), "couldnt insert dem layer")
         
         
         

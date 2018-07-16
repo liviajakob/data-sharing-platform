@@ -22,16 +22,16 @@ def index():
         
         database.closeSession()
         
-        return render_template('main.html', data=query.getBoundingBox(), error=False)
+        return render_template('main.html', data=query.getExtent(), error=False)
     except:
-        return render_template('main.html', data=query.getBoundingBox(), error=True)
+        return render_template('main.html', data=query.getExtent(), error=True)
  
 @app.route('/colours', methods=['GET'])
 def colours():
     layer_id = request.args.get('layer_id')
     database = Database()
     database.scopedSession()
-    layer=database.getLayers({'id': layer_id})[0]
+    layer=database.getLayerGroups({'id': layer_id})[0]
     database.closeSession()
     
 
@@ -57,22 +57,22 @@ def colours():
  
   
 @app.route('/datasets')
-def data():
+def datasets():
     '''Returns a JSON of the datasets, including filteroptions'''
     database = Database()
     database.scopedSession()
-    filters = {}
+    #filters = {}
     print('requestargs', request.args)
-    if 'filter' in request.args:
+    '''if 'filter' in request.args:
         try: 
             print('TRY TO CENVERT', request.args.get('filter'))
             filters = ast.literal_eval(request.args.get('filter'))
         except Exception as e:
             print('NOT POSSIBLE')
             print(e)
-            pass
+            pass'''
         
-    print('FILTERRRR   ',filters, type(filters), 'ARGS: ', request.args.get('filter'), type(request.args.get('filter')), str(request.args.get('filter')))
+    #print('FILTERRRR   ',filters, type(filters), 'ARGS: ', request.args.get('filter'), type(request.args.get('filter')), str(request.args.get('filter')))
     page=0
     page_size=5
     try:
@@ -86,11 +86,11 @@ def data():
         except:
             pass #wrong input, just default is used
     
-    timelayers=False
-    if 'timelayers' in request.args:
-        timelayers=booleanConverter(request.args.get('timelayers'))
+    layerinfo=False
+    if 'layerinfo' in request.args:
+        layerinfo=booleanConverter(request.args.get('layerinfo'))
     
-    datasets=database.getDatasets(filters=filters, dic=True, page=page, page_size=page_size, orderbyarea=True, timelayers=timelayers)
+    datasets=database.getDatasets(filters=request.args.to_dict(), dic=True, page=page, page_size=page_size, orderbyarea=True, layerinfo=layerinfo)
     database.closeSession()
 
     return jsonify(datasets)

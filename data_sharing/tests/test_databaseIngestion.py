@@ -21,7 +21,7 @@ class DatabaseIngestionTest(unittest.TestCase):
         
         rollback=Rollback(self.logger)
         
-        self.insert=Ingestion(rollback=rollback, logger=self.logger, database=self.db)
+        #self.insert=Ingestion(rollback=rollback, logger=self.logger, database=self.db)
         #self.insert.addDataset(layers=None, cite='hi')
         
         
@@ -36,12 +36,7 @@ class DatabaseIngestionTest(unittest.TestCase):
         self.db.scopedSession()
         self.db.dropTables('livia')
         self.db.createTables()
-        
-        #self.db.newLayerType("dem")
-        #self.db.newLayerType("error")
-        #self.db.newLayerType("rate")
-        #self.db.newProjection("Projection1")
-        #self.db.newProjection("Projection2")
+
         self.db.closeSession()
 
 

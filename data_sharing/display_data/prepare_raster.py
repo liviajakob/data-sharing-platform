@@ -124,7 +124,7 @@ class RasterLayerProcessor(object):
     
     
     
-    def getBoundingBox(self):
+    def getExtent(self):
         '''Returns the bounding box in minx, maxx, miny and maxy'''
         
         box = self.getBoundingBoxCorners()

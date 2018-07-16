@@ -1,7 +1,14 @@
-var export_btn = document.querySelector('#png');
-console.log(document.querySelector('#png'));
+/* IceExplorer - Downloads
+ * Filename: export.js
+ * 
+ * This code handles exports and downloads
+ * Author: Livia Jakob
+ * */
 
-// PNG
+var export_btn = document.querySelector('#png');
+
+/* EvenListener for Download view as PNG button
+ * */
 document.querySelector('#png').addEventListener('click', function() {
         map.once('postcompose', function(event) {
           var canvas = event.context.canvas;
@@ -18,22 +25,12 @@ document.querySelector('#png').addEventListener('click', function() {
 
 
 
-
-
-	////// DOWNLOAD LAYER BUTTON
-	$(document).ready(function(e) {
-		$(document).on('click', '#download-layer', function(e){
-			val1 = $(e.target).prop("value");
-			window.location.href=api_link+'/v1/file?'+val1;
-			console.log(api_link+'/v1/file?'+val1)
-			//window.href('download');
-			//$fileDownload('download')
-		    //.done(function () { alert('File download a success!'); })
-		    //.fail(function () { alert('File download failed!'); });
-			
-			
-
-			
+/* EvenListener for Download layer button
+ * */
+$(document).ready(function(e) {
+	$(document).on('click', '#download-layer', function(e){
+		val1 = $(e.target).prop("value");
+		window.location.href=api_link+'/v1/file?'+val1;
 	});
-	});
+});
 	

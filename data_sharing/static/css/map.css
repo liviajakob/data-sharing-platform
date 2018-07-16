@@ -236,7 +236,7 @@
 
 #toggle-swipe{
 	float: left;
-    width: 130px;
+    width: 133px;
     height: 30px;
     border: 3px solid rgba(255,255,255,0.8);
     background-image: url(../img/compare3.png);
@@ -245,7 +245,7 @@
     background-position: 0.5px;
     background-color: rgba(0,60,136,.5);
     border-radius: 4px;
-    padding-left: 37px;
+    padding-left: 33px;
     color:white;
     margin-bottom: 6px;
     text-align: left;
@@ -259,16 +259,16 @@
 
 #toggle-explore{
 	float: left;
-    width: 130px;
+    width: 133px;
     height: 29px;
     border: 3px solid rgba(255,255,255,0.8);
     background-image: url(../img/explore.png);
     background-size: 20px;
     background-repeat: no-repeat;
-    background-position: 7px;
+    background-position: 6px;
     background-color: rgba(0,60,136,.5);
     border-radius: 4px;
-    padding-left: 37px;
+    padding-left: 33px;
     color:white;
     text-align: left;
 }

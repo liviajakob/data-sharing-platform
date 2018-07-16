@@ -1,56 +1,57 @@
-/* IceExplorer - Explore Tool
+/* IceExplorer - Get Values Tool
+ * Filename: getvalues.js
  * 
  * This code handles the explore mode in the toolbox
  * Author: Livia Jakob
  * */
 
 
-exploremode=false; // set explore mode initially to false
+getvaluesmode=false; // set get values mode initially to false
 
 
 /*Add EventListener*/
 map.on('click', function(evt){
-	if (exploremode){
+	if (getvaluesmode){
 		getValues(evt); //get values and display results
 	}
 });
 
 
-/*Add click EventListener to explore button*/
-var explorebutton = document.getElementById('toggle-explore');
-explorebutton.addEventListener('click', function(){
-	if (exploremode){ //exploremode is a global variable keeping track of the modus
-		stopExplore();
+/*Add click EventListener to get values button*/
+var getvaluesbutton = document.getElementById('toggle-explore');
+getvaluesbutton.addEventListener('click', function(){
+	if (getvaluesmode){ //getvaluesmode is a global variable keeping track of the modus
+		stopGetValuesMode();
 	}else{
-		startExplore();
+		startGetValuesMode();
 	}
 })
 
 
-/*Start Explore Mode*/
-function startExplore(){
-	exploremode=true; // set global variable
+/*Start Get Values Mode*/
+function startGetValuesMode(){
+	getvaluesmode=true; // set global variable
 	//document.getElementById('map').style.cursor="pointer"; //change cursor
 	
-	explorebutton.style.backgroundColor = "rgba(93, 62, 60, 0.8)"; // change button style
+	getvaluesbutton.style.backgroundColor = "rgba(93, 62, 60, 0.8)"; // change button style
 	// change tooltip text
-	$('#toggle-explore').tooltip('hide').attr('data-original-title', 'Stop explore mode')
+	$('#toggle-explore').tooltip('hide').attr('data-original-title', 'Stop get values mode')
 	
 	//change cursor
 	document.getElementById('map').classList.add('explore-cursor');
 	$('#point-info').show(); // display window with results
 }
 
-/*Stop Explore Mode*/
-function stopExplore(){
-	if (exploremode){	
+/*Stop Get Values Mode*/
+function stopGetValuesMode(){
+	if (getvaluesmode){	
 		$("#map").off('click');
 		//change cursor
 		document.getElementById('map').classList.remove('explore-cursor');
-		explorebutton.style.backgroundColor = "";
+		getvaluesbutton.style.backgroundColor = "";
 		// change tooltip
-		$('#toggle-explore').tooltip('hide').attr('data-original-title', 'Enter explore mode to explore layer values')
-		exploremode=false; //set global variable
+		$('#toggle-explore').tooltip('hide').attr('data-original-title', 'Enter get values mode to explore layer values')
+		getvaluesmode=false; //set global variable
 		//change and hide result box
 		$('#point-value').html('Click on the map to query values of the top layer');
 		$('#point-info').hide(); //hide result box
@@ -65,7 +66,6 @@ function stopExplore(){
 function getValues(evt){
 	//clicked coordinates
 	coords=map.getCoordinateFromPixel(evt.pixel);
-	console.log(coords[0], coords[1])
 	// get top visible layer
 	ll_arr = dataset_tilelayers.getLayers().getArray();
 	top_l = getTopVisibleLayer(ll_arr);
@@ -94,7 +94,9 @@ function getValues(evt){
 }
 
 
-////// DISPLAY CHART ////////////////////////////////////////////////////
+
+
+////// Display chart with Chart.js ///////////////////////////////////////////
 
 /* Display the data in a Chart.js chart
  * Data is expected in the following format: 

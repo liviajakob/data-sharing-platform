@@ -1,4 +1,5 @@
 /* IceExplorer - Swipe Tool
+ * Filename: swipe.js
  * 
  * This code handles the swipe mode in the toolbox
  * Author: Livia Jakob

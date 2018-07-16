@@ -7,10 +7,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from display_data.models import *
 import os
-from datetime import datetime
 from display_data.system_configuration import ConfigSystem
 from numpy.lib.tests.test_io import strptime
-from pandas.util.testing import getTimeSeriesData
 
 
 
@@ -82,12 +80,6 @@ class Database():
         
         if cite is None:
             cite="No information given."
-        
-        """try:
-            proj = self.Session.query(Projection).filter(Projection.id==projection).one() 
-        except:
-            print("NO valid projection")
-            raise"""
             
         try:
             dataset = Dataset()
@@ -110,8 +102,8 @@ class Database():
             
             
         
-    def newRasterLayer(self, dataset_id, layerType, date, commit=True):
-        """Adds a new dataset layer to a data set"""        
+    def newRasterLayerGroup(self, dataset_id, layerType, date, commit=True):
+        """Adds a new dataset layergr to a data set"""        
         try:
             dataset = self.Session.query(Dataset).filter(Dataset.id==dataset_id).one() 
         except Exception as e:
@@ -119,19 +111,19 @@ class Database():
             raise e
         
         try:
-            layer = RasterLayer()
-            #layer.type_id = layerType.id
-            layer.dataset_id = dataset.id
-            layer.layertype = layerType
-            layer.startdate = date
-            layer.enddate = date
+            layergr = RasterLayerGroup()
+            #layergr.type_id = layerType.id
+            layergr.dataset_id = dataset.id
+            layergr.layertype = layerType
+            layergr.startdate = date
+            layergr.enddate = date
             
-            self.Session.add(layer)
+            self.Session.add(layergr)
             if commit:
                 self.Session.commit()
             else:
                 self.Session.flush()
-                return layer
+                return layergr
         except:
             self.Session.rollback()
             raise
@@ -151,12 +143,12 @@ class Database():
         
         
     def getTableNames(self):
-        '''returns a list with table names
+        '''Returns a list with database table names
         '''
         return self._engine.table_names()
         
         
-    def getDatasets(self, filters={}, dic=False, page=None, page_size=None, orderbyarea=False, timelayers=False):
+    def getDatasets(self, filters={}, dic=False, page=None, page_size=None, orderbyarea=False, layerinfo=False):
         """returns a list of all requested datasets.
         
         Input parameter:
@@ -170,24 +162,21 @@ class Database():
         """
         query = self.Session.query(Dataset)
         
-        print('FILETRS', filters)
-        
+        print('get datasets')
         
         #add filters
         for attr, value in filters.items():
             if hasattr(Dataset, attr):
-                if attr == "startdate": #startdate
+                if attr == "startdate":
                     value = strptime(filters[attr], "%Y-%m-%d")
-                    print('startdate ',value)
-                    query = query.filter(value <= getattr(Dataset, 'startdate')) #, getattr(RasterLayer, 'enddate')>= value
-                    print (query)
+                    query = query.filter(value >= getattr(Dataset, 'startdate'))
                 elif attr == "enddate":
-                    query = query.filter(value >= getattr(Dataset, 'enddate'))
+                    value = strptime(filters[attr], "%Y-%m-%d")
+                    query = query.filter(value <= getattr(Dataset, 'enddate'))
                 else: 
                     query = query.filter(getattr(Dataset, attr) == value)
-            elif hasattr(RasterLayer, attr): #join tables
-                print('JOIN TABLES')
-                query=query.outerjoin(RasterLayer).filter(getattr(RasterLayer, attr) == value).filter(RasterLayer.dataset_id == Dataset.id)
+            elif hasattr(RasterLayerGroup, attr): #filter to join tables
+                query=query.outerjoin(RasterLayerGroup).filter(getattr(RasterLayerGroup, attr) == value).filter(RasterLayerGroup.dataset_id == Dataset.id)
 
         if page_size:
             query = query.limit(page_size)
@@ -196,12 +185,13 @@ class Database():
             query = query.offset(page*page_size)
     
         
-          
+        print('dic', dic)
         if not dic:
             try:
                 result=query.all()   
                 if orderbyarea:
                     result.sort(key=lambda x: x.area, reverse=True)
+                print('result ', result)
                 return result
             except:
                 return []
@@ -210,7 +200,8 @@ class Database():
                 result=query.all() 
                 if orderbyarea:
                     result.sort(key=lambda x: x.area, reverse=True)
-                return self.asDictionary(result, timelayers=timelayers) 
+                print('geoCollection ', self.asDictionary(result, layerinfo=layerinfo))
+                return self.asDictionary(result, layerinfo=layerinfo) 
             except Exception as e:
                 print('Exception ',e)
                 print('No results found')
@@ -222,7 +213,7 @@ class Database():
 
     
     
-    def getRasterLayers(self, filters={}):
+    def getRasterLayerGroups(self, filters={}):
         """returns a list of all requested datasets.
         
         Input parameter:
@@ -235,10 +226,10 @@ class Database():
         
         """
 
-        query = self.Session.query(RasterLayer)
+        query = self.Session.query(RasterLayerGroup)
         
         for attr, value in filters.items():
-            query = query.filter(getattr(RasterLayer, attr) == value)
+            query = query.filter(getattr(RasterLayerGroup, attr) == value)
         
         #query=query.filter(filterrule)
         try:
@@ -248,8 +239,8 @@ class Database():
             return []
     
     
-    def getLayers(self, filters={}):
-        """returns a list of all requested layers.
+    def getLayerGroups(self, filters={}):
+        """returns a list of all requested layer groups.
         
         Input parameter:
             filters – (optional) a list of filteroptions
@@ -257,11 +248,12 @@ class Database():
             dic – true if result should be returned as dictionnary
                 
         Returns:
-            a list with Dataset objects/ one object or a dictionnary
+            a list with layergroup objects/ one object or a dictionnary
         
         """
-
-        result = self.getRasterLayers(filters=filters)
+        # we only have Raster Layer Groups for now...
+        result = self.getRasterLayerGroups(filters=filters)
+        print('layergroup abstr length', len(result))
         result.sort(key=lambda x: x.layertype, reverse=False)
         ## if pointlayer in database they would be added here to the result
         return result
@@ -269,24 +261,25 @@ class Database():
     
     
     
-    def asDictionary(self, datasets, timelayers=False):
+    def asDictionary(self, datasets, layerinfo=False):
         '''Returns a list of datasets as dictionary in GeoJSON format'''
         features=[]
         for ds in datasets:
             geodic = ds.asGeoDict()
-            layers = self.getLayers({'dataset_id' : ds.id})
+            layergr = self.getLayerGroups({'dataset_id' : ds.id})
+            print('layergroup length', len(layergr))
             layers_dict=[]
-            for l in layers:
+            for l in layergr:
                 l_dict=l.asDict()
                 #tile_url = self.conf.getRelativeTilesFolder(l)
                 #l_dict['tileurl'] = tile_url
-                if timelayers:
+                if layerinfo:
                     print('yeah')
-                    l_dict['timeseries'] = self.getTimeSeriesDict(l)
+                    l_dict['layers'] = self.getLayerDict(l)
                 #l_dict['layertype']=self.getLayertypeById(l.layertype).name
                 layers_dict.append(l_dict)
                 
-            geodic['properties']['layers'] = layers_dict
+            geodic['properties']['layergroups'] = layers_dict
             features.append(geodic)
             
         #print(geoDict)
@@ -297,7 +290,7 @@ class Database():
         return geoCollection
     
    
-    def getTimeSeriesDict(self, layer):
+    def getLayerDict(self, layer):
         timeseries = []
         dates = self.conf.getTimeseries(layer)
         for val in reversed(dates):
@@ -320,7 +313,7 @@ class Database():
             self.Session.flush()'''
             
             
-    def updateTimeSeries(self, layer, startdate=None, enddate=None, commit=True):
+    def updateLayerGroupDates(self, layer, startdate=None, enddate=None, commit=True):
         '''Updates a layers start if the new time layer is not within the old time span'''
         assert self.Session is not None
         if enddate is not None:
@@ -345,166 +338,4 @@ class Database():
             self.Session.commit()
         else:
             self.Session.flush()
-       
     
-    
-    
-    """def getRasterLayers(self, dic=None):
-        query = self.Session.query(RasterLayer)
-        
-           
-        result=query.all()
-        
-        if not dic:
-            return result
-        else: 
-            return self.asDictionary(result) """
-    
-    
-    
-    
-    
-    '''def getLayertypeByName(self, tname):
-        query = self.Session.query(LayerType)
-        query=query.filter(LayerType.name == tname)
-        try:
-            return query.first()
-        except Exception as e:
-            print (e)
-            return [] '''
-        
-    '''def getLayertypeById(self, tid):
-        query = self.Session.query(LayerType)
-        query=query.filter(LayerType.id == tid)
-        try:
-            return query.first()
-        except Exception as e:
-            print (e)
-            return [] '''
-           
-    
-    '''def getLayerById(self, l_id):
-
-        query = self.Session.query(RasterLayer)
-        query=query.filter(RasterLayer.id == l_id)
-        try:
-            return query.all()
-        except Exception as e:
-            print (e)
-            return []'''    
-    
-    
-    
-    '''def getLayersByDataset(self, dataset_id):
-        """returns a list of all requested datasets.
-        
-        Input parameter:
-            ids – (optional) a list of integers or one single integer
-                when ids is given only the requested datasets with matching ids are returned
-                when ids is none every dataset is returned
-        
-        Returns:
-            a list with Dataset objects/ one object
-        
-        """
-        query = self.Session.query(RasterLayer)
-        print('datasetid ',dataset_id)
-        query=query.filter(RasterLayer.dataset_id == dataset_id)
-        try:
-            return query.all()
-        except Exception as e:
-            print (e)
-            return [] ##empty array'''
-    
-        
-    
-    
-    '''def getLayerTypes(self, ids=None, dic=False):
-        """returns a list of all requested datasets.
-        
-        Input parameter:
-            ids – (optional) a list of integers or one single integer
-                when ids is given only the requested datasets with matching ids are returned
-                when ids is none every dataset is returned
-        
-        Returns:
-            a list with Dataset objects/ one object
-        
-        """
-        
-        query = self.Session.query(LayerType)
-        
-        if isinstance(ids, list):
-            query=query.filter(LayerType.id.in_(ids))
-        elif isinstance(ids, int):
-            query=query.filter(LayerType.id == ids)
-        result = query.all()
-        if not dic:      
-            return result
-        else: #return a dictionary
-            types=[]
-            for l in result:
-                types.append(l.asDict())
-            dic={}
-            dic['layertypes']=types
-            return dic'''
-    
-    '''def getProjections(self, ids=None):
-        """returns a list of all requested projections.
-        
-        Input parameter:
-            ids – (optional) a list of integers or one single integer
-                when ids is given only the requested projections with matching ids are returned
-                when ids is none every projection is returned
-        
-        Returns:
-            a list with Projection objects
-        
-        """
-        
-        query = self.Session.query(Projection)
-        
-        if isinstance(ids, list):
-            query=query.filter(Dataset.id.in_(ids))
-        elif isinstance(ids, int):
-            query=query.filter(Dataset.id == ids)
-            
-        return query.all()'''
-    
-
-
-        
-    '''def newLayerType(self, name, commit=True):
-        
-        assert self.Session is not None
-        
-        try:
-            layerType = LayerType()
-            layerType.name = name
-            self.Session.add(layerType)
-            self.Session.commit()
-            if commit:
-                self.Session.commit()
-            else:
-                self.Session.flush()
-        except:
-            self.Session.rollback()
-            raise'''
-        
-        
-        
-    '''def newProjection(self, name, commit=True):
-        """Adds a new projection to the database"""
-        assert self.Session is not None
-        
-        try:
-            projection = Projection()
-            projection.name = name
-            self.Session.add(projection)
-            if commit:
-                self.Session.commit()
-            else:
-                self.Session.flush()
-        except:
-            self.Session.rollback()
-            raise'''

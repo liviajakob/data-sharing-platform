@@ -45,10 +45,8 @@ def index():
 # TODO: more flexible
 @app.route('/v1/file', methods=['GET'])
 def file():
-    
     pid=request.args.get('layer_id')
     date = request.args.get('date')
-    
     rasterf=getLayerRawfileFilePath(pid, date)
     #raster = '/Users/livia/msc_dissertation/CODE/data_sharing/data/output/datasets/'+str(pid)+'/dem/raw_input.tif'
     response = send_file(rasterf)
@@ -78,8 +76,7 @@ def values():
         }]
     }
     
-    '''
-    
+    '''  
     # TODO: Error handling
     
     lid=request.args.get('layer_id')
@@ -148,7 +145,7 @@ def getLayerRawfileFilePath(layer_id, date):
     '''
     database = Database()
     database.scopedSession()
-    layer = database.getLayers({'id': layer_id})[0]
+    layer = database.getLayerGroups({'id': layer_id})[0]
     #ltype=database.getLayertypeById(layer.layertype).name
     conf = ConfigSystem()
     file = conf.getLayerTimeRawFile( ltype=layer.layertype, d_id=layer.dataset_id, date=date)
@@ -166,7 +163,7 @@ def getLayerProjectedFilePaths(layer_id):
     '''
     database = Database()
     database.scopedSession()
-    layer = database.getLayers({'id': layer_id})[0]
+    layer = database.getLayerGroups({'id': layer_id})[0]
     #ltype=database.getLayertypeById(layer.layertype).name
     conf = ConfigSystem()
     files = conf.getTimeseriesFolders(layer)

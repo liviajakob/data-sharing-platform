@@ -42,8 +42,7 @@
   </button>
   <div class="collapse navbar-collapse" id="collapsibleNavbar">
     <ul class="navbar-nav">
-       <li
-       {% if request.path == "/" %} class="active" {% endif %} >
+       <li {% if request.path == "/" %} class="active" {% endif %} >
         <a class="nav-link" href="/">Map</a>
       </li>   
       <li {% if request.path == '/about' %}class="active"{% endif %}>

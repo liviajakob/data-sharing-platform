@@ -160,7 +160,7 @@ class RasterLayerCreator(Creator):
         '''Creates the raster layer'''        
         layer = self.getExistingLayer()
         if layer is None:
-            layer = self._db.newRasterLayer(dataset_id=self.dataset_id, layerType=self.layertype, date = self.date, commit=False)
+            layer = self._db.newRasterLayerGroup(dataset_id=self.dataset_id, layerType=self.layertype, date = self.date, commit=False)
             self.conf.newLayerFolder(layer)
             self.rollback.addCommand(self.conf.removeFolder, {'folder': self.layerfolder})
             self.conf.newLayerTimeFolder(layer, self.date)
@@ -173,7 +173,7 @@ class RasterLayerCreator(Creator):
             self.rollback.addCommand(self.conf.removeFolder, {'folder': self.layertimefolder})
             self.processFile(layer)
             #update the time series dates
-            self.updateTimeSeries(layer)
+            self.updateLayerGroupDates(layer)
         elif self.forceUpdate: #self.update(duplicate):
             self.logger.info('Time Layer will be updated: Update forced.')
             self.processFile(layer)
@@ -236,12 +236,12 @@ class RasterLayerCreator(Creator):
        
         
     
-    def updateTimeSeries(self, layer):
+    def updateLayerGroupDates(self, layer):
         '''Updates start and end date of a layer within the database'''
         if self.date < layer.startdate:
-            self._db.updateTimeSeries(layer, startdate=self.date, commit=False)
+            self._db.updateLayerGroupDates(layer, startdate=self.date, commit=False)
         elif self.date > layer.enddate:
-            self._db.updateTimeSeries(layer, enddate=self.date, commit=False)
+            self._db.updateLayerGroupDates(layer, enddate=self.date, commit=False)
         self.updateDatasetDates()
     
     def updateDatasetDates(self):
@@ -257,7 +257,7 @@ class RasterLayerCreator(Creator):
     def getExistingLayer(self):
         '''Returns duplicate if layer with same layertyoe already exists, false otherwise'''
         self.logger.info('Checking if layer with same layertype exists...')
-        dupl = self._db.getRasterLayers(filters={'dataset_id': self.dataset_id, 'layertype': self.layertype})
+        dupl = self._db.getRasterLayerGroups(filters={'dataset_id': self.dataset_id, 'layertype': self.layertype})
         if len(dupl)==0:
             return None   
         else:

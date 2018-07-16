@@ -72,7 +72,7 @@ class DEMRAsterProcessing(unittest.TestCase):
         raster_proc.cutRaster(inputfile=self.outputfile_conv, outputfile=self.outputfile_cut)
         self.assertTrue(os.path.exists(self.outputfile_cut))
         raster_proc.readFile(self.outputfile_cut)
-        bound =  raster_proc.getBoundingBox()
+        bound =  raster_proc.getExtent()
         #check if raster is cut to min size
         self.assertEqual(bound, minbound, 'Raster not properly cut')
         

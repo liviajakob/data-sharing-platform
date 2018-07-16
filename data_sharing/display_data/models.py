@@ -1,5 +1,6 @@
 '''
-Created on 25 Apr 2018
+Contains all the database models to create and map database tables
+File: models.py
 
 @author: livia
 '''
@@ -7,29 +8,21 @@ Created on 25 Apr 2018
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.sql import func
-#from sqlalchemy import desc, func
-#import datetime
 
+#Use of the decalrative extension of SQLAlchemy
 Base = declarative_base()
 
 
 
-"""class Projection(Base):
-    '''Represents a Projection table'''
-    __tablename__ = 'projection'
-    id=Column('id',Integer, primary_key=True)
-    name = Column(String(250), unique=True)
-
-    
-    def __str__(self):
-        return "PROJECTION: id={} name={}".format(self.id, self.name)"""
-    
-
-
 class Dataset(Base):
-    '''Represents a dataset table'''
+    '''Class to represent a dataset database table
+    An instance of the class represents one row of the table
+    
+    Inherits from Base from the declarative API
+    '''
     __tablename__ = 'dataset'
+    
+    #table columns
     id = Column('id',Integer, primary_key=True)
     cite = Column(String(250), nullable=False)
     xmin = Column(Float)
@@ -40,15 +33,25 @@ class Dataset(Base):
     startdate = Column(DateTime(timezone=True))
     enddate = Column(DateTime(timezone=True))
     projection=Column(String()) # this is the projection the dataset xmin, xmax etc. are in
-    #ForeignKey("projection.id")
-    #projection = relationship("Projection", backref=backref("dataset"))
     
-    def getBoundingBox(self):
+    def getExtent(self):
+        '''Returns the extent of the dataset
+        
+        Returns:
+            a dictionnary containing the keys:
+                'xmin' - min x value
+                'xmax' - max x value
+                'ymin' - min y value
+                'ymax' - max y value
+        '''
         return {'xmin':self.xmin,'xmax': self.xmax, 'ymin':self.ymin,'ymax': self.ymax}
     
     
     def asGeoDict(self):
-        '''Returns a dict which can be used to convert to a geoJSON'''
+        ''' Returns a dictionary which can be used to convert to a GeoJSON 
+        Dataset extents are represented by GeoJSON polygon geometries
+        
+        '''
         dic = {}
         dic['type']="Feature"
         dic['properties']={}
@@ -66,57 +69,50 @@ class Dataset(Base):
     
     
     def __str__(self):
-        return "DATASET: id={} cite={}".format(self.id, self.cite)
+        return "Dataset: id={}".format(self.id)
    
    
    
-class RasterLayer(Base):
-    '''Represents a layerType table'''
-    __tablename__ = 'rasterlayer'
+class RasterLayerGroup(Base):
+    '''Class to represent a rasterlayer group database table
+    An instance of the class represents one row of the table
+    
+    Inherits from Base from the declarative API
+    '''
+    __tablename__ = 'rasterlayergroup'
+    
+    # table columns
     id = Column('id',Integer, primary_key=True)
-    #timestamp = Column(DateTime(timezone=True), server_default=func.now())
     dataset_id =Column(Integer(), ForeignKey("dataset.id"))
     dataset = relationship("Dataset", backref=backref("layer"))
     layertype = Column(String()) # '''ForeignKey("layerType.id")'''
     startdate = Column(DateTime(timezone=True))
     enddate = Column(DateTime(timezone=True))
-    #layerType = relationship("LayerType", backref=backref("layer"))
+
     
     def asDict(self):
-        '''Returns a dict which can be used to convert to a JSON'''
+        '''Returns itself represented as a dictionary 
+        which can be used to convert to a JSON
+        
+        '''
         dic = {}
         dic['id']=self.id
-        #dic['timestamp']=self.timestamp
         dic['layertype']=self.layertype
         dic['startdate']=str(self.startdate.strftime("%Y-%m-%d"))
         dic['enddate']=str(self.enddate.strftime("%Y-%m-%d"))
-        
         return dic
     
+    
     def __str__(self):
-        return "LAYER: id={} datasetid={}".format(self.id, self.dataset_id)
+        return "Rasterlayer: id={} type={} datasetid={}".format(self.id, self.layertype, self.dataset_id)
        
-   
-"""class LayerType(Base):
-    '''Represents a layertype table'''
-    __tablename__ = 'layerType'
-    id = Column('id',Integer, primary_key=True)
-    name = Column(String(250), unique=True)
-    
-    
-    def __str__(self):
-        return "LAYERTYPE: id={} name={}".format(self.id, self.name)
- 
-    def asDict(self):
-        '''Returns a dict which can be used to convert to a JSON'''
-        dic = {}
-        dic['id']=self.id
-        dic['name']=self.name
-        return dic
-    """
  
     
 def createModels(engine):
-    '''Creates all tables'''
+    '''Creates all database tables from the models
+    
+    Input Parameter:
+        engine - database engine
+    '''
     Base.metadata.create_all(bind=engine)
     

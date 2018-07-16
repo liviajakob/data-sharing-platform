@@ -1,8 +1,6 @@
 {% extends "layout.html" %}
 {% block head %}
 
-
-
     <script src="{{url_for('static', filename='js/External-JS/proj4.js')}}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/4.6.5/ol.css" type="text/css">
 	
@@ -17,11 +15,10 @@
 	<!-- Chart -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
-	
-
 
 	<link rel="stylesheet" type=text/css href="{{url_for('static', filename='css/ol-layerswitcher.css')}}">
-
+	
+	<!-- Custom CSS for map styles and tool styles -->
     <link rel="stylesheet" type=text/css href="{{url_for('static', filename='css/map.css')}}">
 
 
@@ -97,7 +94,7 @@
    
    <div class='map' id="map">{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
    </div>   
-   <!-- div id="popup"></div>  -->
+   
    
    <div id="toolbox" class="maptool">
 	   <div class="content">
@@ -105,43 +102,31 @@
 	   	<hr>
 	   	
 	   	<button id="toggle-swipe" data-toggle="tooltip" data-placement="right" title="Enter swipe mode to compare the two top layers">Swipe Tool</button>
-	   	<button id="toggle-explore" data-toggle="tooltip" data-placement="right" title="Enter explore mode to explore layer values">Explore Tool</button>
+	   	<button id="toggle-explore" data-toggle="tooltip" data-placement="right" title="Enter get values mode to explore layer values">Get Values Tool</button>
 	   	
 	   	<div style="padding-top: 65px">
 	   	<hr>
-	   	<h6>Legend  <span class="info-button" data-toggle="tooltip" data-placement="right" title="Legend of the top visible layer. Click on the legend to get the value of a specific colour"></span></h6>
-	   	
+	   	<h6>Legend  <span class="info-button" data-toggle="tooltip" data-placement="right" title="Legend of the top visible layer. Click on the legend to get the value of a specific colour"></span></h6>	
 	   	   <div id="legend-content" >
 		   <canvas width="150px" height=64px id="legend-bar" data-toggle="tooltip" data-placement="bottom" title=""></canvas>
 		   </div>
 	   	
 	   </div>
 	   </div>
-   </div>
+   </div> <!-- end toolbox -->
    
 
-   
+   <!-- other absolute map elements -->
    <div id="point-info" class="maptool">
    	<div id="point-value"><p>Click on the map to query values of the top layer</p></div>
    </div>
-   
-   <input id="swipe" type="range" class="swipe-slider" >
-   
-   
-      <div id='infobox'>
-   </div>
-   
+   <input id="swipe" type="range" class="swipe-slider" >   
+    <div id='infobox'></div>
    <div id='infobox-detailed'><span id='info-title'></span>
    <div id='infobox-detailed-content'></div>
       </div>
-
-    <!--div id="search" style="position: absolute; top: 60px; right: 50px; padding: 5px; background-color: rgba(255,255,255,0.5);">
-      <input type="text" placeholder="Search for datasets..." style="width: 200px">
-      <button type="button">Search</button>
-    </div-->
-
-<div id="mouse-position" class="maptool">Mouse Position:
-</div>
+	<div id="mouse-position" class="maptool">Mouse Position:
+	</div>
 
 
 </div> <!-- End of fullscreen -->
@@ -155,7 +140,7 @@
 
 <script src="{{url_for('static', filename='js/export.js')}}"></script>
 <script src="{{url_for('static', filename='js/swipe.js')}}"></script>
-<script src="{{url_for('static', filename='js/explore.js')}}"></script>
+<script src="{{url_for('static', filename='js/getvalues.js')}}"></script>
 <script src="{{url_for('static', filename='js/legend.js')}}"></script>
 
 {% endblock %}
