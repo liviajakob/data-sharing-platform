@@ -162,8 +162,6 @@ class Database():
         """
         query = self.Session.query(Dataset)
         
-        print('get datasets')
-        
         #add filters
         for attr, value in filters.items():
             if hasattr(Dataset, attr):
@@ -253,7 +251,6 @@ class Database():
         """
         # we only have Raster Layer Groups for now...
         result = self.getRasterLayerGroups(filters=filters)
-        print('layergroup abstr length', len(result))
         result.sort(key=lambda x: x.layertype, reverse=False)
         ## if pointlayer in database they would be added here to the result
         return result
@@ -267,14 +264,12 @@ class Database():
         for ds in datasets:
             geodic = ds.asGeoDict()
             layergr = self.getLayerGroups({'dataset_id' : ds.id})
-            print('layergroup length', len(layergr))
             layers_dict=[]
             for l in layergr:
                 l_dict=l.asDict()
                 #tile_url = self.conf.getRelativeTilesFolder(l)
                 #l_dict['tileurl'] = tile_url
                 if layerinfo:
-                    print('yeah')
                     l_dict['layers'] = self.getLayerDict(l)
                 #l_dict['layertype']=self.getLayertypeById(l.layertype).name
                 layers_dict.append(l_dict)
@@ -290,28 +285,21 @@ class Database():
         return geoCollection
     
    
-    def getLayerDict(self, layer):
-        timeseries = []
-        dates = self.conf.getTimeseries(layer)
-        for val in reversed(dates):
-            tile = self.conf.getRelativeTilesFolder(layer, val)
-            timeseries.append({'date': val, 'tileurl': tile})
-        return timeseries
-    
-    
-    
-    '''def updateTimestamp(self, layer, commit=True):
+    def getLayerDict(self, layergroup):
+        '''Returns the layers as dictionary
         
-        assert self.Session is not None
-        
-        time = datetime.utcnow() 
-        
-        layer.timestamp = time
-        if commit:
-            self.Session.commit()
-        else:
-            self.Session.flush()'''
+        Input Parameter:
+            layergroup - a RasterLayerGroup object
             
+        '''
+        layers = []
+        dates = self.conf.getLayerDates(layergroup)
+        for val in reversed(dates):
+            tile = self.conf.getRelativeTilesFolder(layergroup, val)
+            layers.append({'date': val, 'tileurl': tile})
+        return layers
+    
+
             
     def updateLayerGroupDates(self, layer, startdate=None, enddate=None, commit=True):
         '''Updates a layers start if the new time layer is not within the old time span'''

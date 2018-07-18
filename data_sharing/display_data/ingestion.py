@@ -1,12 +1,20 @@
 '''
+Responsible for data processing and database ingestion
+File: ingestion.py
+
+Contains:
+    Ingestion             – Initialises the ingestion
+    Creator               – Abstract interface to ingest a dataset or layer
+    DatasetCreator        – Inherits from Creator
+    RasterLayerCreator    – Inherits from Creator
+
 
 @author: livia
 '''
 
-import os, time
+import os
 import shutil
 from display_data.prepare_raster import RasterLayerProcessor, RasterTiler
-from datetime import datetime
 from display_data.system_configuration import ConfigSystem
 from display_data.database import Database
 from display_data.compute_colours import ColourMaker
@@ -14,9 +22,19 @@ import abc
     
     
 class Ingestion(object):
-    '''Handles everything to ingest an new entry'''
+    '''Handles and initialises the ingestion of a dataset or a layer
+    
+    '''
     
     def __init__(self, rollback, logger, database=None):
+        '''Constructor of the Ingestion class
+        
+        Input Parameters:
+            rollback - a Rollback object
+            logger - a python logger
+            database - (optional) a Database object
+        
+        '''
         if database is None:
             self._db = Database(logger=logger) #use the standard settings from the config file
         else:
@@ -27,52 +45,86 @@ class Ingestion(object):
     
     
     def create(self, creator):
+        '''Creates and processes new data
+        What the method creats depends on the type of creator given
+        
+        Input Paramters:
+            creator - an instance of a class inheriting the Creator object
+        
+        '''
         self._db.scopedSession()
         self.rollback.addCommand(self._db.closeSession)
         creator.addConfiguration(database=self._db, logger=self.logger, rollback=self.rollback)
-        creator.create()
+        creator.create() # create data here
         self._db.commit()
         self._db.closeSession()
         
         
 
 
-
-
-
 class Creator(abc.ABC):
+    '''Abstract interface for creators
+    
+    Child classes must include:
+        create(self)
+    '''
     
     @abc.abstractmethod
     def create(self):
+        '''Abstract create method
+        Should implement data processing and creation
+        '''
         pass
     
     def addConfiguration(self, database, logger, rollback):
+        '''Configures the creator
+        
+        Input Parameter:
+            database – a Database object
+            logger - a python logging object
+            rollback - a Rollback object
+        
+        '''
         self._db = database
         self.rollback = rollback
         self.logger = logger
+
+
 
 
 #############################################################
 
 
 class DatasetCreator(Creator):
+    '''Creates a new dataset with layers
+    Manages database ingestion and data processing
     
+    '''
     
     def __init__(self, **kwargs):
+        '''Constructor of DatasetCreator
+        
+        Input Parameter:
+            **kwargs – keyword dictionary containig ingestion information
+                required keywords:
+                    cite (str): information on how to cite the dataset
+                    layers (list): list with layers
+        '''
         self.conf = ConfigSystem()
         self.cite = kwargs['cite']
         self.layers = kwargs['layers']
-        self.projection = self.conf.getProjection() #if want to read user input --> check for var in **kwargs
+        self.projection = self.conf.getProjection()
         
          
     
     def create(self):
+        '''Creates a new dataset with layers
+        
+        '''
         dataset = self._db.newDataset(cite=self.cite, projection=self.projection, commit=False)
         self.conf.setDatasetid(dataset.id)
         self.conf.newDatasetFolder()
-        #self.layers[0]['date']
         self.rollback.addCommand(self.conf.removeDatasetFolder, {'d_id':dataset.id})
-        
         self.addBoundingBox(dataset)
         self.addArea(dataset)
         
@@ -80,17 +132,21 @@ class DatasetCreator(Creator):
         for l in self.layers:
             l['dataset_id'] = dataset.id
             l['dataset'] = dataset
-            creator = RasterLayerCreator(**l)
+            creator = RasterLayerCreator(**l) # new creator for each layer
             creator.addConfiguration(self._db, self.logger, self.rollback)
             creator.create()
             
-        
 
         
-        
     def addBoundingBox(self, dataset):
+        '''adds a bounding box to the dataset database entry
+        
+        Input Parameter:
+            dataset – a Dataset object to which the bounding box is added
+        
+        '''
         assert len(self.layers) > 0
-        ## for now just take the first layer
+        # take the first layer
         file_extension = os.path.splitext(self.layers[0]['layerfile'])[1]
         srcf = os.path.join(self.conf.getDataInputPath(), self.layers[0]['layerfile'])
         rast_proc = RasterLayerProcessor(self.logger)
@@ -98,7 +154,7 @@ class DatasetCreator(Creator):
         repr_file = 'reproject.'+file_extension
         repr_filepath = os.path.join(self.conf.getDataInputPath(), repr_file)
         rast_proc.reproject(srcf, repr_filepath)
-        print('reprojected')
+
         rast_proc.readFile(repr_filepath)
         box=rast_proc.getMinBoundingBox()        
         dataset.xmin = box['xmin']
@@ -106,9 +162,17 @@ class DatasetCreator(Creator):
         dataset.ymin = box['ymin']
         dataset.ymax = box['ymax']
         os.remove(repr_filepath)
-        self.logger.info('ADDED BOUNDING BOX')
+        self.logger.info('Added bounding box to layer')
+    
+    
         
     def addArea(self, dataset):
+        '''adds a bounding box to the dataset database entry
+        
+        Input Parameter:
+            dataset – a Dataset object to which the bounding box is added
+        
+        '''
         dataset.area=abs((dataset.xmax-dataset.xmin)*(dataset.xmax-dataset.xmin))
 
   
@@ -117,13 +181,25 @@ class DatasetCreator(Creator):
 ##############################################################  
     
 class RasterLayerCreator(Creator):
-    '''Prepares and creates a Layer'''
+    '''Prepares and creates a new raster layer'''
     
     def __init__(self, **kwargs):
+        '''Constructor of RasterLayerCreator
         
-        print('KWARGS', kwargs)
-        print(kwargs['dataset_id'])
-        
+        Input Parameter:
+            **kwargs – keyword dictionary containig ingestion information
+                required keywords:
+                    layerfile (str): layer file name
+                    layertype (str): a layertype (options specified in config.conf)
+                    date (datetime): date of the layer; format YYYY-MM-DD (datetime.datetime)
+                    dataset_id (int): the dataset id
+                optional keywords:
+                    dataset: an instance of the Dataset class representing the database entry
+                    min (float/int): minimum value for saturation; default is in the config.conf file
+                    max (float/int): maximum value for saturation; default is in the config.conf file
+                    forceupdate (boolean): true if file update should be forced, false otherwise (default: false)
+        '''
+
         self.layertype = kwargs['layertype']
         self.layerfile = kwargs['layerfile']
         self.dataset_id = kwargs['dataset_id']
@@ -132,22 +208,20 @@ class RasterLayerCreator(Creator):
         self.dataset = None
         if 'dataset' in kwargs:
             self.dataset = kwargs['dataset']
-            
-            
+               
         self.conf = ConfigSystem(dataset_id=self.dataset_id)
-        self.layertimefolder = self.conf.getLayerTimeFolderByAttributes(self.layertype, self.date, self.dataset_id)
-        self.layerfolder = self.conf.getLayerFolderByAttributes(self.layertype, self.dataset_id)
+        self.layertimefolder = self.conf.getLayerFolderByAttributes(self.layertype, self.date, self.dataset_id)
+        self.layerfolder = self.conf.getLayerGroupFolderByAttributes(self.layertype, self.dataset_id)
         scale = self.conf.getLayerScale(self.layertype)
+        
         if 'min' in kwargs and kwargs['min'] is not None:
             self.min = kwargs['min']
         else:
-            self.min = scale['min']
-            
+            self.min = scale['min']           
         if 'max' in kwargs and kwargs['max'] is not None:
             self.max = kwargs['max']
         else:
-            self.max = scale['max']
-        
+            self.max = scale['max']        
         if 'forceupdate' in kwargs:
             self.forceUpdate = kwargs['forceupdate']
         else:
@@ -157,22 +231,24 @@ class RasterLayerCreator(Creator):
         
     
     def create(self):
-        '''Creates the raster layer'''        
-        layer = self.getExistingLayer()
+        '''Creates and processes the raster layer
+        
+        '''        
+        layer = self.getExistingLayerGroup() # see if database entry exist for layer group
         if layer is None:
             layer = self._db.newRasterLayerGroup(dataset_id=self.dataset_id, layerType=self.layertype, date = self.date, commit=False)
-            self.conf.newLayerFolder(layer)
+            self.conf.newLayerGroupFolder(layer)
             self.rollback.addCommand(self.conf.removeFolder, {'folder': self.layerfolder})
-            self.conf.newLayerTimeFolder(layer, self.date)
+            self.conf.newLayerFolder(layer, self.date)
             self.processFile(layer)
             self.updateDatasetDates()
             
         elif not os.path.isdir(self.layertimefolder):
-            self.logger.info('Adding new time layer.')
-            self.conf.newLayerTimeFolder(layer, self.date)
+            self.logger.info('Adding new layer.')
+            self.conf.newLayerFolder(layer, self.date)
             self.rollback.addCommand(self.conf.removeFolder, {'folder': self.layertimefolder})
             self.processFile(layer)
-            #update the time series dates
+            #update the layergroup dates
             self.updateLayerGroupDates(layer)
         elif self.forceUpdate: #self.update(duplicate):
             self.logger.info('Time Layer will be updated: Update forced.')
@@ -215,14 +291,14 @@ class RasterLayerCreator(Creator):
         self.rast_proc.cutRaster(inputfile=proj, outputfile=cut)
         
         # 4. compute colourfile
-        colfile = self.conf.getLayersColourfile(layer)
+        colfile = self.conf.getLayerGroupsColourfile(layer)
         if not os.path.isfile(colfile): 
-            col_inputfile = self.conf.getSampleColourFile(self.layertype)
+            col_inputfile = self.conf.getColourFileTemplate(self.layertype)
             colgen = ColourMaker(col_inputfile, colfile)
             colgen.computeColours(self.min, self.max)
                 
         # 5. add colour
-        col_rast = os.path.join(self.conf.getLayerTimeFolderByAttributes(self.layertype, self.date, self.dataset_id), ('coloured'+file_extension))
+        col_rast = os.path.join(self.conf.getLayerFolderByAttributes(self.layertype, self.date, self.dataset_id), ('coloured'+file_extension))
         self.rast_proc.addColours(inputfile=cut, outputfile=col_rast, colourfile=colfile) # take the above computed as input
         
         # 6. tile
@@ -232,7 +308,6 @@ class RasterLayerCreator(Creator):
         zoom = tiler.calculateZoom(self.dataset.area)
         tiler.createTiles(col_rast, self.conf.getTilesFolder(self.layertype, self.date, d_id = self.dataset_id), zoom=zoom)
             
-        print('FILE: ', self.layerfile, ' TYPE: ', self.layertype, ' DATASETID', self.dataset_id)
        
         
     
@@ -254,7 +329,7 @@ class RasterLayerCreator(Creator):
             self._db.updateDatasetDates(self.dataset, enddate=self.date, commit=False)
         
         
-    def getExistingLayer(self):
+    def getExistingLayerGroup(self):
         '''Returns duplicate if layer with same layertyoe already exists, false otherwise'''
         self.logger.info('Checking if layer with same layertype exists...')
         dupl = self._db.getRasterLayerGroups(filters={'dataset_id': self.dataset_id, 'layertype': self.layertype})

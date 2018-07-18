@@ -113,7 +113,7 @@ def datasets():
             
     print(request.args)
     
-    datasets=database.getDatasets(request.args.to_dict(), dic=True, orderbyarea=False, timelayers=True)
+    datasets=database.getDatasets(request.args.to_dict(), dic=True, orderbyarea=False, layerinfo=True)
     database.closeSession()
     
     if protocol.lower() == 'json':
@@ -148,7 +148,7 @@ def getLayerRawfileFilePath(layer_id, date):
     layer = database.getLayerGroups({'id': layer_id})[0]
     #ltype=database.getLayertypeById(layer.layertype).name
     conf = ConfigSystem()
-    file = conf.getLayerTimeRawFile( ltype=layer.layertype, d_id=layer.dataset_id, date=date)
+    file = conf.getLayerRawFile( ltype=layer.layertype, d_id=layer.dataset_id, date=date)
     
     database.closeSession()
     return file
@@ -166,7 +166,7 @@ def getLayerProjectedFilePaths(layer_id):
     layer = database.getLayerGroups({'id': layer_id})[0]
     #ltype=database.getLayertypeById(layer.layertype).name
     conf = ConfigSystem()
-    files = conf.getTimeseriesFolders(layer)
+    files = conf.getLayerFolders(layer)
     database.closeSession()
     raw = conf.getReprojectedFilename()
     for i, f in enumerate(files): ## add the raw file to the path

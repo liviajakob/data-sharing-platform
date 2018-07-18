@@ -36,7 +36,7 @@ def colours():
     
 
     conf= ConfigSystem()
-    pth = conf.getLayersColourfile(layer)
+    pth = conf.getLayerGroupsColourfile(layer)
     file_o = open(pth, 'r')
     lines = file_o.readlines()
     rgbarr=[]
