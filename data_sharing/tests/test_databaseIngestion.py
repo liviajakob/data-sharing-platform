@@ -19,7 +19,7 @@ class DatabaseIngestionTest(unittest.TestCase):
         logging.basicConfig(level=logging.INFO) #NOTSET gives all the levels, e.g. INFO only .info
         self.logger = logging.getLogger(__name__)
         
-        rollback=Rollback(self.logger)
+        rollback=Rollback()
         
         #self.insert=Ingestion(rollback=rollback, logger=self.logger, database=self.db)
         #self.insert.addDataset(layers=None, cite='hi')

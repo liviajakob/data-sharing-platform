@@ -104,9 +104,24 @@ class ConfigSystem():
         i = self.config['layers']['types'].index(layertype)
         filename = self.config['layers']['colours'][i]
         return os.path.join(self.config['layers']['colpath'], filename)
+   
+   
+    def getColourMethod(self, layertype):
+        '''Returns the method with which a colourfile of a certain layertype should be computed from the config file
+        
+        Input Parameter:
+            layertype (String) – type of a layer, e.g. 'dem', options configured in config file
+        
+        Returns:
+            colourmethod (String) – the method to create the colourfiles, e.g. 'linear' or 'centred'
+        '''
+        assert layertype in self.config['layers']['types']
+        i = self.config['layers']['types'].index(layertype)
+        colmethod = self.config['layers']['colourmethods'][i]
+        return colmethod
     
     
-    def getLayerScale(self, layertype):
+    def getScale(self, layertype):
         '''Returns saturation scale for a layertype from the config file
         
         Input Parameter:

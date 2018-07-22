@@ -301,13 +301,13 @@ class Database():
     
 
             
-    def updateLayerGroupDates(self, layer, startdate=None, enddate=None, commit=True):
-        '''Updates a layers start if the new time layer is not within the old time span'''
+    def updateLayerGroupDates(self, layergroup, startdate=None, enddate=None, commit=True):
+        '''Updates a layers start if the new time layergroup is not within the old time span'''
         assert self.Session is not None
         if enddate is not None:
-            layer.enddate = enddate
+            layergroup.enddate = enddate
         if startdate is not None:
-            layer.startdate = startdate
+            layergroup.startdate = startdate
         if commit:
             self.Session.commit()
         else:

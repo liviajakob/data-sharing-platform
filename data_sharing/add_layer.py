@@ -75,9 +75,12 @@ def add_layer(**kwargs):
         kwargs - a keyword dictionary containing information to add the new layer
         
     '''
-    logging.basicConfig(level=logging.NOTSET) #NOTSET gives all the levels, e.g. INFO only .info
+    logging.basicConfig(level=logging.INFO) 
     logger = logging.getLogger(__name__)
-    rollback = Rollback(logger)
+    # add handler file
+    handler = logging.FileHandler('add_dataset.log')
+    handler.setLevel(logging.NOTSET)#NOTSET gives all the levels, e.g. INFO only .info
+    rollback = Rollback()
 
     try:
         ing = Ingestion(rollback, logger)
@@ -91,6 +94,8 @@ def add_layer(**kwargs):
             logger.error(e.message)
         else:
             logger.error(traceback.format_exc()) 
+        logger.info('See the log file add_layer.log for more information about the error')
+
         
 
 

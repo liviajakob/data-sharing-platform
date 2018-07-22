@@ -200,31 +200,12 @@ class RasterLayerProcessor(object):
             boundbox = self.getMinBoundingBox() # calculate bounding box 
         
         commandlist=['gdalwarp', '-te', str(boundbox['xmin']), str(boundbox['ymin']), str(boundbox['xmax']), str(boundbox['ymax']), '-overwrite', inputfile, outputfile]
-        print(commandlist)
         subprocess.call(commandlist)
         
     
     def reproject(self, inputfile, outputfile, projection='EPSG:3413'):
         commandlist=['gdalwarp', '-t_srs', projection, '-overwrite', inputfile, outputfile]
-        print('reproject...')
-        print(commandlist)
         subprocess.call(commandlist)
-    
-    # @TODO delete not hardcoded!
-    def to8Bit(self, inputfile, outputfile, scale, fileformat='GTiff', bits=[1,255], nodata=0):
-        '''Converts the raster to 8-bits
-        
-        Input Params:
-            scale -- [minraster, maxraster, min_newraster, max_newraster]
-        
-        '''
-        print(scale, type(scale))
-        self.logger.info('Converting raster to 8 Bit...')
-        commandlist=['gdal_translate', '-ot', 'Byte', '-of', fileformat, '-scale', str(scale['min']), str(scale['max']), str(bits[0]), str(bits[1]),''''-exponent', str(exponent),''' '-a_nodata', str(nodata), inputfile, outputfile]
-        print(commandlist)
-        subprocess.call(commandlist)
-
-        self.logger.info('Finished converting to 8 Bit')
         
     
     

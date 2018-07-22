@@ -17,7 +17,7 @@ import shutil
 from display_data.prepare_raster import RasterLayerProcessor, RasterTiler
 from display_data.system_configuration import ConfigSystem
 from display_data.database import Database
-from display_data.compute_colours import ColourMaker
+from display_data.compute_colours import ColourFactory
 import abc
     
     
@@ -181,7 +181,10 @@ class DatasetCreator(Creator):
 ##############################################################  
     
 class RasterLayerCreator(Creator):
-    '''Prepares and creates a new raster layer'''
+    '''Prepares and creates a new raster layer
+    Manages database ingestion and data processing
+    
+    '''
     
     def __init__(self, **kwargs):
         '''Constructor of RasterLayerCreator
@@ -210,9 +213,9 @@ class RasterLayerCreator(Creator):
             self.dataset = kwargs['dataset']
                
         self.conf = ConfigSystem(dataset_id=self.dataset_id)
-        self.layertimefolder = self.conf.getLayerFolderByAttributes(self.layertype, self.date, self.dataset_id)
-        self.layerfolder = self.conf.getLayerGroupFolderByAttributes(self.layertype, self.dataset_id)
-        scale = self.conf.getLayerScale(self.layertype)
+        self.layerfolder = self.conf.getLayerFolderByAttributes(self.layertype, self.date, self.dataset_id)
+        self.layergroupfolder = self.conf.getLayerGroupFolderByAttributes(self.layertype, self.dataset_id)
+        scale = self.conf.getScale(self.layertype)
         
         if 'min' in kwargs and kwargs['min'] is not None:
             self.min = kwargs['min']
@@ -238,15 +241,15 @@ class RasterLayerCreator(Creator):
         if layer is None:
             layer = self._db.newRasterLayerGroup(dataset_id=self.dataset_id, layerType=self.layertype, date = self.date, commit=False)
             self.conf.newLayerGroupFolder(layer)
-            self.rollback.addCommand(self.conf.removeFolder, {'folder': self.layerfolder})
+            self.rollback.addCommand(self.conf.removeFolder, {'folder': self.layergroupfolder})
             self.conf.newLayerFolder(layer, self.date)
             self.processFile(layer)
             self.updateDatasetDates()
             
-        elif not os.path.isdir(self.layertimefolder):
+        elif not os.path.isdir(self.layerfolder):
             self.logger.info('Adding new layer.')
             self.conf.newLayerFolder(layer, self.date)
-            self.rollback.addCommand(self.conf.removeFolder, {'folder': self.layertimefolder})
+            self.rollback.addCommand(self.conf.removeFolder, {'folder': self.layerfolder})
             self.processFile(layer)
             #update the layergroup dates
             self.updateLayerGroupDates(layer)
@@ -262,11 +265,14 @@ class RasterLayerCreator(Creator):
         
         
         
-    def processFile(self, layer):
-        '''Processes the layer input file and prepares it for display
+    def processFile(self, layergroup):
+        '''Processes the layergroup input file and prepares it for display
+        
+        Input Parameter:
+            layergroup – a LayerGroup / RasterLayerGroup object
         
         Steps are:
-            1. Copy original file and save in layer folder
+            1. Copy original file and save in layergroup folder
             2. Reproject file to configured projection
             3. Crop nan values in raster file
             4. Dynamically compute colourfile with min and max values
@@ -279,27 +285,29 @@ class RasterLayerCreator(Creator):
         srcf = os.path.join(self.conf.getDataInputPath(), self.layerfile)
         
         # 1. save init file in output folder
-        cp = os.path.join(self.layertimefolder, (self.conf.getRawInputFilename()+file_extension))
+        cp = os.path.join(self.layerfolder, (self.conf.getRawInputFilename()+file_extension))
         shutil.copyfile(srcf, cp)
         
         # 2. reproject
-        proj = os.path.join(self.layertimefolder, (self.conf.getReprojectedFilename()+file_extension))
+        proj = os.path.join(self.layerfolder, (self.conf.getReprojectedFilename()+file_extension))
         self.rast_proc.reproject(inputfile=srcf, outputfile=proj)
         
         # 3. cut raster
-        cut = os.path.join(self.layertimefolder, ('cropped'+file_extension))
+        cut = os.path.join(self.layerfolder, ('cropped'+file_extension))
         self.rast_proc.cutRaster(inputfile=proj, outputfile=cut)
         
         # 4. compute colourfile
-        colfile = self.conf.getLayerGroupsColourfile(layer)
-        if not os.path.isfile(colfile): 
+        col_output = self.conf.getLayerGroupsColourfile(layergroup)
+        if not os.path.isfile(col_output): 
             col_inputfile = self.conf.getColourFileTemplate(self.layertype)
-            colgen = ColourMaker(col_inputfile, colfile)
+            col_method = self.conf.getColourMethod(self.layertype)
+            # create right ColourCreator with ColourFactory
+            colgen = ColourFactory().get_colourmaker(col_method, col_inputfile, col_output)
             colgen.computeColours(self.min, self.max)
                 
         # 5. add colour
         col_rast = os.path.join(self.conf.getLayerFolderByAttributes(self.layertype, self.date, self.dataset_id), ('coloured'+file_extension))
-        self.rast_proc.addColours(inputfile=cut, outputfile=col_rast, colourfile=colfile) # take the above computed as input
+        self.rast_proc.addColours(inputfile=cut, outputfile=col_rast, colourfile=col_output) # take the above computed as input
         
         # 6. tile
         tiler = RasterTiler()
@@ -311,16 +319,22 @@ class RasterLayerCreator(Creator):
        
         
     
-    def updateLayerGroupDates(self, layer):
-        '''Updates start and end date of a layer within the database'''
-        if self.date < layer.startdate:
-            self._db.updateLayerGroupDates(layer, startdate=self.date, commit=False)
-        elif self.date > layer.enddate:
-            self._db.updateLayerGroupDates(layer, enddate=self.date, commit=False)
+    def updateLayerGroupDates(self, layergroup):
+        '''Updates start and end date of a layergroup within the database
+        
+        Input Parameter:
+            layergroup – a LayerGroup/RasterLayerGroup object representing an entry within the database
+        '''
+        if self.date < layergroup.startdate:
+            self._db.updateLayerGroupDates(layergroup, startdate=self.date, commit=False)
+        elif self.date > layergroup.enddate:
+            self._db.updateLayerGroupDates(layergroup, enddate=self.date, commit=False)
         self.updateDatasetDates()
     
     def updateDatasetDates(self):
-        '''Updates the datasets dates (self.dataset) within the database'''
+        '''Updates the datasets dates (from self.dataset) within the database
+        
+        '''
         if self.dataset is None:
             self.dataset = self._db.getDatasets(filters={'id': self.dataset_id})
         if self.dataset.startdate is None or self.date < self.dataset.startdate:
@@ -330,7 +344,11 @@ class RasterLayerCreator(Creator):
         
         
     def getExistingLayerGroup(self):
-        '''Returns duplicate if layer with same layertyoe already exists, false otherwise'''
+        '''Returns layer group if dataset with same layertype already exists
+        
+        Returns – LayerGroup/RasterLayerGroup object if it exists in database, None otherwise
+        
+        '''
         self.logger.info('Checking if layer with same layertype exists...')
         dupl = self._db.getRasterLayerGroups(filters={'dataset_id': self.dataset_id, 'layertype': self.layertype})
         if len(dupl)==0:
@@ -340,14 +358,3 @@ class RasterLayerCreator(Creator):
             return dupl[0]
         
         
-        
-    """def update(self, duplicate):
-        '''Returns true if time layer should be updated, false otherwise'''
-        self.logger.info('Checking for updates...')
-        srcf = os.path.join(self.conf.getDataInputPath(), self.layerfile)
-        timestamp = time.ctime(os.path.getmtime(srcf))
-        timestamp = datetime.strptime(timestamp, "%a %b %d %H:%M:%S %Y")
-        if timestamp >= duplicate.timestamp: 
-            return True
-        else:
-            return False"""
