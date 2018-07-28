@@ -1,39 +1,82 @@
 '''
-API for accessing the data of the IceExplorer
+External RESTful API for accessing the data of the IceExplorer
+File: api.py
+
+API Endpoints:
+    file
+    datasets
+    getvalues
+    
+Classes:
+    APIRequestException – API Exception class
 
 @author: livia
 '''
 from display_data.database import Database
 from flask import Flask, jsonify, request, send_file, Response
-from flask_restful import Resource, Api
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from display_data.system_configuration import ConfigSystem
 from get_data.query_point import retrieve_pixel_value
 import os, glob
 from dicttoxml import dicttoxml
+from datetime import datetime
+
 
 app = Flask(__name__)
 CORS(app) #allow cross origin
 
 
-# TODO: more flexible
 @app.route('/v1/file', methods=['GET'])
 def file():
-    pid=request.args.get('layergroup_id')
-    date = request.args.get('date')
+    '''file API endpoint:
+    
+    URL Input Parameter:
+        layergroup_id (int) - (required) Layer group id
+        date - (required) Date of the layer in the following format: 'YYYY-MM-DD' (e.g. 2013-11-21)
+    
+    Endpoint URL: 
+    root/v1/file
+    
+    Example URL:
+    root/v1/file?layergroup_id=1&date=2017-06-26
+    
+    Response type:
+        the requested file, e.g. a TIFF file
+    
+    '''
+    ## layergroup_id
+    try:
+        pid=request.args.get('layergroup_id')
+        pid = int(pid)
+    except TypeError:
+        raise APIRequestException('Missing Arguments: <layergroup_id> is missing', status_code=419)
+    except ValueError:
+        raise APIRequestException('Invalid Arguments: <layergroup_id> must be an integer', status_code=420)
+    ## date
+    try:
+        date=request.args.get('date')
+        datetime.strptime(date, "%Y-%m-%d")
+    except TypeError:
+        raise APIRequestException('Missing Arguments: <date> is missing', status_code=419)
+    except ValueError:
+        raise APIRequestException('Invalid Arguments: <date> is in the wrong format, should be YYY-MM-DD', status_code=420)
+    # get the file path
     rasterf=getLayerRawfileFilePath(pid, date)
-    #raster = '/Users/livia/msc_dissertation/CODE/data_sharing/data/output/datasets/'+str(pid)+'/dem/raw_input.tif'
-    response = send_file(rasterf)
+    try:
+        response = send_file(rasterf)
+    except FileNotFoundError:
+        raise APIRequestException('Not Found: Requested file could not be found, check if the input parameters match', status_code=404)
     return response
+
 
 @app.route('/v1/values', methods=['GET'])
 def values():
     '''Returns date and value pairs of the time layers of a given layer and x and y coordinates
     
-    Input parameter -
-        layer_id - the id of the queried layer
-        x - x-Coordinate
-        y - y-Coordinate
+    URL Input parameter:
+        layergroup_id (int) - the id of the queried layer
+        x (str/float) - x-Coordinate
+        y (str/float) - y-Coordinate
     
     
     Response type: JSON
@@ -51,23 +94,33 @@ def values():
     }
     
     '''  
-    # TODO: Error handling
-    
     try:
-        lid=request.args.get('layer_id')
-    except:
-        pass
+        lid=request.args.get('layergroup_id')
+        lid = int(lid)
+    except TypeError:
+        raise APIRequestException('Missing Arguments: <layergroup_id> is missing', status_code=419)
+    except ValueError:
+        raise APIRequestException('Invalid Arguments: <layergroup_id> must be an integer', status_code=420)
+
     fnames=getLayerProjectedFilePaths(lid)
+    
+    #coordinates
     x = request.args.get('x')
     y = request.args.get('y')
-    coords=[float(x),float(y)]
+    try:
+        coords=[float(x),float(y)]
+    except TypeError:
+        raise APIRequestException('Missing Arguments: coordinates are missing', status_code=419)
+    except ValueError:
+        raise APIRequestException('Invalid Arguments: coordinates are in the wrong format, float is expected', status_code=420)    
+    
     pixelvalues=[]
     for fname in fnames:
         val=retrieve_pixel_value(coords, fname)
         try:
             val = round(val,4)
         except:
-            pass
+            raise APIRequestException('Internal Server Error: unexpected internal server error', status_code=500) 
         date = os.path.basename(os.path.dirname(fname)) #folder name
         pixelvalues.append({'y': val, 'x': date})
     
@@ -76,84 +129,148 @@ def values():
     return jsonify(response)
 
 
-# TODO: Error handling 
+
 @app.route('/v1/datasets', methods=['GET'])
 def datasets():
-    '''Returns a JSON of the datasets, including filteroptions'''
+    '''Returns dataset information, including filteroptions
+    
+    URL Input Paramters:
+        layertype (str) - (optional) Type of data. Use one of the following: dem, error, velocity, rate
+        startdate (str) - (optional) Filters only datasets with layers starting before this date. Format: 'YYYY-MM-DD' (e.g. 2013-11-21)
+        enddate (str) - (optional)     Filters only datasets with layers ending after this date. Format: 'YYYY-MM-DD' (e.g. 2013-11-21)
+        id (int) – (optional) Dataset id. Only returns the dataset with the specified id
+        page (int) – (optional), (default: 1) Page number. The default page size is 100 datasets
+        response (str) – (optional), (default: json) Response type. Use one of the following: json, xml
+    
+    Endpoint URL: 
+    root/v1/datasets
+    
+    Example URL:
+    root/v1/datasets?layertype=dem&startdate=2011-09-21
+    
+    Response type:
+        the data in requested protocol type 
+    
+    '''
     database = Database()
     database.scopedSession()
     
+    # pagination
+    page=0
+    page_size=100
+    if 'page' in request.args:
+        try:
+            page=int(request.args.get('page'))-1
+        except ValueError:
+            raise APIRequestException('Invalid Arguments: <page> must be an integer', status_code=420)
+    
+    try:
+        datasets=database.getDatasets(request.args.to_dict(), dic=True, page=page, page_size=page_size, orderbyarea=False, layerinfo=True)
+    except ValueError:
+        raise APIRequestException('Invalid Arguments: one or multiple input parameters are invalid, refer to the documentation', status_code=420)
+    
+    database.closeSession()
+    
+    # protocol types
     protocol = 'json'
     if 'protocol' in request.args:
         protocol = request.args.get('protocol')
-            
-    print(request.args)
-    
-    page=0
-    page_size=100
-    try:
-        page=int(request.args.get('page'))-1
-    except:
-        # TODO: error message
-        pass
-    
-    datasets=database.getDatasets(request.args.to_dict(), dic=True, page=page, page_size=page_size, orderbyarea=False, layerinfo=True)
-    database.closeSession()
-    
-    
-    
-    
-    
-    
     if protocol.lower() == 'json':
-        return jsonify(datasets) #jsonify is flask function, so header is set automatically
+        return jsonify(datasets) #jsonify is a flask function, so header is set automatically
     elif protocol.lower() == 'xml':
         xml=dicttoxml(datasets)
         return Response(xml, mimetype='text/xml')
     else:
-        return protocol +' is not a valid protocol type'
+        raise APIRequestException('Invalid Arguments: <<'+ protocol +'>> is not a valid <protocol> type', status_code=420)
 
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return "<h1>404</h1><p>The resource could not be found.</p>", 404
+
+    
+## Error Handling
+
+class APIRequestException(Exception):
+    '''Exception class for API Exceptions
+    
+    Inherits from Exceptions    
+    
+    '''
+    
+    # default status code is 400
+    status_code = 400
+
+    def __init__(self, message, status_code=None):
+        '''
+        Input Parameters:
+            message (str) – Error message
+            status_code (int) – (optional) status code of the occurred error
+        
+        '''
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+
+    def to_dict(self):
+        '''Converts the error message to a dictionnary
+        
+        Returns:
+            dict – a dictionnary of the Error
+        '''
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        rv['status_code'] = self.status_code
+        return rv
 
 
+@app.errorhandler(APIRequestException)
+def handle_invalid_usage(error):
+    '''Flask error handler to handle the APIRequestException
+    
+    Response:
+        a JSON with information about the occurred Error
+    '''
+    response = error.to_dict()
+    response = jsonify(response)
+    return response
 
 
 ###### Helper Methods
 
  
-def getLayerRawfileFilePath(layer_id, date):
+def getLayerRawfileFilePath(layergroup_id, date):
     '''Returns one raw file (unprojected) path
     
     Input Parameter:
-        layer_id - ID of the layer
-        date - date of the time layer
+        layergroup_id - ID of the layer group
+        date - date of the layer
     
     '''
     database = Database()
     database.scopedSession()
-    layer = database.getLayerGroups({'id': layer_id})[0]
-    #ltype=database.getLayertypeById(layer.layertype).name
+    try:
+        layer = database.getLayerGroups({'id': layergroup_id})[0]
+    except IndexError:
+        raise APIRequestException('Not Found: Requested layergroup does not exist', status_code=404)
     conf = ConfigSystem()
     file = conf.getLayerRawFile( ltype=layer.layertype, d_id=layer.dataset_id, date=date)
-    
     database.closeSession()
     return file
      
   
 
-def getLayerProjectedFilePaths(layer_id):
+def getLayerProjectedFilePaths(layergroup_id):
     '''Returns reprojected raw file path of all the time series files of a layer
     
     Input Parameter:
-        layer_id - ID of the layer
+        layergroup_id - ID of the layer group
     '''
     database = Database()
     database.scopedSession()
-    layer = database.getLayerGroups({'id': layer_id})[0]
-    #ltype=database.getLayertypeById(layer.layertype).name
+    try:
+        layer = database.getLayerGroups({'id': layergroup_id})[0]
+    except IndexError:
+        raise APIRequestException('Not Found: Requested layergroup does not exist', status_code=404)
+    
     conf = ConfigSystem()
     files = conf.getLayerFolders(layer)
     database.closeSession()
@@ -163,36 +280,9 @@ def getLayerProjectedFilePaths(layer_id):
         for file in glob.glob(f+'.*'): #get files with any extension
             f=file
             break
-        files[i] = f
-        
+        files[i] = f   
     return files
 
-
-
-    
-## Error Handling
-
-class InvalidUsage(Exception):
-    status_code = 400
-
-    def __init__(self, message, status_code=None, payload=None):
-        Exception.__init__(self)
-        self.message = message
-        if status_code is not None:
-            self.status_code = status_code
-        self.payload = payload
-
-    def to_dict(self):
-        rv = dict(self.payload or ())
-        rv['message'] = self.message
-        return rv
-
-
-@app.errorhandler(InvalidUsage)
-def handle_invalid_usage(error):
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
-    return response
 
 
 ###

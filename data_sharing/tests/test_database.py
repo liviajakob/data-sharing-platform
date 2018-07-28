@@ -1,13 +1,13 @@
 '''
+Unittests for the Database class
+File: test_database.py
+
 @author: livia
 '''
 import unittest
 from display_data import Database
 import sys, os
-from numpy.lib.tests.test_io import strptime
 from datetime import datetime
-
-
 
 
 class DatabaseTest(unittest.TestCase):
@@ -29,7 +29,7 @@ class DatabaseTest(unittest.TestCase):
 
     def tearDown(self):
         '''Drops the tables and closes the connection'''
-        self.db.dropTables("livia")
+        self.db.dropTables()
         self.db.closeSession()
 
 
@@ -47,9 +47,9 @@ class DatabaseTest(unittest.TestCase):
         self.db.newDataset("this is how", 'EPSG:3413')
         self.db.newDataset("cite...", 'EPSG:3413')
         self.db.newDataset("this is how you cite", 'EPSG:3413')
-        self.db.newRasterLayerGroup(1, "dem", strptime('2017-06-26', "%Y-%m-%d"))
-        self.db.newRasterLayerGroup(1, "error", strptime('2017-06-29', "%Y-%m-%d"))
-        self.db.newRasterLayerGroup(2, "dem", strptime('2017-06-26', "%Y-%m-%d"))
+        self.db.newRasterLayerGroup(1, "dem", datetime.strptime('2017-06-26', "%Y-%m-%d"))
+        self.db.newRasterLayerGroup(1, "error", datetime.strptime('2017-06-29', "%Y-%m-%d"))
+        self.db.newRasterLayerGroup(2, "dem", datetime.strptime('2017-06-26', "%Y-%m-%d"))
         
         self.db.commit()
         
@@ -61,10 +61,7 @@ class DatabaseTest(unittest.TestCase):
         filters={'dataset_id' : 1, 'layertype' : 'dem'}
         self.assertEquals(self.db.getRasterLayerGroups(filters)[0].layertype, 'dem', "couldnt insert dem layer")
         self.assertEquals(self.db.getRasterLayerGroups(filters)[0].enddate, datetime(2017, 6, 26, 0, 0), "couldnt insert dem layer")
-        
-        
-        
-
+    
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

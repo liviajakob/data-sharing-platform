@@ -153,7 +153,7 @@ class DatasetCreator(Creator):
         
         repr_file = 'reproject.'+file_extension
         repr_filepath = os.path.join(self.conf.getDataInputPath(), repr_file)
-        rast_proc.reproject(srcf, repr_filepath)
+        rast_proc.reproject(srcf, repr_filepath, projection=self.projection)
 
         rast_proc.readFile(repr_filepath)
         box=rast_proc.getMinBoundingBox()        
@@ -215,7 +215,9 @@ class RasterLayerCreator(Creator):
         self.conf = ConfigSystem(dataset_id=self.dataset_id)
         self.layerfolder = self.conf.getLayerFolderByAttributes(self.layertype, self.date, self.dataset_id)
         self.layergroupfolder = self.conf.getLayerGroupFolderByAttributes(self.layertype, self.dataset_id)
+        self.projection = self.conf.getProjection()
         scale = self.conf.getScale(self.layertype)
+        
         
         if 'min' in kwargs and kwargs['min'] is not None:
             self.min = kwargs['min']
@@ -290,7 +292,7 @@ class RasterLayerCreator(Creator):
         
         # 2. reproject
         proj = os.path.join(self.layerfolder, (self.conf.getReprojectedFilename()+file_extension))
-        self.rast_proc.reproject(inputfile=srcf, outputfile=proj)
+        self.rast_proc.reproject(inputfile=srcf, outputfile=proj, projection=self.projection)
         
         # 3. cut raster
         cut = os.path.join(self.layerfolder, ('cropped'+file_extension))

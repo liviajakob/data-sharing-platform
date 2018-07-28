@@ -21,8 +21,6 @@
 	<!-- Custom CSS for map styles and tool styles -->
     <link rel="stylesheet" type=text/css href="{{url_for('static', filename='css/map.css')}}">
 
-
-
     
 {% endblock %}
 {% block content %}
@@ -81,21 +79,17 @@
 	<a href="https://www.ed.ac.uk/"><img class="logo-small" src="{{ url_for('static', filename='img/logo_ed.png') }}" alt="University of Edinburgh"></img></a>
 	<a href="https://www.esa.int"><img class="logo-small" src="{{ url_for('static', filename='img/logo_esa.png') }}" alt="ESA"></img></a>
 	<a href="https://cryotop-evolution.org/"><img class="logo-small" src="{{ url_for('static', filename='img/logo_cryo.png') }}"alt="CryoTop Evolution"></img></a>
-	
 	</div>
 	
 	<div id="attribution"></div>
     </div> <!-- end side-content -->
     </div> <!-- end side -->
-    
-    
 
 
-   
-   <div class='map' id="map">{% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
-   </div>   
-   
-   
+   <!-- Map -->
+   <div class='map' id="map">
+   </div>  <!-- End of map -->
+   <!-- Toolbox -->  
    <div id="toolbox" class="maptool">
 	   <div class="content">
 	   	<h6>Toolbox  <span class="info-button" data-toggle="tooltip" data-placement="right" title="Tools to explore this dataset"></span></h6>
@@ -128,10 +122,8 @@
 	<div id="mouse-position" class="maptool">Mouse Position:
 	</div>
 
-
 </div> <!-- End of fullscreen -->
 
- <script>console.log('{{data}}')</script>
  <script src="{{url_for('static', filename='js/mapstyles.js')}}"></script>
  <script src="{{url_for('static', filename='js/map.js')}}"></script>
   <script src="{{url_for('static', filename='js/controls.js')}}"></script>

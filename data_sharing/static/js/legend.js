@@ -15,7 +15,7 @@ var legend  = document.getElementById('legend-bar');
  * */
 function getLegend(layer){
 	// request colourvalues and corresponding values
-	link = 'colours?layer_id='+layer.get('layerid');
+	link = 'colours?layergroup_id='+layer.get('layerid');
 	$.getJSON(link, function(data) {
 		colourvalues=data.values;
 		//draw the legend

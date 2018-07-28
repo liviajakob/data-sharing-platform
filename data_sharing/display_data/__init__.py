@@ -4,3 +4,5 @@ from .prepare_raster import *
 from .rollback import *
 from .system_configuration import *
 from .ingestion import *
+from .prepare_raster import *
+from .compute_colours import *

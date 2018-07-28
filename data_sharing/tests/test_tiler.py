@@ -1,5 +1,6 @@
 '''
-Created on 6 May 2018
+Unittests for the RasterTiler class
+File: test_tiler.py
 
 @author: livia
 '''
@@ -21,9 +22,7 @@ class TilerTest(unittest.TestCase):
         # remove output folder if exists
         if os.path.exists(self.outputdir):
             shutil.rmtree(self.outputdir) 
-            
-        self.tiler = RasterTiler()
-        self.tiler.createTiles(self.inputfile, self.outputdir)
+        
 
 
 
@@ -31,9 +30,12 @@ class TilerTest(unittest.TestCase):
         pass
 
 
-    def testName(self):
-        pass
-
+    def testCreateTiles(self):
+        '''Tests if creation of tiles works'''
+        self.assertFalse(os.path.exists(self.outputdir))
+        self.tiler = RasterTiler()
+        self.tiler.createTiles(self.inputfile, self.outputdir)
+        self.assertTrue(os.path.exists(self.outputdir))
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

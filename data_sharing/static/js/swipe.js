@@ -18,7 +18,6 @@ swipebutton.addEventListener('click', function(){
 		ll_arr = dataset_tilelayers.getLayers().getArray(); //all layers
 		top_l = getTopVisibleLayer(ll_arr);
 		if (top_l){
-			console.log('TOP',top_l)
 			startSwipe(top_l);
 		}
 	}

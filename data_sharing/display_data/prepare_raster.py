@@ -1,4 +1,9 @@
-'''Contains all the classes to process a raster and prepare it for webdisplay
+'''
+Contains all the classes to process a raster and prepare it for webdisplay
+
+Contains:
+    RasterTiler – creates raster tiles
+    RasterLayerProcessor – processes raster files
 
 @author: livia
 
@@ -10,33 +15,34 @@ import osr, math
 import numpy as np
 
 class RasterTiler(object):
-    '''
-    Creates tiles
+    '''Class to create map tiles
     '''
 
-
-    def __init__(self):
-        '''
-        Constructor
-        '''
-        pass
-    
     
     def createTiles(self, inputfile, outputdir, zoom="2-5"):
-        #commandlist=['gdal2tiles.py', '-z', zoom, '-p', 'raster', inputfile, outputdir]
+        '''Creates raster tiles and saves them in the output directory
+        
+        Input Paramter:
+            inputfile (str) – input of the rasterfile to be tiled
+            outputdir (str) – directory of the tiles output
+            zoom (str) – zooms to compute, default is 2-5
+        
+        '''
         commandlist=['gdal2tiles.py', '-z', zoom, inputfile, outputdir]
-        print(commandlist)
         subprocess.call(commandlist)
     
     
-    def calculateZoom(self, area, minzoom=2, e0=5224000.0):
-        '''area in metre'''
-        #8 -- 2400722068.95274
-        #one line --> sqrt(area)
+    def calculateZoom(self, area, e0=5224000.0):
+        '''area in metre
         
-        #0.3 m on screen --> line (conv)
-        ## reference
+        Input Parameters
+            area – area of a file in square meters
+            e0 – area for zoomlevel 1 (in square metres)
         
+        Returns
+            zooms (string) – suggested zooms, e.g. 2-9
+        
+        '''
         length=math.sqrt(area)
         
         arr=[]
@@ -47,24 +53,24 @@ class RasterTiler(object):
         bottomzoom = topzoom + 6
         
         zooms=str(topzoom)+'-'+str(bottomzoom)
-        print('ZOOMS ---- ', zooms)
         return zooms
     
     
-
     
-###################################################    
+##################################################  
     
 class RasterLayerProcessor(object):
     '''
-    Creates Layer entries
+    Contains functions to process rasterfiles
+    
     '''
     
-    
-    
     def __init__(self, logger):
-        '''
-        Constructor
+        '''Constructor for RasterLayerProcessor
+        
+        Input Parameter:
+            logger – a logging object
+        
         '''
         self.logger = logger
         self.raster = None
@@ -72,28 +78,40 @@ class RasterLayerProcessor(object):
 
    
     def readFile(self, inputfile, band=1):
-        '''read raster file with gdal'''
+        '''reads a raster file with gdal
+        Should be used before other functions
+        
+        Input Parameter:
+            inputfile (str) – path of inputfile
+            band (int) – number of bands, default 1
+            
+        '''
         self.logger.info("Starting to read raster...")
         
         try: 
             self.raster = gdal.Open(inputfile)
             assert(self.raster is not None)
         except AssertionError:
-            print('file could not be opened. may not exist')
             raise IOError('file: "'+ inputfile + '" could not be opened. Check if the file exists')
         self.logger.info("Success reading raster...")
         self.band = self.raster.GetRasterBand(band) #for now I assume there is only one band
 
+
     def getStatistics(self):
+        '''Returns statistics of a raster
+        
+        Returns:
+            a dictionary containing "min", "max", "mean", "stdev"
+        
+        '''
+        assert self.raster is not None
         stats = self.band.GetStatistics(True, True)
         statsdir = {'min' : stats[0], 'max': stats[1], 'mean' : stats[2], 'stdev' : stats[3]}
-        #print(statsdir)
-        #print ("[ NO DATA VALUE ] = ", self.band.GetNoDataValue()) # none
-        #print ("[ SCALE ] = ", self.band.GetScale())
-        #print ("[ UNIT TYPE ] = ", self.band.GetUnitType())
         return statsdir
 
+    
     def getProjection(self):
+        assert self.raster is not None
         '''Generates a wkt and converts it to SpatialReference object
         
         Returns:
@@ -101,9 +119,7 @@ class RasterLayerProcessor(object):
         
         '''
         prj = self.raster.GetProjection()
-        srs=osr.SpatialReference(wkt=prj)
-        #if srs.IsProjected:
-            #print ('proj',srs.GetAttrValue('projcs'))        
+        srs=osr.SpatialReference(wkt=prj)      
         return srs
 
     
@@ -115,7 +131,8 @@ class RasterLayerProcessor(object):
         
         '''
         assert self.raster is not None
-        ulx, xres, xskew, uly, yskew, yres  = self.raster.GetGeoTransform()
+        geo  = self.raster.GetGeoTransform() # get coordinates and resolution
+        ulx, xres, uly, yres = geo[0], geo[1], geo[3], geo[5]
         lrx = ulx + (self.raster.RasterXSize * xres)
         lry = uly + (self.raster.RasterYSize * yres)
         #ulx, uly: upper left corner
@@ -125,8 +142,11 @@ class RasterLayerProcessor(object):
     
     
     def getExtent(self):
-        '''Returns the bounding box in minx, maxx, miny and maxy'''
+        '''Returns the bounding box in minx, maxx, miny and maxy
         
+        Returns:
+            A dictionnary with "xmax", "ymax", "xmin" and "ymin"
+        '''
         box = self.getBoundingBoxCorners()
         minXc, minYc = box['upleft'][0], box['upleft'][1]
         maxXc, maxYc = box['downright'][0], box['downright'][1] 
@@ -137,7 +157,6 @@ class RasterLayerProcessor(object):
     
     
     
-    # @TODO check if min > max
     def getMinBoundingBox(self):
         '''Calculates a min boundingbox without cutting not Null values
         
@@ -146,10 +165,7 @@ class RasterLayerProcessor(object):
         
         '''
         assert self.band is not None
-        
         grid = self.band.ReadAsArray()
-        print('shape ', grid.shape)
-        print('NODATA ', self.band.GetNoDataValue())
         # create 1D array (x-direction) with True values where the whole column/raster of the raster is Null
         if self.band.GetNoDataValue() is None:
             xArr = np.all(np.isnan(grid), axis = 0)
@@ -157,9 +173,7 @@ class RasterLayerProcessor(object):
         else:
             xArr = np.all(grid==self.band.GetNoDataValue(), axis = 0)
             yArr = np.all(grid==self.band.GetNoDataValue(), axis = 1)    
-        
-        
-        print(xArr.shape)
+            
         xContent = np.where(np.invert(xArr))
         minX, maxX = xContent[0][0]-1, xContent[0][-1]+1
 
@@ -174,7 +188,8 @@ class RasterLayerProcessor(object):
         if maxY > len(yArr): maxY = len(yArr)
         
         #calculate coordinates
-        ulx, xres, xskew, uly, yskew, yres  = self.raster.GetGeoTransform() # get corrdinates and resolution
+        geo  = self.raster.GetGeoTransform() # get corrdinates and resolution
+        ulx, xres, uly, yres = geo[0], geo[1], geo[3], geo[5]
         minXc = ulx + (minX * xres)
         maxXc = ulx + (maxX * xres)
         minYc = uly + (minY * yres)
@@ -186,12 +201,15 @@ class RasterLayerProcessor(object):
         
         return {'xmin': minXc, 'xmax': maxXc, 'ymin': minYc, 'ymax': maxYc}
 
-    
-    # @Todo several checks
+
     def cutRaster(self, inputfile, outputfile, boundbox={}):
-        '''Cuts the raster to a desired ...
-        
+        '''Cuts the raster to a desired extent
         Default cuts the minimum boundingbox for not NaN values
+        
+        Input Parameter:
+            inputfile (str) - the input file path
+            outputfile (str) – the output file path
+            boundbox (optional) – the extent it should be cropped to
         
         '''
         self.readFile(inputfile)
@@ -203,13 +221,30 @@ class RasterLayerProcessor(object):
         subprocess.call(commandlist)
         
     
-    def reproject(self, inputfile, outputfile, projection='EPSG:3413'):
+    def reproject(self, inputfile, outputfile, projection):
+        '''Reprojects a file to a desired projection
+        
+        Input Parameter:
+            inputfile (str) - the input file path
+            outputfile (str) – the output file path
+            projection (str) – desired projection code, e.g. EPSG:3413
+            
+        '''
         commandlist=['gdalwarp', '-t_srs', projection, '-overwrite', inputfile, outputfile]
         subprocess.call(commandlist)
         
     
     
     def addColours(self, inputfile, outputfile, colourfile):
+        '''Colours the input raster
+        
+        Input Parameter:
+            inputfile (str) - the input file path
+            outputfile (str) – the output file path
+            colourfile (str) – colourfilewith structure (row): Value R G B Alpha
+        
+        
+        '''
         self.logger.info('Adding colour...')
         commandlist=['gdaldem', 'color-relief', '-alpha', inputfile, colourfile, outputfile]
         subprocess.call(commandlist)

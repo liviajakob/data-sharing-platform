@@ -33,7 +33,7 @@ from display_data.rollback import Rollback
 from display_data.ingestion import Ingestion, RasterLayerCreator
 import logging
 import traceback
-from numpy.lib.tests.test_io import strptime
+from datetime import datetime
 
 
 
@@ -79,14 +79,14 @@ def add_layer(**kwargs):
     logger = logging.getLogger(__name__)
     # add handler file
     handler = logging.FileHandler('add_dataset.log')
-    handler.setLevel(logging.NOTSET)#NOTSET gives all the levels, e.g. INFO only .info
+    handler.setLevel(logging.NOTSET) #NOTSET gives all the levels, e.g. INFO only .info
     rollback = Rollback()
 
     try:
         ing = Ingestion(rollback, logger)
         creator = RasterLayerCreator(**kwargs) 
         ing.create(creator) # create the layer
-        logger.info('Layer successful added!')
+        logger.info('Layer successfully added!')
     except Exception as e:
         logger.info('Error encountered, rolling back...')
         rollback.rollback()
@@ -107,7 +107,7 @@ def valid_date(s):
     
     '''
     try:
-        return strptime(s, "%Y-%m-%d")
+        return datetime.strptime(s, "%Y-%m-%d")
     except ValueError:
         msg = "Not a valid date: '{0}'.".format(s)
         raise argparse.ArgumentTypeError(msg)

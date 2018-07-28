@@ -43,7 +43,7 @@ from display_data.rollback import Rollback
 from display_data.ingestion import Ingestion, DatasetCreator
 import logging
 import traceback
-from numpy.lib.tests.test_io import strptime
+from datetime import datetime
 
 
 def handle_input():
@@ -113,7 +113,7 @@ def add_dataset(**kwargs):
         ing = Ingestion(rollback, logger)
         creator = DatasetCreator(**kwargs)
         ing.create(creator)
-        logger.info('Dataset successful added!')
+        logger.info('Dataset successfully added!')
     except Exception as e:
         logger.info('Error encountered, rolling back...')
         rollback.rollback()
@@ -149,7 +149,7 @@ def valid_date(s):
     
     '''
     try:
-        return strptime(s, "%Y-%m-%d")
+        return datetime.strptime(s, "%Y-%m-%d")
     except ValueError:
         msg = "Not a valid date: '{0}'.".format(s)
         raise argparse.ArgumentTypeError(msg)

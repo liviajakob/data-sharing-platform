@@ -1,5 +1,6 @@
 '''
 Responsible for computing concrete colourfiles from colour templates
+File: compute_colours.py
 
 Contains:
     ColourFactory          – Factory class with factory method to create ColourMakers
@@ -152,7 +153,7 @@ class ColourMaker(abc.ABC):
         try:
             os.remove(self.col_output)
         except:
-            pass
+            pass # do nothing
 
 
 ########################

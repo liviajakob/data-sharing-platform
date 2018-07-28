@@ -8,6 +8,7 @@ File: models.py
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy.sql.schema import UniqueConstraint
 
 #Use of the decalrative extension of SQLAlchemy
 Base = declarative_base()
@@ -85,10 +86,10 @@ class RasterLayerGroup(Base):
     id = Column('id',Integer, primary_key=True)
     dataset_id =Column(Integer(), ForeignKey("dataset.id"))
     dataset = relationship("Dataset", backref=backref("layer"))
-    layertype = Column(String()) # '''ForeignKey("layerType.id")'''
+    layertype = Column(String()) #unique
     startdate = Column(DateTime(timezone=True))
     enddate = Column(DateTime(timezone=True))
-
+    UniqueConstraint('dataset_id', 'layertype', name='uix_1')
     
     def asDict(self):
         '''Returns itself represented as a dictionary 

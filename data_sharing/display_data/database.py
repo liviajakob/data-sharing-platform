@@ -1,15 +1,18 @@
-'''
+'''Manages creation, ingestion and querying of database
+
+Contains:
+    Database
 
 @author: livia
 '''
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
-from display_data.models import *
+from display_data.models import * # import all the models
 import os
 from display_data.system_configuration import ConfigSystem
-from numpy.lib.tests.test_io import strptime
-
+from sqlalchemy.exc import SQLAlchemyError
+from datetime import datetime
 
 
 
@@ -18,64 +21,62 @@ class Database():
 
     def __init__(self, dbSettings={}, logger=None, rollback=None, echo=False):
         '''
-        
         Input Parameter:
             dbSettings - dictionary containing:
                         'type' : type of db (e.g. sqllite, or oracle, or mysql)
                         'path' : path to database
                         'name' : database name
-            echo - determines if database operations are printed in console
+            logger – a loging object
+            rollback – a Rollback object
+            echo (boolean) – determines if database queries are printed in console
                     
         '''
         
         if len(dbSettings)==0:
             filesys = ConfigSystem()
-            self._engine = create_engine(filesys.dbEngine()+filesys.dbPath(), echo=echo)
-
-            
+            self._engine = create_engine(filesys.dbEngine()+filesys.dbPath(), echo=echo)  
         else:
-            # @TODO: more tests
             self._engine = create_engine(dbSettings['type']+os.path.join(dbSettings['path'],dbSettings['name']), echo=echo)
 
         self.rollback = rollback
         self.logger = logger
         self.conf = ConfigSystem()
-
-        
-        #self._engine = create_engine(self._db['type']+os.path.join(self._db['path'],self._db['name']), echo=True)
-        #Base.metadata.create_all(bind=engine)
-        #Session = sessionmaker(bind=engine)
         
         self.Session = None #capital because it's a factory
         createModels(self._engine)
 
         
-        #session=Session()
-        
     def createTables(self):
+        '''Creates database structure from Models in models.py'''
         createModels(self._engine)
     
     
     def scopedSession(self):
+        '''Creates a scoped session'''
         self.Session = scoped_session(sessionmaker(autocommit=False,
                                                  autoflush=False,
                                                  bind=self._engine))
     
     def closeSession(self):
+        '''Closes the current session'''
         assert self.Session != None #Check connection open
         self.Session.close()
-        #self.Session=None
+        self.Session=None
     
     
     def commit(self):
+        '''Commit the current session'''
         self.Session.commit()
     
     def newDataset(self, cite, projection, commit=True):
         """Adds a new dataset to the database
         
+        Input Parameter:
+            cite (str) – how to cite the dataset
+            projection (str) – A projection code
+            commit (boolean) – default: True, determines if session should commit
         
-        """
-        
+        """  
         assert self.Session is not None
         
         if cite is None:
@@ -96,23 +97,30 @@ class Database():
             else:
                 self.Session.flush()
                 return dataset
-        except:
+        except SQLAlchemyError:
             self.Session.rollback()
-            raise
+            raise SQLAlchemyError
             
             
         
     def newRasterLayerGroup(self, dataset_id, layerType, date, commit=True):
-        """Adds a new dataset layergr to a data set"""        
+        """Adds a new raster layergroup to a dataset
+        
+        Input Parameter:
+            dataset_id (int) – ID of corresponding dataset
+            layerType (str) – type of layer, e.g. dem
+            date (datetime.date) – a python dat object
+            commit (boolean) – default: True, determines if session should commit
+        
+        """        
         try:
             dataset = self.Session.query(Dataset).filter(Dataset.id==dataset_id).one() 
-        except Exception as e:
-            self.logger.error("input '{}' is NO valid is NO valid dataset id".format(dataset_id))
+        except SQLAlchemyError as e:
+            self.logger.error("input '{}' is NO valid dataset id".format(dataset_id))
             raise e
         
         try:
             layergr = RasterLayerGroup()
-            #layergr.type_id = layerType.id
             layergr.dataset_id = dataset.id
             layergr.layertype = layerType
             layergr.startdate = date
@@ -124,22 +132,19 @@ class Database():
             else:
                 self.Session.flush()
                 return layergr
-        except:
+        except SQLAlchemyError as e:
             self.Session.rollback()
-            raise
+            raise e
        
         
         
-    def dropTables(self, pw=None):
-        '''
-        Drops all tables within the database, used for testing
+    def dropTables(self):
+        '''Drops all tables within the database, used for testing
+        
         '''
         assert self.Session is not None
-        
-        if pw =="livia":
-            Base.metadata.drop_all(self._engine) #drop all tables
-        else:
-            print("No access to drop tables")
+        Base.metadata.drop_all(self._engine) #drop all tables
+
         
         
     def getTableNames(self):
@@ -152,9 +157,12 @@ class Database():
         """returns a list of all requested datasets.
         
         Input parameter:
-            filters – (optional) a list of filter statements
-            dic - (default: True) if dic is set true it will return a dictionnary which can be converted to a geojson
+            filters – (optional) a dictionary of filter statements
+            dic - (default: False) if dic is set true it will return a dictionary
+            page (int) - (optional) page number to be queried
+            page_size (int) – (optional) page size to be queried
             orderbyarea - True if results should be ordered by area (descending; largest datasets first)
+            layerinfo (boolean) – (default: False) if True detailed info on layers is given
             
         Returns:
             a list with Dataset objects/ one object OR a dictionnary
@@ -166,10 +174,10 @@ class Database():
         for attr, value in filters.items():
             if hasattr(Dataset, attr):
                 if attr == "startdate":
-                    value = strptime(filters[attr], "%Y-%m-%d")
+                    value = datetime.strptime(filters[attr], "%Y-%m-%d")
                     query = query.filter(value >= getattr(Dataset, 'startdate'))
                 elif attr == "enddate":
-                    value = strptime(filters[attr], "%Y-%m-%d")
+                    value = datetime.strptime(filters[attr], "%Y-%m-%d")
                     query = query.filter(value <= getattr(Dataset, 'enddate'))
                 else: 
                     query = query.filter(getattr(Dataset, attr) == value)
@@ -181,28 +189,22 @@ class Database():
             
         if page: 
             query = query.offset(page*page_size)
-    
-        
-        print('dic', dic)
+
         if not dic:
             try:
                 result=query.all()   
                 if orderbyarea:
                     result.sort(key=lambda x: x.area, reverse=True)
-                print('result ', result)
                 return result
-            except:
+            except SQLAlchemyError:
                 return []
         else: 
             try:
                 result=query.all() 
                 if orderbyarea:
                     result.sort(key=lambda x: x.area, reverse=True)
-                print('geoCollection ', self.asDictionary(result, layerinfo=layerinfo))
                 return self.asDictionary(result, layerinfo=layerinfo) 
-            except Exception as e:
-                print('Exception ',e)
-                print('No results found')
+            except SQLAlchemyError:
                 geoCollection = {}
                 geoCollection['type']= 'FeatureCollection'
                 geoCollection['features'] = []
@@ -217,7 +219,6 @@ class Database():
         Input parameter:
             filters – (optional) a list of filteroptions
                 e.g. filters={'dataset_id' : 1, 'layertype' : 'dem'}
-            dic – true if result should be returned as dictionnary
                 
         Returns:
             a list with Dataset objects/ one object or a dictionnary
@@ -229,11 +230,9 @@ class Database():
         for attr, value in filters.items():
             query = query.filter(getattr(RasterLayerGroup, attr) == value)
         
-        #query=query.filter(filterrule)
         try:
             return query.all()
-        except Exception as e:
-            #print (e)
+        except SQLAlchemyError:
             return []
     
     
@@ -246,7 +245,7 @@ class Database():
             dic – true if result should be returned as dictionnary
                 
         Returns:
-            a list with layergroup objects/ one object or a dictionnary
+            a list with layergroup objects/ one object or a dictionnary, sorted on layertype
         
         """
         # we only have Raster Layer Groups for now...
@@ -259,7 +258,13 @@ class Database():
     
     
     def asDictionary(self, datasets, layerinfo=False):
-        '''Returns a list of datasets as dictionary in GeoJSON format'''
+        '''Returns a list of datasets as dictionary in GeoJSON format
+        
+        Input Parameter:
+            datasets – a list of Dataset objects
+            layerinfo (boolean) – (default: False) if True detailed info on layers is given
+        
+        '''
         features=[]
         for ds in datasets:
             geodic = ds.asGeoDict()
@@ -267,17 +272,12 @@ class Database():
             layers_dict=[]
             for l in layergr:
                 l_dict=l.asDict()
-                #tile_url = self.conf.getRelativeTilesFolder(l)
-                #l_dict['tileurl'] = tile_url
                 if layerinfo:
                     l_dict['layers'] = self.getLayerDict(l)
-                #l_dict['layertype']=self.getLayertypeById(l.layertype).name
                 layers_dict.append(l_dict)
                 
             geodic['properties']['layergroups'] = layers_dict
             features.append(geodic)
-            
-        #print(geoDict)
         geoCollection = {}
         geoCollection['type']= 'FeatureCollection'
         geoCollection['features'] = features
@@ -302,7 +302,16 @@ class Database():
 
             
     def updateLayerGroupDates(self, layergroup, startdate=None, enddate=None, commit=True):
-        '''Updates a layers start if the new time layergroup is not within the old time span'''
+        '''Updates a layergroups start or enddate if the new date is not within the old timespan
+        
+        Input Parameter:
+            layergroup – a Layergroup/RasterLayerGroup object
+            startdate (datetime.date) – (optional) date to be checked
+            enddate (datetime.date) – (optinal) date to be checked
+            commit (boolean) – (default: False), determines if session should commit
+        
+        
+        '''
         assert self.Session is not None
         if enddate is not None:
             layergroup.enddate = enddate
@@ -316,7 +325,17 @@ class Database():
 
             
     def updateDatasetDates(self, dataset, startdate=None, enddate=None, commit=True):
-        '''Updates a layers start if the new time layer is not within the old time span'''
+        '''Updates a datasets start or enddate if the new date is not within the old timespan
+        
+                
+        Input Parameter:
+            dataset – a Dataset object
+            startdate (datetime.date) – (optional) date to be checked
+            enddate (datetime.date) – (optinal) date to be checked
+            commit (boolean) – (default: False), determines if session should commit
+        
+        
+        '''
         assert self.Session is not None
         if enddate is not None:
             dataset.enddate = enddate

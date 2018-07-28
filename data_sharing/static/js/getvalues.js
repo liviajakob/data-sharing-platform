@@ -71,10 +71,9 @@ function getValues(evt){
 	top_l = getTopVisibleLayer(ll_arr);
 	
 	if (top_l){
-		j_url=api_link +'/v1/values?layer_id='+top_l.get('layerid')+'&x='+coords[0]+'&y='+coords[1];
+		j_url=api_link +'/v1/values?layergroup_id='+top_l.get('layerid')+'&x='+coords[0]+'&y='+coords[1];
 		
         $.getJSON(j_url, function(result) {
-        	console.info(result);
         	if (result.data.length<=1){
         		$('#point-value').html('<h6>Value of clicked position:</h6><hr>'
         				+'<p> <strong>Date: </strong>' + result.data[0].x + '<br>'

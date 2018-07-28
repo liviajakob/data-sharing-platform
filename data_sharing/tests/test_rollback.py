@@ -1,4 +1,5 @@
 '''
+Unittests for the Rollback class
 File: test_rollback.py
 
 @author: livia

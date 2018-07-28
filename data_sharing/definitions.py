@@ -1,5 +1,10 @@
 '''
-Created on 3 May 2018
+Definitions of global variables
+File: definitions.py
+
+Contains:
+    ROOT_DIR
+    CONFIG_PATH
 
 @author: livia
 '''
