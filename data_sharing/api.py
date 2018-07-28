@@ -9,43 +9,17 @@ from flask_restful import Resource, Api
 from flask_cors import CORS, cross_origin
 from display_data.system_configuration import ConfigSystem
 from get_data.query_point import retrieve_pixel_value
-import os, glob, ast
+import os, glob
 from dicttoxml import dicttoxml
 
 app = Flask(__name__)
 CORS(app) #allow cross origin
 
-#api = Api(app)
-
-
-'''class Download(Resource):
-    def download(self, filename):
-        uploads = os.path.join(current_app.root_path, app.config['UPLOAD_FOLDER'])
-        return send_from_directory(directory=uploads, filename=filename)
-
-api.add_resource(HelloWorld, '/')
-api.add_resource(HelloWorld, '/')'''
-
-
-'''@app.route('/', methods=['GET'])
-def index():
-    ###
-    dic = {}
-    dic['hi']='Livia'
-    base='/Users/livia/msc_dissertation/CODE/data_sharing/data/output'
-    attachment_filename='hi5.tif'
-    #return jsonify(dic)
-    response = send_file('/Users/livia/msc_dissertation/CODE/data_sharing/data/input/Greenland_1000_error.tif')
-    #response.headers.add('Access-Control-Allow-Origin', '*')
-    #response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    #response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    
-    return response'''
 
 # TODO: more flexible
 @app.route('/v1/file', methods=['GET'])
 def file():
-    pid=request.args.get('layer_id')
+    pid=request.args.get('layergroup_id')
     date = request.args.get('date')
     rasterf=getLayerRawfileFilePath(pid, date)
     #raster = '/Users/livia/msc_dissertation/CODE/data_sharing/data/output/datasets/'+str(pid)+'/dem/raw_input.tif'
@@ -79,7 +53,10 @@ def values():
     '''  
     # TODO: Error handling
     
-    lid=request.args.get('layer_id')
+    try:
+        lid=request.args.get('layer_id')
+    except:
+        pass
     fnames=getLayerProjectedFilePaths(lid)
     x = request.args.get('x')
     y = request.args.get('y')
@@ -88,8 +65,7 @@ def values():
     for fname in fnames:
         val=retrieve_pixel_value(coords, fname)
         try:
-            val = round(val,4) #"{:.6f}".format(val)
-            pass
+            val = round(val,4)
         except:
             pass
         date = os.path.basename(os.path.dirname(fname)) #folder name
@@ -113,8 +89,21 @@ def datasets():
             
     print(request.args)
     
-    datasets=database.getDatasets(request.args.to_dict(), dic=True, orderbyarea=False, layerinfo=True)
+    page=0
+    page_size=100
+    try:
+        page=int(request.args.get('page'))-1
+    except:
+        # TODO: error message
+        pass
+    
+    datasets=database.getDatasets(request.args.to_dict(), dic=True, page=page, page_size=page_size, orderbyarea=False, layerinfo=True)
     database.closeSession()
+    
+    
+    
+    
+    
     
     if protocol.lower() == 'json':
         return jsonify(datasets) #jsonify is flask function, so header is set automatically
@@ -177,7 +166,36 @@ def getLayerProjectedFilePaths(layer_id):
         files[i] = f
         
     return files
+
+
+
     
+## Error Handling
+
+class InvalidUsage(Exception):
+    status_code = 400
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
+
+
+@app.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
+
+###
 
     
 if __name__ == '__main__':

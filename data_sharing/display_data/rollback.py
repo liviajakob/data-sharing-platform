@@ -78,14 +78,3 @@ class Rollback(metaclass=Singleton):
         '''
         return self._commands
 
-
-
-
-def main():
-    m1 = Rollback()
-    m2 = Rollback()
-    assert m1 is m2
-
-
-if __name__ == "__main__":
-    main()

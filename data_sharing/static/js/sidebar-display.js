@@ -188,7 +188,7 @@ $.getJSON('layertypes', function(data) {
  * */
 function displayLayertypes(layertypes){
 	div = document.getElementById('layertypes');
-	html='<option selected value="">Choose Layertype</option>';
+	html='<option selected value="">Choose Data Type</option>';
 	for (i in layertypes){
 		html = html.concat('<option value="'+layertypes[i]+'">'+layertypes[i]+'</option>')	
 	}

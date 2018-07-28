@@ -46,21 +46,28 @@ consortium <a href="https://cryotop-evolution.org/">CryoTop Evolution</a>.</p>
         <td>no</td>
         <td>string</td>
         <td></td>
-        <td>Filters only datasets with layers after this date. Format: 'YYYY-MM-DD' (e.g. 2013-11-21)</td>
+        <td>Filters only datasets with layers starting before this date. Format: 'YYYY-MM-DD' (e.g. 2013-11-21)</td>
       </tr>
       <tr>
         <td>enddate</td>
         <td>no</td>
         <td>string</td>
         <td></td>
-        <td>Filters only datasets with layers before this date. Format: 'YYYY-MM-DD' (e.g. 2013-11-21)</td>
+        <td>Filters only datasets with layers ending after this date. Format: 'YYYY-MM-DD' (e.g. 2013-11-21)</td>
       </tr>
       <tr>
         <td>id</td>
         <td>no</td>
         <td>integer</td>
         <td></td>
-        <td>Dataset id</td>
+        <td>Dataset id. Only returns the dataset with the specified id.<td>
+      </tr>
+      <tr>
+        <td>page</td>
+        <td>no</td>
+        <td>integer</td>
+        <td>1</td>
+        <td>Page number. Note that the page size is 100 datasets.</td>
       </tr>
       <tr>
         <td>protocol</td>
@@ -76,7 +83,7 @@ consortium <a href="https://cryotop-evolution.org/">CryoTop Evolution</a>.</p>
   
 <h3>Query data file:</h3>
 <p><b>Endpoint URL: </b>{{root}}/v1/file <br>
-<b>Example: </b>{{root}}/v1/file?layer_id=1&date=2017-06-26</p>
+<b>Example: </b>{{root}}/v1/file?layergroup_id=1&date=2017-06-26</p>
 <p>Input Parameter:</p>
 <table class="table table-hover">
     <thead>
@@ -90,11 +97,11 @@ consortium <a href="https://cryotop-evolution.org/">CryoTop Evolution</a>.</p>
     </thead>
     <tbody>
       <tr>
-        <td>layer_id</td>
+        <td>layergroup_id</td>
         <td>yes</td>
         <td>integer</td>
         <td></td>
-        <td>Layer id</td>
+        <td>Layer group id</td>
       </tr>
       <tr>
         <td>date</td>
