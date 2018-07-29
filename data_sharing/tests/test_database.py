@@ -38,7 +38,7 @@ class DatabaseTest(unittest.TestCase):
         self.assertEqual(len(self.db.getTableNames()), 2, "Database should have 2 tables")
         
     def test_noEntries(self):
-        self.assertEqual(len(self.db.getDatasets()), 0, "No table entries for projections should exist")
+        self.assertEqual(len(self.db.getDatasets()), 0, "No table entries for datasets should exist")
         self.assertEqual(len(self.db.getRasterLayerGroups()), 0, "No table entries for layers should exist")
     
     

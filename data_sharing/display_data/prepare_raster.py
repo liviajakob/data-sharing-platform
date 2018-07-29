@@ -8,9 +8,11 @@ Contains:
 @author: livia
 
 '''
-#from osgeo import gdal
+try:
+    from osgeo import gdal
+except ImportError:
+    import gdal
 import subprocess
-import gdal
 import osr, math
 import numpy as np
 

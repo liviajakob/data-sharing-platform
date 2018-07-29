@@ -4,7 +4,11 @@ File: query_point.py
 
 @author: livia
 '''
-import gdal
+
+try:
+    from osgeo import gdal
+except ImportError:
+    import gdal
 import struct
 import numpy as np
 
@@ -21,7 +25,6 @@ def retrieve_pixel_value(geo_coord, data_source):
         a floating-point value, nan if coordinates out of bound
         
     """
-    print(data_source)
     mx, my = geo_coord[0], geo_coord[1]
     src_ds=gdal.Open(data_source) 
     gt=src_ds.GetGeoTransform()

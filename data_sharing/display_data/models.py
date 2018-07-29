@@ -22,7 +22,6 @@ class Dataset(Base):
     Inherits from Base from the declarative API
     '''
     __tablename__ = 'dataset'
-    
     #table columns
     id = Column('id',Integer, primary_key=True)
     cite = Column(String(250), nullable=False)
@@ -33,7 +32,8 @@ class Dataset(Base):
     area = Column(Float)
     startdate = Column(DateTime(timezone=True))
     enddate = Column(DateTime(timezone=True))
-    projection=Column(String()) # this is the projection the dataset xmin, xmax etc. are in
+    projection=Column(String(10)) # this is the projection the dataset xmin, xmax etc. are in
+    
     
     def getExtent(self):
         '''Returns the extent of the dataset
@@ -81,12 +81,11 @@ class RasterLayerGroup(Base):
     Inherits from Base from the declarative API
     '''
     __tablename__ = 'rasterlayergroup'
-    
     # table columns
     id = Column('id',Integer, primary_key=True)
     dataset_id =Column(Integer(), ForeignKey("dataset.id"))
     dataset = relationship("Dataset", backref=backref("layer"))
-    layertype = Column(String()) #unique
+    layertype = Column(String(12)) #unique
     startdate = Column(DateTime(timezone=True))
     enddate = Column(DateTime(timezone=True))
     UniqueConstraint('dataset_id', 'layertype', name='uix_1')

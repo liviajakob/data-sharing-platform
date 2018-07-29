@@ -1,0 +1,22 @@
+
+:: create virtual environment
+virtualenv env
+source env/bin/activate
+cd env
+
+
+:: download GDAL package, unzip and cd into it
+pip download GDAL==2.3.1
+tar -zxvf GDAL-2.3.1.tar.gz
+cd GDAL-2.3.1
+
+export CFLAGS=-Qunused-arguments export CPPFLAGS=-Qunused-arguments
+
+python setup.py build_ext\
+     --gdal-config=/Library/Frameworks/GDAL.framework/Versions/2.3/unix/bin/gdal-config\
+     --library-dirs=/Library/Frameworks/GDAL.framework/Versions/2.3/unix/lib/\
+     --include-dirs=/Library/Frameworks/GDAL.framework/Versions/2.3/Headers/
+
+:: Build and install
+python setup.py build
+python setup.py install
