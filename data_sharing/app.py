@@ -21,7 +21,6 @@ from display_data.database import Database
 from flask import Flask, render_template, jsonify, request
 from display_data.system_configuration import ConfigSystem
 from string import Formatter
-from api import APIRequestException
 
 app = Flask(__name__)
   
