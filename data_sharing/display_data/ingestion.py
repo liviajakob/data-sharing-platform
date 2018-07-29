@@ -3,10 +3,10 @@ Responsible for data processing and database ingestion
 File: ingestion.py
 
 Contains:
-    Ingestion             – Initialises the ingestion
-    Creator               – Abstract interface to ingest a dataset or layer
-    DatasetCreator        – Inherits from Creator
-    RasterLayerCreator    – Inherits from Creator
+    Ingestion             - Initialises the ingestion
+    Creator               - Abstract interface to ingest a dataset or layer
+    DatasetCreator        - Inherits from Creator
+    RasterLayerCreator    - Inherits from Creator
 
 
 @author: livia
@@ -80,7 +80,7 @@ class Creator(abc.ABC):
         '''Configures the creator
         
         Input Parameter:
-            database – a Database object
+            database - a Database object
             logger - a python logging object
             rollback - a Rollback object
         
@@ -105,7 +105,7 @@ class DatasetCreator(Creator):
         '''Constructor of DatasetCreator
         
         Input Parameter:
-            **kwargs – keyword dictionary containig ingestion information
+            **kwargs - keyword dictionary containig ingestion information
                 required keywords:
                     cite (str): information on how to cite the dataset
                     layers (list): list with layers
@@ -142,7 +142,7 @@ class DatasetCreator(Creator):
         '''adds a bounding box to the dataset database entry
         
         Input Parameter:
-            dataset – a Dataset object to which the bounding box is added
+            dataset - a Dataset object to which the bounding box is added
         
         '''
         assert len(self.layers) > 0
@@ -170,7 +170,7 @@ class DatasetCreator(Creator):
         '''adds a bounding box to the dataset database entry
         
         Input Parameter:
-            dataset – a Dataset object to which the bounding box is added
+            dataset - a Dataset object to which the bounding box is added
         
         '''
         dataset.area=abs((dataset.xmax-dataset.xmin)*(dataset.xmax-dataset.xmin))
@@ -190,7 +190,7 @@ class RasterLayerCreator(Creator):
         '''Constructor of RasterLayerCreator
         
         Input Parameter:
-            **kwargs – keyword dictionary containig ingestion information
+            **kwargs - keyword dictionary containig ingestion information
                 required keywords:
                     layerfile (str): layer file name
                     layertype (str): a layertype (options specified in config.conf)
@@ -271,7 +271,7 @@ class RasterLayerCreator(Creator):
         '''Processes the layergroup input file and prepares it for display
         
         Input Parameter:
-            layergroup – a LayerGroup / RasterLayerGroup object
+            layergroup - a LayerGroup / RasterLayerGroup object
         
         Steps are:
             1. Copy original file and save in layergroup folder
@@ -325,7 +325,7 @@ class RasterLayerCreator(Creator):
         '''Updates start and end date of a layergroup within the database
         
         Input Parameter:
-            layergroup – a LayerGroup/RasterLayerGroup object representing an entry within the database
+            layergroup - a LayerGroup/RasterLayerGroup object representing an entry within the database
         '''
         if self.date < layergroup.startdate:
             self._db.updateLayerGroupDates(layergroup, startdate=self.date, commit=False)
@@ -348,7 +348,7 @@ class RasterLayerCreator(Creator):
     def getExistingLayerGroup(self):
         '''Returns layer group if dataset with same layertype already exists
         
-        Returns – LayerGroup/RasterLayerGroup object if it exists in database, None otherwise
+        Returns - LayerGroup/RasterLayerGroup object if it exists in database, None otherwise
         
         '''
         self.logger.info('Checking if layer with same layertype exists...')
