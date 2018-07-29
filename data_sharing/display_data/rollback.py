@@ -3,8 +3,8 @@ Manages the ingestion rollback
 File: rollback.py
 
 Contains:
-    Singleton       – metaclass for the Singleton pattern implementation
-    Rollback        – a class storing and executing rollback commands 
+    Singleton       - metaclass for the Singleton pattern implementation
+    Rollback        - a class storing and executing rollback commands 
 
 @author: livia
 '''
@@ -12,7 +12,7 @@ Contains:
 class Singleton(type):
     '''Metaclass to create Singleton classes
     
-    _instances – saves the instances of classes
+    _instances - saves the instances of classes
     
     '''  
     # saves the instances of the classes
@@ -43,7 +43,7 @@ class Rollback(metaclass=Singleton):
         '''Constructor of Rollback
         
         Input Parameter:
-            logger – a python logging object
+            logger - a python logging object
         
         '''
         self._commands = []
@@ -53,8 +53,8 @@ class Rollback(metaclass=Singleton):
         '''Adds a command to the rollback
         
         Input parameter:
-            command – a command function
-            params – (default: {}) a keyword dictionary with the command function parameters
+            command - a command function
+            params - (default: {}) a keyword dictionary with the command function parameters
         
         '''
         newCommand = [command, params]
@@ -74,7 +74,7 @@ class Rollback(metaclass=Singleton):
         '''Getter for commands
         
         Returns:
-            commands (list) – a list of the saved commands
+            commands (list) - a list of the saved commands
         '''
         return self._commands
 
