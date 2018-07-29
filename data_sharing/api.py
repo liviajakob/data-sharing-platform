@@ -8,7 +8,7 @@ API Endpoints:
     getvalues
     
 Classes:
-    APIRequestException – API Exception class
+    APIRequestException - API Exception class
 
 @author: livia
 '''
@@ -138,9 +138,9 @@ def datasets():
         layertype (str) - (optional) Type of data. Use one of the following: dem, error, velocity, rate
         startdate (str) - (optional) Filters only datasets with layers starting before this date. Format: 'YYYY-MM-DD' (e.g. 2013-11-21)
         enddate (str) - (optional)     Filters only datasets with layers ending after this date. Format: 'YYYY-MM-DD' (e.g. 2013-11-21)
-        id (int) – (optional) Dataset id. Only returns the dataset with the specified id
-        page (int) – (optional), (default: 1) Page number. The default page size is 100 datasets
-        response (str) – (optional), (default: json) Response type. Use one of the following: json, xml
+        id (int) - (optional) Dataset id. Only returns the dataset with the specified id
+        page (int) - (optional), (default: 1) Page number. The default page size is 100 datasets
+        response (str) - (optional), (default: json) Response type. Use one of the following: json, xml
     
     Endpoint URL: 
     root/v1/datasets
@@ -201,8 +201,8 @@ class APIRequestException(Exception):
     def __init__(self, message, status_code=None):
         '''
         Input Parameters:
-            message (str) – Error message
-            status_code (int) – (optional) status code of the occurred error
+            message (str) - Error message
+            status_code (int) - (optional) status code of the occurred error
         
         '''
         Exception.__init__(self)
@@ -214,9 +214,9 @@ class APIRequestException(Exception):
         '''Converts the error message to a dictionnary
         
         Returns:
-            dict – a dictionnary of the Error
+            dict - a dictionnary of the Error
         '''
-        rv = dict(self.payload or ())
+        rv = {}
         rv['message'] = self.message
         rv['status_code'] = self.status_code
         return rv

@@ -2,13 +2,13 @@
 Contains all the classes to process a raster and prepare it for webdisplay
 
 Contains:
-    RasterTiler – creates raster tiles
-    RasterLayerProcessor – processes raster files
+    RasterTiler - creates raster tiles
+    RasterLayerProcessor - processes raster files
 
 @author: livia
 
 '''
-
+#from osgeo import gdal
 import subprocess
 import gdal
 import osr, math
@@ -23,9 +23,9 @@ class RasterTiler(object):
         '''Creates raster tiles and saves them in the output directory
         
         Input Parameter:
-            inputfile (str) – input of the rasterfile to be tiled
-            outputdir (str) – directory of the tiles output
-            zoom (str) – zooms to compute, default is 2-5
+            inputfile (str) - input of the rasterfile to be tiled
+            outputdir (str) - directory of the tiles output
+            zoom (str) - zooms to compute, default is 2-5
         
         '''
         commandlist=['gdal2tiles.py', '-z', zoom, inputfile, outputdir]
@@ -36,11 +36,11 @@ class RasterTiler(object):
         '''area in metre
         
         Input Parameters
-            area – area of a file in square meters
-            e0 – area for zoomlevel 1 (in square metres)
+            area - area of a file in square meters
+            e0 - area for zoomlevel 1 (in square metres)
         
         Returns
-            zooms (string) – suggested zooms, e.g. 2-9
+            zooms (string) - suggested zooms, e.g. 2-9
         
         '''
         length=math.sqrt(area)
@@ -69,7 +69,7 @@ class RasterLayerProcessor(object):
         '''Constructor for RasterLayerProcessor
         
         Input Parameter:
-            logger – a logging object
+            logger - a logging object
         
         '''
         self.logger = logger
@@ -82,8 +82,8 @@ class RasterLayerProcessor(object):
         Should be used before other functions
         
         Input Parameter:
-            inputfile (str) – path of inputfile
-            band (int) – number of bands, default 1
+            inputfile (str) - path of inputfile
+            band (int) - number of bands, default 1
             
         '''
         self.logger.info("Starting to read raster...")
@@ -208,8 +208,8 @@ class RasterLayerProcessor(object):
         
         Input Parameter:
             inputfile (str) - the input file path
-            outputfile (str) – the output file path
-            boundbox (optional) – the extent it should be cropped to
+            outputfile (str) - the output file path
+            boundbox (optional) - the extent it should be cropped to
         
         '''
         self.readFile(inputfile)
@@ -226,8 +226,8 @@ class RasterLayerProcessor(object):
         
         Input Parameter:
             inputfile (str) - the input file path
-            outputfile (str) – the output file path
-            projection (str) – desired projection code, e.g. EPSG:3413
+            outputfile (str) - the output file path
+            projection (str) - desired projection code, e.g. EPSG:3413
             
         '''
         commandlist=['gdalwarp', '-t_srs', projection, '-overwrite', inputfile, outputfile]
@@ -240,8 +240,8 @@ class RasterLayerProcessor(object):
         
         Input Parameter:
             inputfile (str) - the input file path
-            outputfile (str) – the output file path
-            colourfile (str) – colourfilewith structure (row): Value R G B Alpha
+            outputfile (str) - the output file path
+            colourfile (str) - colourfilewith structure (row): Value R G B Alpha
         
         
         '''

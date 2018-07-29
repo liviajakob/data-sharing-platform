@@ -3,16 +3,16 @@ Internal API for web GUI
 File: app.py
 
 App Endpoints:
-    index – the main app page
-    about – the about page
+    index - the main app page
+    about - the about page
     
     colours - returns requested colours as JSON
-    datasets – returns requested datasets as JSON
-    layertypes – returns all available layertypes as JSON
+    datasets - returns requested datasets as JSON
+    layertypes - returns all available layertypes as JSON
 
 Classes:
-    MyFormatter – specific Formatter
-    APIRequestException – API Exception class
+    MyFormatter - specific Formatter
+    APIRequestException - API Exception class
 
 
 @author: livia
@@ -48,7 +48,7 @@ def colours():
     Returns requested colour schema as JSON
     
     Input parameter:
-        layergroup_id (int) – id of the layergroup
+        layergroup_id (int) - id of the layergroup
     
     '''
     layer_id = request.args.get('layergroup_id')
@@ -88,10 +88,10 @@ def datasets():
         layertype (str) - (optional) Type of data. Use one of the following: dem, error, velocity, rate
         startdate (str) - (optional) Filters only datasets with layers starting before this date. Format: 'YYYY-MM-DD' (e.g. 2013-11-21)
         enddate (str) - (optional)     Filters only datasets with layers ending after this date. Format: 'YYYY-MM-DD' (e.g. 2013-11-21)
-        id (int) – (optional) Dataset id. Only returns the dataset with the specified id
-        page (int) – (optional), (default: 1) Page number
-        page (int) – (optional), (default 8) Page size
-        response (str) – (optional), (default: json) Response type. Use one of the following: json, xml
+        id (int) - (optional) Dataset id. Only returns the dataset with the specified id
+        page (int) - (optional), (default: 1) Page number
+        page (int) - (optional), (default 8) Page size
+        response (str) - (optional), (default: json) Response type. Use one of the following: json, xml
     
     
     '''
@@ -153,8 +153,8 @@ class APIRequestException(Exception):
     def __init__(self, message, status_code=None):
         '''
         Input Parameters:
-            message (str) – Error message
-            status_code (int) – (optional) status code of the occurred error
+            message (str) - Error message
+            status_code (int) - (optional) status code of the occurred error
         
         '''
         Exception.__init__(self)
@@ -166,7 +166,7 @@ class APIRequestException(Exception):
         '''Converts the error message to a dictionnary
         
         Returns:
-            dict – a dictionnary of the Error
+            dict - a dictionnary of the Error
         '''
         rv = dict(self.payload or ())
         rv['message'] = self.message
@@ -194,7 +194,7 @@ def booleanConverter(value):
     Raises a ValueError if input string can't be converted
     
     Input Parameter:
-        value (str) – a boolean string; False, false, True or true 
+        value (str) - a boolean string; False, false, True or true 
     
     '''
     if value.lower() == 'true':

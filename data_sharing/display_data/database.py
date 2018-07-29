@@ -26,9 +26,9 @@ class Database():
                         'type' : type of db (e.g. sqllite, or oracle, or mysql)
                         'path' : path to database
                         'name' : database name
-            logger – a loging object
-            rollback – a Rollback object
-            echo (boolean) – determines if database queries are printed in console
+            logger - a loging object
+            rollback - a Rollback object
+            echo (boolean) - determines if database queries are printed in console
                     
         '''
         
@@ -72,9 +72,9 @@ class Database():
         """Adds a new dataset to the database
         
         Input Parameter:
-            cite (str) – how to cite the dataset
-            projection (str) – A projection code
-            commit (boolean) – default: True, determines if session should commit
+            cite (str) - how to cite the dataset
+            projection (str) - A projection code
+            commit (boolean) - default: True, determines if session should commit
         
         """  
         assert self.Session is not None
@@ -107,10 +107,10 @@ class Database():
         """Adds a new raster layergroup to a dataset
         
         Input Parameter:
-            dataset_id (int) – ID of corresponding dataset
-            layerType (str) – type of layer, e.g. dem
-            date (datetime.date) – a python dat object
-            commit (boolean) – default: True, determines if session should commit
+            dataset_id (int) - ID of corresponding dataset
+            layerType (str) - type of layer, e.g. dem
+            date (datetime.date) - a python dat object
+            commit (boolean) - default: True, determines if session should commit
         
         """        
         try:
@@ -157,12 +157,12 @@ class Database():
         """returns a list of all requested datasets.
         
         Input parameter:
-            filters – (optional) a dictionary of filter statements
+            filters - (optional) a dictionary of filter statements
             dic - (default: False) if dic is set true it will return a dictionary
             page (int) - (optional) page number to be queried
-            page_size (int) – (optional) page size to be queried
+            page_size (int) - (optional) page size to be queried
             orderbyarea - True if results should be ordered by area (descending; largest datasets first)
-            layerinfo (boolean) – (default: False) if True detailed info on layers is given
+            layerinfo (boolean) - (default: False) if True detailed info on layers is given
             
         Returns:
             a list with Dataset objects/ one object OR a dictionnary
@@ -217,7 +217,7 @@ class Database():
         """returns a list of all requested datasets.
         
         Input parameter:
-            filters – (optional) a list of filteroptions
+            filters - (optional) a list of filteroptions
                 e.g. filters={'dataset_id' : 1, 'layertype' : 'dem'}
                 
         Returns:
@@ -240,9 +240,9 @@ class Database():
         """returns a list of all requested layer groups.
         
         Input parameter:
-            filters – (optional) a list of filteroptions
+            filters - (optional) a list of filteroptions
                 e.g. filters={'dataset_id' : 1, 'layertype' : 'dem'}
-            dic – true if result should be returned as dictionnary
+            dic - true if result should be returned as dictionnary
                 
         Returns:
             a list with layergroup objects/ one object or a dictionnary, sorted on layertype
@@ -261,8 +261,8 @@ class Database():
         '''Returns a list of datasets as dictionary in GeoJSON format
         
         Input Parameter:
-            datasets – a list of Dataset objects
-            layerinfo (boolean) – (default: False) if True detailed info on layers is given
+            datasets - a list of Dataset objects
+            layerinfo (boolean) - (default: False) if True detailed info on layers is given
         
         '''
         features=[]
@@ -305,10 +305,10 @@ class Database():
         '''Updates a layergroups start or enddate if the new date is not within the old timespan
         
         Input Parameter:
-            layergroup – a Layergroup/RasterLayerGroup object
-            startdate (datetime.date) – (optional) date to be checked
-            enddate (datetime.date) – (optinal) date to be checked
-            commit (boolean) – (default: False), determines if session should commit
+            layergroup - a Layergroup/RasterLayerGroup object
+            startdate (datetime.date) - (optional) date to be checked
+            enddate (datetime.date) - (optinal) date to be checked
+            commit (boolean) - (default: False), determines if session should commit
         
         
         '''
@@ -329,10 +329,10 @@ class Database():
         
                 
         Input Parameter:
-            dataset – a Dataset object
-            startdate (datetime.date) – (optional) date to be checked
-            enddate (datetime.date) – (optinal) date to be checked
-            commit (boolean) – (default: False), determines if session should commit
+            dataset - a Dataset object
+            startdate (datetime.date) - (optional) date to be checked
+            enddate (datetime.date) - (optinal) date to be checked
+            commit (boolean) - (default: False), determines if session should commit
         
         
         '''

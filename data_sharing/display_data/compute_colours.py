@@ -3,10 +3,10 @@ Responsible for computing concrete colourfiles from colour templates
 File: compute_colours.py
 
 Contains:
-    ColourFactory          – Factory class with factory method to create ColourMakers
-    ColourMaker            – Interface for concrete ColourMakers
-    LinearColourMaker      – Creates a linear colourfile from min, max values
-    CentredColourMaker     – Creates a centred colourfile from min, max values
+    ColourFactory          - Factory class with factory method to create ColourMakers
+    ColourMaker            - Interface for concrete ColourMakers
+    LinearColourMaker      - Creates a linear colourfile from min, max values
+    CentredColourMaker     - Creates a centred colourfile from min, max values
 
 @author: livia
 '''
@@ -24,9 +24,9 @@ class ColourFactory():
         '''Factory class to create a ColourMaker
         
         Input Parameter:
-            colourmaker_type (String) – the type of the colourmaker which should be created, e.g. 'linear' or 'centred'
-            inputfile (String) – path of the template colourfile
-            outputfile (String) – path of where the computed colourfile should be saved
+            colourmaker_type (String) - the type of the colourmaker which should be created, e.g. 'linear' or 'centred'
+            inputfile (String) - path of the template colourfile
+            outputfile (String) - path of where the computed colourfile should be saved
         
         Returns:
             colourmaker object inheriting from the ColourMaker class
@@ -54,8 +54,8 @@ class ColourMaker(abc.ABC):
         '''Constructor of ColourMaker
         
         Input Parameter:
-            inputfile (String) – path of the template colourfile
-            outputfile (String) – path of where the computed colourfile should be saved
+            inputfile (String) - path of the template colourfile
+            outputfile (String) - path of where the computed colourfile should be saved
         
         '''
         self.col_output = outputpath
@@ -67,7 +67,7 @@ class ColourMaker(abc.ABC):
         '''Returns the colour output file path
         
         Returns:
-            filepath (String) – the colour output file path
+            filepath (String) - the colour output file path
         '''
         return self.col_output
 
@@ -76,7 +76,7 @@ class ColourMaker(abc.ABC):
         '''Returns the colour input file path
         
         Returns:
-            filepath (String) – the colour input file path
+            filepath (String) - the colour input file path
         '''
         return self.col_input
 
@@ -86,8 +86,8 @@ class ColourMaker(abc.ABC):
         '''Abstract method that has to be implemented by child classes
     
         Input Parameter:
-            min_val (int/float) – minimum saturation value
-            max_val (int/float) – maximum saturation value
+            min_val (int/float) - minimum saturation value
+            max_val (int/float) - maximum saturation value
     
         Should compute and create a colourfile with min_values and max_values as saturation values
         '''
@@ -98,7 +98,7 @@ class ColourMaker(abc.ABC):
         '''Writes values and colours into an outputfile
         
         Input Parameter:
-            values (numpy.array) – a 2-dimensional array with the computed values and colours
+            values (numpy.array) - a 2-dimensional array with the computed values and colours
         
         '''
         colours = np.genfromtxt(fname=self.col_input) #read file into array
@@ -112,12 +112,12 @@ class ColourMaker(abc.ABC):
         '''Calculates a linear sequence of n values between a minimum and a maximum value
         
         Input Parameter:
-            nr_of_values (int) – Number of output values that should be calculated
-            min_val (int/float) – minimum value
-            max_val (int/float) – maximum value
+            nr_of_values (int) - Number of output values that should be calculated
+            min_val (int/float) - minimum value
+            max_val (int/float) - maximum value
         
         Returns
-            values (list) – a list of the requested values 
+            values (list) - a list of the requested values 
         '''
         vals = []
         for i in range(nr_of_values):
@@ -140,7 +140,7 @@ class ColourMaker(abc.ABC):
         '''Returns number of rows in a file
         
         Returns:
-            number (int) – the number of rows
+            number (int) - the number of rows
         '''
         return sum(1 for line in open(self.col_input))
     
@@ -168,8 +168,8 @@ class LinearColourMaker(ColourMaker):
         Computes the values linear
         
         Input Parameter:
-            min_val (int/float) – minimum saturation value
-            max_val (int/float) – maximum saturation value
+            min_val (int/float) - minimum saturation value
+            max_val (int/float) - maximum saturation value
         
         '''
         nr_of_values = self.file_len()
@@ -194,8 +194,8 @@ class CentredColourMaker(ColourMaker):
         Computes the values centred around 0
         
         Input Parameter:
-            min_val (int/float) – minimum saturation value
-            max_val (int/float) – maximum saturation value
+            min_val (int/float) - minimum saturation value
+            max_val (int/float) - maximum saturation value
         
         '''    
         assert min_val < 0

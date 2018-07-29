@@ -3,7 +3,7 @@ Responsible for system and filestructure configuration, uses the config file
 File: system_configuration.py
 
 Contains:
-    ConfigSystem       – Manages the file system and the config file
+    ConfigSystem       - Manages the file system and the config file
 
 @author: livia
 '''
@@ -26,8 +26,8 @@ class ConfigSystem():
         '''Constructor of ConfigSystem
         
         Input Parameter:
-            logger – (optional) a python logging object
-            dataset_id (int) – (optional) id of the configured dataset
+            logger - (optional) a python logging object
+            dataset_id (int) - (optional) id of the configured dataset
         '''
         if logger is None:
             logging.basicConfig(level=logging.INFO) #NOTSET gives all the levels, e.g. INFO only .info
@@ -51,7 +51,7 @@ class ConfigSystem():
         '''Returns the projection from the config file
         
         Returns:
-            projection (String) – e.g. ESPG:3454
+            projection (String) - e.g. ESPG:3454
         '''
         return self.config['data']['projection']
     
@@ -60,7 +60,7 @@ class ConfigSystem():
         '''Returns path of the data input from the config file
         
         Returns:
-            path (String) – the path where the input data is located
+            path (String) - the path where the input data is located
         '''
         return self.config['data']['input']
     
@@ -69,7 +69,7 @@ class ConfigSystem():
         '''Returns path of the data output from the config file
         
         Returns:
-            path (String) – the path where the output data is located
+            path (String) - the path where the output data is located
         '''
         return self.config['data']['output']
     
@@ -78,7 +78,7 @@ class ConfigSystem():
         '''Returns path (inc. filname) to the database from the config file
         
         Returns:
-            path (String) – the path where the database is located
+            path (String) - the path where the database is located
         '''
         settings = self.config['db']
         return os.path.join(settings['path'],settings['name'])
@@ -87,7 +87,7 @@ class ConfigSystem():
         '''Returns the database engine type
         
         Returns:
-            enginetype (String) – the database engine, e.g. 'sqlite:///'
+            enginetype (String) - the database engine, e.g. 'sqlite:///'
         '''
         return self.config['db']['type']
     
@@ -96,10 +96,10 @@ class ConfigSystem():
         '''Returns path with (inc. filename) to the colourfile template for a given layertype
         
         Input Parameter:
-            layertype (String) – type of a layer, e.g. 'dem', options configured in config file
+            layertype (String) - type of a layer, e.g. 'dem', options configured in config file
         
         Returns:
-            path (String) – the path where the sample colourfile of a layertype is located
+            path (String) - the path where the sample colourfile of a layertype is located
         '''
         assert layertype in self.config['layers']['types']
         i = self.config['layers']['types'].index(layertype)
@@ -111,10 +111,10 @@ class ConfigSystem():
         '''Returns the method with which a colourfile of a certain layertype should be computed from the config file
         
         Input Parameter:
-            layertype (String) – type of a layer, e.g. 'dem', options configured in config file
+            layertype (String) - type of a layer, e.g. 'dem', options configured in config file
         
         Returns:
-            colourmethod (String) – the method to create the colourfiles, e.g. 'linear' or 'centred'
+            colourmethod (String) - the method to create the colourfiles, e.g. 'linear' or 'centred'
         '''
         assert layertype in self.config['layers']['types']
         i = self.config['layers']['types'].index(layertype)
@@ -126,10 +126,10 @@ class ConfigSystem():
         '''Returns saturation scale for a layertype from the config file
         
         Input Parameter:
-            layertype (String) – type of a layer, e.g. 'dem', options configured in config file
+            layertype (String) - type of a layer, e.g. 'dem', options configured in config file
         
         Returns:
-            scale (dict) – the saturation scale, e.g. {'min': -2,'max': 2}
+            scale (dict) - the saturation scale, e.g. {'min': -2,'max': 2}
         '''
         assert layertype in self.config['layers']['types']
         i = self.config['layers']['types'].index(layertype)
@@ -143,13 +143,13 @@ class ConfigSystem():
         If proj is set to true the reprojected file path is returned
         
         Input Parameter:
-            ltype (String) – type of the layer, e.g. 'dem', options configured in config file
-            d_id (int) – dataset id of the layers layergroup
-            date (datetime.datetime) – date of the layer
-            proj – boolean (default: False), set to True the reprojected file path is returned
+            ltype (String) - type of the layer, e.g. 'dem', options configured in config file
+            d_id (int) - dataset id of the layers layergroup
+            date (datetime.datetime) - date of the layer
+            proj - boolean (default: False), set to True the reprojected file path is returned
         
         Returns:
-            filepath (String) – the path of the file
+            filepath (String) - the path of the file
         '''
         pth = self.getLayerFolderByAttributes(ltype, date, d_id=d_id)
         # get file with any extension
@@ -168,7 +168,7 @@ class ConfigSystem():
         '''Creates a new dataset folder
 
         Input Parameter:
-            d_id (int) – (default: self.dataset_id) the dataset id
+            d_id (int) - (default: self.dataset_id) the dataset id
             
         '''
         if d_id is None:
@@ -186,8 +186,8 @@ class ConfigSystem():
         '''Creates a new layer folder
 
         Input Parameter:
-            layergroup – a LayerGroup / RasterLayerGroup object
-            date (datetime.datetime) – date of the layer
+            layergroup - a LayerGroup / RasterLayerGroup object
+            date (datetime.datetime) - date of the layer
             
         '''
         d_id = layergroup.dataset_id
@@ -202,7 +202,7 @@ class ConfigSystem():
         '''Creates a new layergroup folder
 
         Input Parameter:
-            layergroup – a LayerGroup / RasterLayerGroup object
+            layergroup - a LayerGroup / RasterLayerGroup object
             
         '''
         d_id = layergroup.dataset_id
@@ -217,7 +217,7 @@ class ConfigSystem():
         '''Removes a given folder from the directory
 
         Input Parameter:
-            folder – the folder (inc. path) to be removed
+            folder - the folder (inc. path) to be removed
             
         '''
         if os.path.exists(folder):
@@ -231,7 +231,7 @@ class ConfigSystem():
         '''Removes the dataset directory
         
         Input Parameter:
-            d_id (int) – (default: self.dataset_id) the dataset id
+            d_id (int) - (default: self.dataset_id) the dataset id
         
         '''
         if d_id is None:
@@ -249,10 +249,10 @@ class ConfigSystem():
         '''Returns the path to a dataset
 
         Input Parameter:
-            d_id (int) – (default: self.dataset_id) dataset id of the layers layergroup
+            d_id (int) - (default: self.dataset_id) dataset id of the layers layergroup
 
         Returns:
-            folderpath (String) – the path of the folder
+            folderpath (String) - the path of the folder
         '''
         if d_id is None:
             assert self.dataset_id is not None
@@ -267,12 +267,12 @@ class ConfigSystem():
         '''Returns the path to a layergroup (layertype)
 
         Input Parameter:
-            ltype (String) – type of the layer, e.g. 'dem', options configured in config file
-            date (datetime.datetime) – date of the layer
-            d_id (int) – (default: self.dataset_id) dataset id of the layers layergroup
+            ltype (String) - type of the layer, e.g. 'dem', options configured in config file
+            date (datetime.datetime) - date of the layer
+            d_id (int) - (default: self.dataset_id) dataset id of the layers layergroup
 
         Returns:
-            folderpath (String) – the path of the folder
+            folderpath (String) - the path of the folder
         '''
         if d_id is None:
             assert self.dataset_id is not None
@@ -288,11 +288,11 @@ class ConfigSystem():
         '''Returns the path to a layergroup (layertype)
         
         Input Parameter:
-            ltype (String) – type of the layer, e.g. 'dem', options configured in config file
-            d_id (int) – (default: self.dataset_id) dataset id of the layers layergroup
+            ltype (String) - type of the layer, e.g. 'dem', options configured in config file
+            d_id (int) - (default: self.dataset_id) dataset id of the layers layergroup
         
         Returns:
-            folderpath (String) – the path of the folder
+            folderpath (String) - the path of the folder
         '''
         if d_id is None:
             assert self.dataset_id is not None
@@ -305,10 +305,10 @@ class ConfigSystem():
         '''Returns the folderpath of a layergroup
         
         Input Parameter:
-            layergroup – a LayerGroup / RasterLayerGroup object
+            layergroup - a LayerGroup / RasterLayerGroup object
         
         Returns:
-            folderpath (String) – the path of the folder
+            folderpath (String) - the path of the folder
         '''
         d_id = layergroup.dataset_id
         folder = os.path.join(self.getDatasetFolder(d_id), layergroup.layertype)
@@ -319,10 +319,10 @@ class ConfigSystem():
         '''Returns the folderpaths of layers within a layergroup
 
         Input Parameter:
-            layergroup – a LayerGroup / RasterLayerGroup object
+            layergroup - a LayerGroup / RasterLayerGroup object
         
         Returns:
-            folderpaths (list) – a list of folderpaths
+            folderpaths (list) - a list of folderpaths
         '''
         wkdir = self.getLayerGroupFolder(layergroup)
         content = next(os.walk(wkdir))
@@ -336,10 +336,10 @@ class ConfigSystem():
         '''Returns the dates of layers within a layergroup
 
         Input Parameter:
-            layergroup – a LayerGroup / RasterLayerGroup object
+            layergroup - a LayerGroup / RasterLayerGroup object
         
         Returns:
-            dates (list) – a list of dates (in string format), e.g. ['2018-05-26','2018-05-27']
+            dates (list) - a list of dates (in string format), e.g. ['2018-05-26','2018-05-27']
         '''
         wkdir = self.getLayerGroupFolder(layergroup)
         content = next(os.walk(wkdir))
@@ -353,12 +353,12 @@ class ConfigSystem():
         '''Returns the path to a tile layers folder of a layer
 
         Input Parameter:
-            ltype (String) – type of the layer, e.g. 'dem', options configured in config file
-            date (datetime.datetime) – date of the layer
-            d_id (int) – (default: self.dataset_id) dataset id of the layers layergroup
+            ltype (String) - type of the layer, e.g. 'dem', options configured in config file
+            date (datetime.datetime) - date of the layer
+            d_id (int) - (default: self.dataset_id) dataset id of the layers layergroup
         
         Returns:
-            folderpath (String) – the path of the folder
+            folderpath (String) - the path of the folder
         '''
         folder = os.path.join(self.getLayerFolderByAttributes(ltype=ltype, date=date, d_id=d_id), self.config['data']['tiles'])
         return folder
@@ -368,10 +368,10 @@ class ConfigSystem():
         '''Returns the path to a colourfile of a layergroup
 
         Input Parameter:
-            layergroup – a LayerGroup / RasterLayerGroup object
+            layergroup - a LayerGroup / RasterLayerGroup object
         
         Returns:
-            filepath (String) – the path of the file
+            filepath (String) - the path of the file
         '''
         path = os.path.join(self.getLayerGroupFolder(layergroup), 'colourfile.txt')
         return path
@@ -382,11 +382,11 @@ class ConfigSystem():
         The absolute root path is removed
 
         Input Parameter:
-            layergroup – a LayerGroup / RasterLayerGroup object
-            date (datetime.datetime) – date of the layer
+            layergroup - a LayerGroup / RasterLayerGroup object
+            date (datetime.datetime) - date of the layer
         
         Returns:
-            folderpath (String) – the path of the folder, e.g. 2/dem/2018-05-05/tiles
+            folderpath (String) - the path of the folder, e.g. 2/dem/2018-05-05/tiles
         '''
         abs_path = self.getTilesFolder(layergroup.layertype, date, layergroup.dataset_id)
         prefix = self.getDataOutputPath()
@@ -398,7 +398,7 @@ class ConfigSystem():
         '''Returns the layertypes from the config file
 
         Returns:
-            layertypes (list) – a list of the layertypes
+            layertypes (list) - a list of the layertypes
         '''
         return self.config['layers']['types']
     
@@ -413,7 +413,7 @@ class ConfigSystem():
             date (datetime.date) - a datetime object to be converted
             
         Returns:
-            date (String) – of the format YYYY-MM-DD   
+            date (String) - of the format YYYY-MM-DD   
         '''
         if isinstance(date, datetime.date):
             date = str(date.strftime("%Y-%m-%d"))
@@ -424,7 +424,7 @@ class ConfigSystem():
         '''Returns filename of the raw data file from the config file
         
         Returns:
-            filename (String) – the standard filename assigned to the raw data
+            filename (String) - the standard filename assigned to the raw data
         '''
         return self.config['layers']['rawfilename']
     
@@ -433,7 +433,7 @@ class ConfigSystem():
         '''Returns filename of the reprojected data file from the config file
         
         Returns:
-            filename (String) – the standard filename assigned to the reprojected data
+            filename (String) - the standard filename assigned to the reprojected data
         '''
         return self.config['layers']['reprojectedfilename']
     
