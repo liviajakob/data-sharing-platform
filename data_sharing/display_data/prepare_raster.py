@@ -22,7 +22,7 @@ class RasterTiler(object):
     def createTiles(self, inputfile, outputdir, zoom="2-5"):
         '''Creates raster tiles and saves them in the output directory
         
-        Input Paramter:
+        Input Parameter:
             inputfile (str) – input of the rasterfile to be tiled
             outputdir (str) – directory of the tiles output
             zoom (str) – zooms to compute, default is 2-5

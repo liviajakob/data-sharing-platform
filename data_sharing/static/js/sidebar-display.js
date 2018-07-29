@@ -205,33 +205,25 @@ $("#timerange").dateRangeSlider({
 	    min: {days: 1}
 	  },
 	  bounds:{
-		    min: new Date(2016, 0, 1),
-		    max: new Date(2019, 1, 31)
+		    min: new Date(2015, 0, 1),
+		    max: new Date(2018, 1, 31)
 	},
 	defaultValues:{
-	    min: new Date(2017, 0, 1),
-	    max: new Date(2018, 11, 31)
+	    min: new Date(2016, 0, 1),
+	    max: new Date(2017, 7, 29)
 	  },
 		arrows:false
 });
 
-
-
-/* Fade in / Fade out time slider when ticking and unticking the checkbox
- * */
-$("#bytime").change( function(){
-	if (this.checked){
-		$("#timerange").fadeTo(100, 1);
-	}
-	else{
-		$("#timerange").fadeTo(100, 0.5);
-	}
-})
 
 /* Collapse filtering options after 1 second when loading the page
  * */
 setTimeout(function() {
 	document.getElementById("collapse-btn-inner").click()
 }, 1000)
+
+setTimeout(function() {
+	document.getElementById("bytime").click()
+}, 1100)
 
 

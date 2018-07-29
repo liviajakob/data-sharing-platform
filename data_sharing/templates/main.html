@@ -44,9 +44,16 @@
 	</div>
     <div id="filterby" class="collapse show">
     
-    	<div class="small" id="timerange-outer"><div id="timerange"></div>
-    	<input data-toggle="tooltip" data-placement="bottom" title="Click here to enable or disable filter by time functionality" id="bytime" type="checkbox" name="filterbytime" value="Time"> Filter by Time</div>
-    	<div class="small"><select id="layertypes"></select>
+    	<div class="semi-small" id="timerange-outer">
+    	    	<input data-toggle="collapse" checked data-target="#timerange" data-placement="bottom" id="bytime" type="checkbox" name="filterbytime" value="Time"> Filter by Time
+    	    	<span class="info-button" data-toggle="tooltip" data-placement="top" title="Filters datasets covering the entered timespan. Smaller timespans will give more results."></span>
+    	        	<div class="collapse show" id="timerange"></div>	
+    	    	
+    	    	</div>
+    	
+
+    	<div class="semi-small"><select id="layertypes"></select>
+    	<hr>
     	<hr>
     	<div style="text-align: center;"><button id='filterDatasets'>Goooo!</button></div></div>
     

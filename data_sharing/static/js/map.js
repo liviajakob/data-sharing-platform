@@ -214,7 +214,7 @@ map.on('pointermove', function (evt) {
  * */
 function hoverInfo(feature){
 	html = '<h5>Dataset: '+feature.getId()+'</h5><p>';
-	layers=feature.get('layers');
+	layers=feature.get('layergroups');
 	html = html.concat('<b>Span: </b>'+feature.get('startdate')+' - '+ feature.get('enddate'))
 	html = html.concat(' <b>Available Layers: </b><span class="upper">')
 	for (l in layers){ // display layertypes

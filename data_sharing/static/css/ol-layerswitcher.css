@@ -1,3 +1,11 @@
+/* Style for background layerswitcher
+ * Filename: ol-layerswitcher.css
+ * 
+ * Author: Matt Walker (https://github.com/walkermatt/ol-layerswitcher)
+ * Adapted by: Livia Jakob
+ * */
+
+
 .layer-switcher.shown.ol-control {
     background-color: transparent;
 }

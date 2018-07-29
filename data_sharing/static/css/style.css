@@ -1,3 +1,10 @@
+/* Ice Explorer - Main Style Sheet
+ * Filename: style.css
+ * 
+ * Author: Livia Jakob
+ * */
+
+
 h1, h2, h3, h4, h5, h6{
     font-family: 'PT Serif', serif;
     font-weight: bold;
@@ -139,6 +146,10 @@ a{
 	font-size: 12px;
 }
 
+.semi-small{
+	font-size: 13px;
+}
+
 #datasets-bar{
 	margin: 4px;
 	margin-bottom: 10px;
@@ -168,6 +179,7 @@ a{
    	display: inline;
    	margin: 3px;
 }
+
 
 .info:hover{
 	cursor: pointer;
@@ -225,7 +237,7 @@ a{
 .head{
 	height: 3px;
     margin: 0px 0px 30px;
-    background: rgba(61, 100, 102,0.6);//rgb(217, 255, 249);
+    background: rgba(61, 100, 102,0.6);
     border-radius: 5px;
     margin-left: -20px;
 }
@@ -280,11 +292,7 @@ a{
 }
 
 #timerange{
-	//display: inline;
-	//hight: 30px;
-	//width: 80px;
 	margin-bottom: -5px;
-	opacity: 0.3;
 }
 
 #timerange-outer{
@@ -293,6 +301,12 @@ a{
 	background-color: darkgrey;
 	border: 2px solid #fff;
 	border-radius: 4px;
+}
+
+#timerange-outer .info-button{
+	padding-top: 2px;
+	padding-bottom: 2px;
+	margin-left: 10px;
 }
 
 
@@ -321,7 +335,6 @@ a{
 	position: absolute;
 	top: 35px;
 	right: 15px;
-	//float: right;
 }
 
 .collapse-btn button{
@@ -342,6 +355,9 @@ a{
 	opacity: 0.7;
 }
 
+#bytime{
+	margin-right: 10px;
+}
 
 
 select {
@@ -352,6 +368,9 @@ select {
     //background-color: rgb(61, 100, 102);
     //color: white;
     margin-bottom: 7px;
+    cursor: pointer;
+    width: 99%;
+    padding-left: 10px;
 }
 
 select:hover{
@@ -360,10 +379,9 @@ select:hover{
 }
 
 #filterDatasets{
-	//float: right;
 	cursor: pointer;
 	border: 2px solid rgba(255,255,255,0.8);
-    background-color: rgba(93, 62, 60, 0.8);// rgba(0,60,136,.5);
+    background-color: rgba(93, 62, 60, 0.8);
     color: white;
     border-radius: 4px;
     margin-top: 5px;

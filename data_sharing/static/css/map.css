@@ -1,37 +1,36 @@
-
+/* Ice Explorer - Map Style Sheet
+ * Filename: map.css
+ * 
+ * Author: Livia Jakob
+ * */
 
 
  #map {
  	top: 58px;
  	bottom: 30px;
- height: -moz-calc(100% - 88px);
- height: -webkit-calc(100% - 88px);
- height: calc(100% - 88px);
-   /*height: 100vh; *//*500px;*/
- width: -moz-calc(100% - 250px);
- width: -webkit-calc(100% - 250px);
- width: calc(100% - 250px);
+	 height: -moz-calc(100% - 88px);
+	 height: -webkit-calc(100% - 88px);
+	 height: calc(100% - 88px);
+	 width: -moz-calc(100% - 250px);
+	 width: -webkit-calc(100% - 250px);
+	 width: calc(100% - 250px);
    position: absolute;
    margin-left: 250px;
    
 }
 
-.explore-cursor{
-	//cursor: url("../img/cursor.png"), pointer;
-	cursor: pointer;
-}
-
 
 .ol-scale-line{
-
-    //top: -moz-calc(100% - 35px);
-    //top: -webkit-calc(100% - 35px);
-    //top: calc(100% - 35px);
     left: -moz-calc(45px);
     left: -webkit-calc(45px);
     left: calc(45px);
     bottom: 10px;
 
+}
+
+.explore-cursor{
+	//cursor: url("../img/cursor.png"), pointer; /*uncomment for fancy cursor*/
+	cursor: pointer;
 }
 
 #mouse-position{
@@ -58,44 +57,41 @@
     padding-bottom: 15px;
 }
 
+.fullscreen:-moz-full-screen {
+  height: 100%;
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
+  background-color: lightsteelblue;
+}
+.fullscreen:-webkit-full-screen {
+  height: 100%;
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
+  background-color: lightsteelblue;
+}
+.fullscreen:-ms-fullscreen {
+  height: 100%;
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
+}
+
+.fullscreen:fullscreen {
+  height: 100%;
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
+  background-color: lightsteelblue;
+}
 
 
-      .fullscreen:-moz-full-screen {
-        height: 100%;
-        width: 100%;
-        padding: 0px;
-        margin: 0px;
-        background-color: lightsteelblue;
-      }
-      .fullscreen:-webkit-full-screen {
-        height: 100%;
-        width: 100%;
-        padding: 0px;
-        margin: 0px;
-        background-color: lightsteelblue;
-      }
-      .fullscreen:-ms-fullscreen {
-        height: 100%;
-        width: 100%;
-        padding: 0px;
-        margin: 0px;
-        //background-color: lightsteelblue;
-      }
-
-      .fullscreen:fullscreen {
-        height: 100%;
-        width: 100%;
-        padding: 0px;
-        margin: 0px;
-        background-color: lightsteelblue;
-      }
-      
-      
  /**/     
  
 
 #infobox{
-	position:absolute;
+	position: absolute;
 	top: 9px;
 	left: -moz-calc(100% - 250px);
  	left: -webkit-calc(100% - 250px);
@@ -109,7 +105,6 @@
  	display: none;
  	border-radius: 7px;
  	overflow: hidden;
- 	//color: white;
 }
 
 #infobox p{
@@ -120,21 +115,19 @@
  
 #infobox-detailed{
 	position:absolute;
-	top: -moz-calc(100% - 360px);
- 	top: -webkit-calc(100% - 360px);
- 	top: calc(100% - 360px);
-	left: -moz-calc(100% - 320px);
- 	left: -webkit-calc(100% - 320px);
- 	left: calc(100% - 320px);
+	top: -moz-calc(100% - 402px);
+ 	top: -webkit-calc(100% - 402px);
+ 	top: calc(100% - 402px);
+	left: -moz-calc(100% - 316px);
+ 	left: -webkit-calc(100% - 316px);
+ 	left: calc(100% - 316px);
  	font-size: 12px;
  	padding: 10px; 
  	background-color: rgba(95,158,160,0.6);
- 	
  	height: 300px;
  	width: 300px;
  	display: none;
  	border-radius: 7px;
- 	//overflow: scroll;
 }
 
 #infobox-detailed p{
@@ -146,10 +139,8 @@
 	position:relative;
  	padding: 10px; 
  	background-color: rgba(255,255,255,0.6);
- 	
  	height: 240px;
  	width: 100%;
- 	//border-radius: 7px;
  	overflow-y: scroll;
 }
  
@@ -158,10 +149,8 @@
 #toolbox{
 	top: 68px;
 	left: 300px;
- 	//height: 100px;
  	width: 160px;
  	display: none;
-
     /*fix border opacity*/
     -webkit-background-clip: padding-box;
     -moz-background-clip: padding;
@@ -176,7 +165,6 @@
     padding: 6px;
     border-radius: 4px;
     background-color: rgba(32,85,153,0.5);
-
     color: white;
     /*fix border opacity*/
     -webkit-background-clip: padding-box;
@@ -186,21 +174,16 @@
 }
 
 #point-info{
-	//top: 320px;
-	//left: 300px;
-	bottom: 95px;
-	left: 270px;
+	bottom: 101px;
+	left: 266px;
  	background-clip: padding-box;
- 	//height: 100px;
  	width: 300px;
  	display: none;
- 	//border-radius: 7px;
  	font-size: 13px;
  	background-color: rgba(93, 62, 60, 0.8);
 }
 
 #point-value{
-	//background-color: rgba(93, 62, 60, 0.8);
 	padding: 7px;
 	padding-bottom: 0px;
 	margin-right: 8px;
@@ -208,7 +191,7 @@
 }
 
  
- 
+
 #toolbox .content {
     padding: 5px;
     opacity: 1;
@@ -229,7 +212,6 @@
 }
 
 #toolbox h6 { 
-	//padding-bottom: 1px;
 	margin-bottom: 2px;
 }
 
@@ -295,7 +277,6 @@
 	width: -webkit-calc(100% - 280px);
 	width: calc(100% - 280px);
 	visibility: hidden;
-	//display: none;
 }
  
  
@@ -388,22 +369,16 @@ input[type="range"]::-moz-range-thumb {
 }
 
 
-
-
-
 .download{
-	position: absolute; right: 0;
-	//float: right;
-    //width: 110px;
-    //height: 20px;
+	position: absolute; 
+	right: 0;
     border: 1px solid rgba(255,255,255,1);
     border: none;
     background-image: url(../img/download.svg);
     background-size: 15px;
     background-repeat: no-repeat;
     background-position: 3px;
-    background-color: transparent;//rgba(0,60,136,.5);
-    //border-radius: 4px;
+    background-color: transparent;
     padding-left: 22px;
     padding-top: 2px;
     padding-bottom: 2px;
@@ -437,7 +412,6 @@ input[type="range"]::-moz-range-thumb {
 
 .collapse-title{
 	background-color: rgba(255,255,255,0.4);
-	//border-radius: 4px;
 	cursor: pointer;
 	margin: -4px;
 	padding: 4px;
