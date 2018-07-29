@@ -8,7 +8,7 @@ File: models.py
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
-from sqlalchemy.sql.schema import UniqueConstraint
+from sqlalchemy.sql.schema import UniqueConstraint#, Sequence # uncomment for Oracle
 
 #Use of the decalrative extension of SQLAlchemy
 Base = declarative_base()
@@ -23,6 +23,7 @@ class Dataset(Base):
     '''
     __tablename__ = 'dataset'
     #table columns
+    # Sequence('id_seq'), # insert this after Integer for Oracle Databases
     id = Column('id',Integer, primary_key=True)
     cite = Column(String(250), nullable=False)
     xmin = Column(Float)
@@ -82,6 +83,7 @@ class RasterLayerGroup(Base):
     '''
     __tablename__ = 'rasterlayergroup'
     # table columns
+    # Sequence('id_seq'), # insert this after Integer for Oracle Databases
     id = Column('id',Integer, primary_key=True)
     dataset_id =Column(Integer(), ForeignKey("dataset.id"))
     dataset = relationship("Dataset", backref=backref("layer"))
