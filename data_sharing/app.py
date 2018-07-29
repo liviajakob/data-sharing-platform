@@ -48,7 +48,7 @@ def colours():
     Returns requested colour schema as JSON
     
     Input parameter:
-        layergroup_id (int) – id of the layergroup
+        layergroup_id (int) - id of the layergroup
     
     '''
     layer_id = request.args.get('layergroup_id')
@@ -153,8 +153,8 @@ class APIRequestException(Exception):
     def __init__(self, message, status_code=None):
         '''
         Input Parameters:
-            message (str) – Error message
-            status_code (int) – (optional) status code of the occurred error
+            message (str) - Error message
+            status_code (int) - (optional) status code of the occurred error
         
         '''
         Exception.__init__(self)
@@ -166,7 +166,7 @@ class APIRequestException(Exception):
         '''Converts the error message to a dictionnary
         
         Returns:
-            dict – a dictionnary of the Error
+            dict - a dictionnary of the Error
         '''
         rv = dict(self.payload or ())
         rv['message'] = self.message
@@ -194,7 +194,7 @@ def booleanConverter(value):
     Raises a ValueError if input string can't be converted
     
     Input Parameter:
-        value (str) – a boolean string; False, false, True or true 
+        value (str) - a boolean string; False, false, True or true 
     
     '''
     if value.lower() == 'true':
