@@ -3,16 +3,16 @@ Internal API for web GUI
 File: app.py
 
 App Endpoints:
-    index – the main app page
-    about – the about page
+    index - the main app page
+    about - the about page
     
     colours - returns requested colours as JSON
-    datasets – returns requested datasets as JSON
-    layertypes – returns all available layertypes as JSON
+    datasets - returns requested datasets as JSON
+    layertypes - returns all available layertypes as JSON
 
 Classes:
-    MyFormatter – specific Formatter
-    APIRequestException – API Exception class
+    MyFormatter - specific Formatter
+    APIRequestException - API Exception class
 
 
 @author: livia
@@ -88,10 +88,10 @@ def datasets():
         layertype (str) - (optional) Type of data. Use one of the following: dem, error, velocity, rate
         startdate (str) - (optional) Filters only datasets with layers starting before this date. Format: 'YYYY-MM-DD' (e.g. 2013-11-21)
         enddate (str) - (optional)     Filters only datasets with layers ending after this date. Format: 'YYYY-MM-DD' (e.g. 2013-11-21)
-        id (int) – (optional) Dataset id. Only returns the dataset with the specified id
-        page (int) – (optional), (default: 1) Page number
-        page (int) – (optional), (default 8) Page size
-        response (str) – (optional), (default: json) Response type. Use one of the following: json, xml
+        id (int) - (optional) Dataset id. Only returns the dataset with the specified id
+        page (int) - (optional), (default: 1) Page number
+        page (int) - (optional), (default 8) Page size
+        response (str) - (optional), (default: json) Response type. Use one of the following: json, xml
     
     
     '''
