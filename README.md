@@ -7,7 +7,8 @@ For more information see in my portfolio: [http://www.livia.geo-blog.com/msc-the
 
 # Set up guide
 
-Tested with Python version: 3.6.4
+Tested with Python version 3.6.4
+
 
 **Clone the repository**
 
@@ -24,10 +25,12 @@ Tested with Python version: 3.6.4
 ```pip3 install -r requirements.txt --user```
 
 **Change Configuration File**
+
 - Open ```write_config.py``` file in current folder and change (1) database configuration, (2) data input path and (3) data ouput path
 
 
 **Ingest Data (Example for file Greenland_1000DEM.tif located in data input folder)**
+
 ```python add_dataset.py Greenland_1000_DEM.tif dem 2017-06-26```
 
 Add another layer to the dataset with id 1
