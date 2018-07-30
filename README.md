@@ -33,10 +33,14 @@ Tested with Python version 3.6.4
 
 ```python add_dataset.py Greenland_1000_DEM.tif dem 2017-06-26```
 
-Add another layer to the dataset with id 1
+
+Add another layer to the dataset with id 1:
+
+
 ```python add_layer.py 1 Greenland_1000_rate.tif rate 2017-06-27```
 
 For help type:
+
 ```
 python add_dataset.py --help
 python add_layer.py --help
