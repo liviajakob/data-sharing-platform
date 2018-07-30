@@ -19,6 +19,8 @@ from display_data.system_configuration import ConfigSystem
 from display_data.database import Database
 from display_data.compute_colours import ColourFactory
 import abc
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import SQLAlchemyError
     
     
 class Ingestion(object):
@@ -314,7 +316,10 @@ class RasterLayerCreator(Creator):
         # 6. tile
         tiler = RasterTiler()
         if self.dataset is None:
-            self.dataset = self._db.getDatasets(filters={'id': self.dataset_id})
+            try:
+                self.dataset = self._db.getDatasets(filters={'id': self.dataset_id})[0]
+            except SQLAlchemyError as e:
+                raise e
         zoom = tiler.calculateZoom(self.dataset.area)
         tiler.createTiles(col_rast, self.conf.getTilesFolder(self.layertype, self.date, d_id = self.dataset_id), zoom=zoom)
             
@@ -338,7 +343,10 @@ class RasterLayerCreator(Creator):
         
         '''
         if self.dataset is None:
-            self.dataset = self._db.getDatasets(filters={'id': self.dataset_id})
+            try:
+                self.dataset = self._db.getDatasets(filters={'id': self.dataset_id})[0]
+            except SQLAlchemyError as e:
+                raise e
         if self.dataset.startdate is None or self.date < self.dataset.startdate:
             self._db.updateDatasetDates(self.dataset, startdate=self.date, commit=False)
         if self.dataset.enddate is None or self.date > self.dataset.enddate:
