@@ -32,7 +32,7 @@ You might have to follow [this](https://pypi.org/project/GDAL/) (https://pypi.or
 
 ### Change configuration file
 
-- Open ```write_config.py``` file in current folder and change (1) database configuration, (2) data input path and (3) data ouput path
+- Open ```write_config.py``` file in current folder and change (1) database configuration, (2) data input path and (3) data output path
 - Run ```python write_config.py```
 - When using Oracle make the changes in ```data-display/models.py``` suggested in the comments
 
