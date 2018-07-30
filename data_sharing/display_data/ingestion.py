@@ -151,7 +151,7 @@ class DatasetCreator(Creator):
         srcf = os.path.join(self.conf.getDataInputPath(), self.layers[0]['layerfile'])
         rast_proc = RasterLayerProcessor(self.logger)
         
-        repr_file = 'reproject.'+file_extension
+        repr_file = 'reproject'+file_extension
         repr_filepath = os.path.join(self.conf.getDataInputPath(), repr_file)
         rast_proc.reproject(srcf, repr_filepath, projection=self.projection)
 

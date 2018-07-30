@@ -30,20 +30,11 @@ class DEMRAsterProcessing(unittest.TestCase):
         raster_proc = RasterLayerProcessor(logger=self.logger)
         raster_proc.readFile(self.inputfile)
         box = raster_proc.getBoundingBoxCorners()
-        result = {'upleft': (-1771834.5, -521176.688), 'downright': (2117165.5, -3433176.688)}
+        print(box)
+        result = {'upleft': (-50.48764491820475, 67.32946338522015), 'downright': (-49.405871523253154, 66.7586531752604)}
         self.assertEqual(box, result)
-        stats = {'min': 0.0, 'max': 3277.0476074219, 'mean': 2178.9048430742, 'stdev': 680.47755318626}
-        self.assertEqual(raster_proc.getStatistics(), stats)
         
         
-        
-    def test_getProjection(self):
-        '''Tests the method getProjection'''
-        raster_proc = RasterLayerProcessor(logger=self.logger)
-        raster_proc.readFile(self.inputfile)
-        proj = raster_proc.getProjection()
-        self.assertEqual(proj.GetAttrValue('PROJECTION'), 'Polar_Stereographic')
-
 
     def test_conversion(self):
         '''Tests the conversion of a raster using the gdal commandline tool'''

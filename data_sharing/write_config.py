@@ -6,21 +6,26 @@ File: write_config.py
 """
 
 from configobj import ConfigObj
-import os
+import os, sys
 config = ConfigObj()
 
 config.filename = "config.conf"
+
+# get absolute module directory
+module_path = sys.modules[__name__].__file__
+dir_path = os.path.dirname(module_path)
+
 
 #
 config['db'] = {}
 config['db']['name'] = 'metadata.db'
 config['db']['type'] = 'sqlite:///'
-config['db']['path'] = '/Users/livia/msc_dissertation/CODE/data_sharing/data/output'
+config['db']['path'] = os.path.join(dir_path,'data', 'output')
 
 #
 config['data'] = {}
-config['data']['input'] = '/Users/livia/msc_dissertation/CODE/data_sharing/data/input'
-config['data']['output'] = os.path.join(config['db']['path'],'datasets')
+config['data']['input'] = os.path.join(dir_path,'data', 'input')
+config['data']['output'] = os.path.join(dir_path,'data', 'output','datasets')
 config['data']['tiles'] = 'tiles'
 config['data']['projection'] = 'EPSG:3413' #this is the projection all the data is converted to for display
 
