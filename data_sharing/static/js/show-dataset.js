@@ -164,7 +164,7 @@ function detailedInfo(dataset){
 	for (i = 0; i < layer_groups.length; i++){ // generate layergroup display
 		layer_group= layer_groups[i]
 		html=html.concat('<div class="layer-outer"><div class="collapse-title" data-toggle="collapse" data-target="#l'+layer_group.layertype+'" aria-expanded="false" class="collapsed">')
-		html=html.concat('<b class="upper"> '+layer_group.layertype + ' </b> | (Layer id: '+ layer_group.id+ ')')
+		html=html.concat('<b class="upper"> '+layer_group.layertype + ' </b> | (Layergroup id: '+ layer_group.id+ ')')
 		html=html.concat('<button class="collapse-button">&times;</button>')
 		html=html.concat('<br></div><div id="l'+layer_group.layertype+'" class="collapse show" style="background-color: transparent; border-radius: 4px; padding-top: 15px;">')
 		for (e = 0; e<layer_group.layers.length; e++){ // generate layers with checkbox
@@ -173,7 +173,7 @@ function detailedInfo(dataset){
 			html=html.concat('<div style="padding-bottom: 10px; padding-left: 10px;"><input type="checkbox" value="'+sid+'" id="l_visible" ')
 			if (i==0 && e==0) html=html.concat('checked') // first layer is checked as it is visible
 			html=html.concat('>  <b>Date: </b>'+ layer.date)
-			html=html.concat('<button class="download" data-toggle="tooltip" data-placement="right" data-original-title="Download this layer" id="download-layer" value="'+'layer_id='+layer_group.id+'&date='+layer.date+'">Download </button>')
+			html=html.concat('<button class="download" data-toggle="tooltip" data-placement="right" data-original-title="Download this layer" id="download-layer" value="'+'layergroup_id='+layer_group.id+'&date='+layer.date+'">Download </button>')
 			html=html.concat('<br></div>')
 		}
 		html = html.concat("</div></div>"); 
