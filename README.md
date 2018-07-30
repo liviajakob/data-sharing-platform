@@ -27,6 +27,7 @@ Tested with Python version 3.6.4
 **Change Configuration File**
 
 - Open ```write_config.py``` file in current folder and change (1) database configuration, (2) data input path and (3) data ouput path
+- Run ```python write_config.py```
 
 
 **Ingest Data (Example for file Greenland_1000DEM.tif located in data input folder)**
