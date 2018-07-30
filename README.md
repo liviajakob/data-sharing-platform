@@ -5,10 +5,10 @@ For more information see in my portfolio: [http://www.livia.geo-blog.com/msc-the
 
 
 
-# Set up guide
+# Installation guide
 
 Tested with Python version 3.6.4
-
+Using a virtual environment for python (e.g. virtualenv) is recommended.
 
 ### Clone the repository
 
@@ -25,6 +25,8 @@ Tested with Python version 3.6.4
 ### Install dependencies
 
 ```pip3 install -r requirements.txt --user```
+
+You might have to follow [this](https://pypi.org/project/GDAL/) (https://pypi.org/project/GDAL/) installation guide to install GDAL.
 
 ### Change configuration file
 
