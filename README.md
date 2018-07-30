@@ -32,12 +32,17 @@ You might have to follow [this](https://pypi.org/project/GDAL/) (https://pypi.or
 
 ### Change configuration file
 
-- Open ```write_config.py``` file in current folder and change (1) database configuration, (2) data input path and (3) data output path
 - Run ```python write_config.py```
+
+**Optional**
+
+- Open ```write_config.py``` file in current folder and change database configuration, data input path, data output path or other settings, run it as described above
 - When using Oracle make the changes in ```data-display/models.py``` suggested in the comments
 
 
 ### Ingest Data 
+
+The software comes with exmple data files in ```data-sharing/data/input/```
 
 **Example for file Greenland_1000DEM.tif located in data input folder**
 
