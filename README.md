@@ -10,37 +10,41 @@ For more information see in my portfolio: [http://www.livia.geo-blog.com/msc-the
 Tested with Python version 3.6.4
 
 
-**Clone the repository**
+### Clone the repository
 
 ```git init```
 
 ```git clone https://github.com/liviajakob/data-sharing-platform```
 
-**Change to folder:**
+
+### Change to folder
 
 ```cd data-sharing-platform/data-sharing```
 
-**Install dependencies:**
+
+### Install dependencies
 
 ```pip3 install -r requirements.txt --user```
 
-**Change Configuration File**
+### Change configuration file
 
 - Open ```write_config.py``` file in current folder and change (1) database configuration, (2) data input path and (3) data ouput path
 - Run ```python write_config.py```
 
 
-**Ingest Data (Example for file Greenland_1000DEM.tif located in data input folder)**
+### Ingest Data 
+
+**Example for file Greenland_1000DEM.tif located in data input folder**
 
 ```python add_dataset.py Greenland_1000_DEM.tif dem 2017-06-26```
 
 
-Add another layer to the dataset with id 1:
+**Add another layer to the dataset with id 1:**
 
 
 ```python add_layer.py 1 Greenland_1000_rate.tif rate 2017-06-27```
 
-For help type:
+### For help type:
 
 ```
 python add_dataset.py --help
@@ -48,7 +52,7 @@ python add_layer.py --help
 ```
 
 
-**Run Webapplication:**
+### Run Webapplication:
 
 ```
 python app.py
@@ -56,7 +60,7 @@ python app.py
 
 Access on ```localhost:5000```
 
-**Run API:**
+### Run web API:
 
 ```
 python api.py
