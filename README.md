@@ -30,6 +30,7 @@ Tested with Python version 3.6.4
 
 - Open ```write_config.py``` file in current folder and change (1) database configuration, (2) data input path and (3) data ouput path
 - Run ```python write_config.py```
+- When using Oracle make the changes in ```data-display/models.py``` suggested in the comments
 
 
 ### Ingest Data 
