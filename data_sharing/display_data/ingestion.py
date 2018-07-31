@@ -19,7 +19,6 @@ from display_data.system_configuration import ConfigSystem
 from display_data.database import Database
 from display_data.compute_colours import ColourFactory
 import abc
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
     
     

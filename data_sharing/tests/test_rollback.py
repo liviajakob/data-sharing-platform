@@ -15,12 +15,12 @@ class RollbackTest(unittest.TestCase):
         pass
 
     def test_addCommand(self):
-        '''Tests if commands are added'''
+        '''Tests if command is added'''
         rl = Rollback()
         hlp = Helper()
         cmd = [hlp.change, {'val1': 1, 'val2': 2}]
         rl.addCommand(cmd[0], cmd[1])
-        self.assertEqual(rl.getCommands()[0], cmd, "Command not added properly")
+        self.assertEqual(rl.getCommands()[0], cmd, "Command not added")
         
         
     def test_rollback(self):
@@ -42,7 +42,7 @@ class RollbackTest(unittest.TestCase):
         '''Tests the singleton pattern'''
         rl1 = Rollback()
         rl2 = Rollback()
-        self.assertEqual(rl1, rl2, "Singleton pattern not working, should be the same object")
+        self.assertEqual(rl1, rl2, "Singleton pattern not working, should be equal")
     
     
 class Helper(object):

@@ -174,7 +174,7 @@ class APIRequestException(Exception):
 
 
 @app.errorhandler(APIRequestException)
-def handle_invalid_usage(error):
+def handle_apiRequestException(error):
     '''Flask error handler to handle the APIRequestException
     
     Response:

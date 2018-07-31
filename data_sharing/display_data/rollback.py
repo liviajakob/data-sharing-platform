@@ -52,7 +52,7 @@ class Rollback(metaclass=Singleton):
     def addCommand(self, command, params={}):
         '''Adds a command to the rollback
         
-        Input parameter:
+        Input parameters:
             command - a command function
             params - (default: {}) a keyword dictionary with the command function parameters
         
@@ -67,7 +67,6 @@ class Rollback(metaclass=Singleton):
         
         '''
         for cmd in reversed(self._commands):
-            print(cmd)
             cmd[0](**cmd[1])
         
     def getCommands(self):
