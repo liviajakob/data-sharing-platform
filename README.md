@@ -30,7 +30,7 @@ Using a virtual environment for python (e.g. virtualenv) is recommended.
 
 You might have to follow [this](https://pypi.org/project/GDAL/) (https://pypi.org/project/GDAL/) installation guide to install GDAL.
 
-### Change configuration file
+### Generate configuration file
 
 - Run ```python write_config.py```
 
@@ -42,17 +42,17 @@ You might have to follow [this](https://pypi.org/project/GDAL/) (https://pypi.or
 
 ### Ingest Data 
 
-The software comes with exmple data files in ```data-sharing/data/input/```
+The software comes with two example data files in ```data-sharing/data/input/```
 
 **Example for file Greenland_1000DEM.tif located in data input folder**
 
-```python add_dataset.py Greenland_1000_DEM.tif dem 2017-06-26```
+```python add_dataset.py dem.tif dem 2017-06-26```
 
 
 **Add another layer to the dataset with id 1:**
 
 
-```python add_layer.py 1 Greenland_1000_rate.tif rate 2017-06-27```
+```python add_layer.py 1 rate.tif rate 2017-06-27```
 
 ### For help type:
 
