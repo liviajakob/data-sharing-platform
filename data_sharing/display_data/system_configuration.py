@@ -208,7 +208,7 @@ class ConfigSystem():
         for file in fls:
             fname=file
             break
-        return os.path.join(pth,fname)
+        return fname
     
         
     def newDatasetFolder(self, d_id=None):
@@ -376,7 +376,7 @@ class ConfigSystem():
         folders=[]
         for folder in content[1]:
             folders.append(os.path.join(content[0], folder))
-        return folders
+        return sorted(folders, reverse=True)
     
      
     def getLayerDates(self, layergroup):
@@ -393,7 +393,7 @@ class ConfigSystem():
         dates=[]
         for folder in content[1]:
             dates.append(folder)
-        return dates
+        return sorted(dates, reverse=True)
     
     
     def getTilesFolder(self, ltype, date, d_id=None):

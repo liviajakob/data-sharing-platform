@@ -32,14 +32,15 @@ def index():
     '''HTML for index page of the app'''
     conf=ConfigSystem()
     params = conf.getWebParameters()
-    print(params)
     api_loc = conf.getApiRoot()+':'+str(conf.getApiPort())
     return render_template('main.html', api_location=api_loc, tiles_weblocation=params['tiles_weblocation'], map_centre=params['map_centre'], projection=params['projection'])
 
 @app.route('/about')
 def about():
     '''HTML for about page'''
-    return render_template('about.html', root="localhost:5002")
+    conf=ConfigSystem()
+    api_loc = conf.getApiRoot()+':'+str(conf.getApiPort())
+    return render_template('about.html', root=api_loc)
 
 
 

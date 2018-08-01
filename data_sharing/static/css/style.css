@@ -79,6 +79,16 @@ a{
 	float: left;
 }
 
+
+#side-content {
+    -ms-overflow-style: none;  // IE 10+
+    overflow: -moz-scrollbars-none;  // Firefox
+}
+#side-content::-webkit-scrollbar { 
+    display: none;  // Safari and Chrome
+}
+
+
 #attribution{
 	position:relative;
 }
