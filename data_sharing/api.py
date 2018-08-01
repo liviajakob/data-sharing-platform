@@ -289,4 +289,5 @@ def getLayerProjectedFilePaths(layergroup_id):
 
     
 if __name__ == '__main__':
-    app.run(debug=True, threaded=True, port=5002)
+    port= ConfigSystem().getApiPort()
+    app.run(debug=True, threaded=True, port=port)

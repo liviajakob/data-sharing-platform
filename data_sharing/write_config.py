@@ -16,11 +16,25 @@ module_path = sys.modules[__name__].__file__
 dir_path = os.path.dirname(module_path)
 
 
+
+
+
 #
 config['db'] = {}
 config['db']['name'] = 'metadata.db'
 config['db']['type'] = 'sqlite:///'
 config['db']['path'] = os.path.join(dir_path,'data', 'output')
+
+#
+config['web'] = {}
+config['web']['dataset_location'] = 'http://127.0.0.1:8887'
+config['web']['mapcentre'] = {'x': 30665.5, 'y': -2039176.688}
+config['web']['projection'] = 'EPSG:3413' # this is the projection displayed on the client-side
+config['web']['app_port'] = 5000
+config['web']['api_port'] = 5002
+config['web']['app_root'] = 'http://localhost'
+config['web']['api_root'] = 'http://localhost'
+
 
 #
 config['data'] = {}

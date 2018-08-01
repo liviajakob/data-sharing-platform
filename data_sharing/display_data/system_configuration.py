@@ -36,6 +36,7 @@ class ConfigSystem():
             self.logger = logger
         self.config = ConfigObj(CONFIG_PATH)
         self.dataset_id=dataset_id
+       
         
         
     def setDatasetid(self, dataset_id):
@@ -90,6 +91,52 @@ class ConfigSystem():
             enginetype (String) - the database engine, e.g. 'sqlite:///'
         '''
         return self.config['db']['type']
+    
+    
+    def getAppPort(self):
+        '''Returns port for app
+        
+        '''
+        return int(self.config['web']['app_port'])
+    
+    
+    def getApiPort(self):
+        '''Returns port for api
+        
+        '''
+        return int(self.config['web']['api_port'])
+    
+    
+    def getApiRoot(self):
+        '''Returns root where api is running
+        
+        '''
+        return self.config['web']['api_root']
+    
+    
+    def getAppRoot(self):
+        '''Returns root where app is running
+        
+        '''
+        return self.config['web']['app_root']
+    
+
+    def getWebParameters(self):
+        '''Returns parameters used for webdisplay
+        
+        Returns:
+            a dictionary containing:
+                tiles_weblocation - the web location where the dataset folders with tiles are
+                map_centre - coordinates of the centre of the map, [x,y]
+                projection - the EPSG code for the display projection
+        
+        '''
+        result = {}
+        result['tiles_weblocation']=self.config['web']['dataset_location']
+        centre=self.config['web']['mapcentre']
+        result['map_centre'] = [float(centre['x']), float(centre['y'])]
+        result['projection'] = self.config['web']['projection']
+        return result
     
     
     def getColourFileTemplate(self, layertype):

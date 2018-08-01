@@ -30,7 +30,11 @@ app = Flask(__name__)
 @app.route('/', methods=['POST', 'GET'])
 def index():
     '''HTML for index page of the app'''
-    return render_template('main.html')
+    conf=ConfigSystem()
+    params = conf.getWebParameters()
+    print(params)
+    api_loc = conf.getApiRoot()+':'+str(conf.getApiPort())
+    return render_template('main.html', api_location=api_loc, tiles_weblocation=params['tiles_weblocation'], map_centre=params['map_centre'], projection=params['projection'])
 
 @app.route('/about')
 def about():
@@ -224,4 +228,5 @@ class MyFormatter(Formatter):
 
 
 if __name__ == '__main__':
-    app.run(debug=True, threaded=True, host='0.0.0.0', port=5000)
+    port= ConfigSystem().getAppPort()
+    app.run(debug=True, threaded=True, host='0.0.0.0', port=port)

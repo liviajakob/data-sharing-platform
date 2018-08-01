@@ -7,13 +7,8 @@
 
 
 var clickdatasets = true;
-var root_link = 'http://127.0.0.1:8887'; //folder where the datasets are in!
-var api_link = 'http://localhost:5002'; // external api
 var polylayer;
 var polylayer_group;
-var projection = "EPSG:3413";
-var mapcenter = [30665.5, -2039176.688]; // centre of the map; centre of Greenland
-
 
 
 /* Creating the OpenLayers map object with two base layers
