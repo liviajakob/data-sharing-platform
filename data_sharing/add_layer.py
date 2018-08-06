@@ -77,9 +77,6 @@ def add_layer(**kwargs):
     '''
     logging.basicConfig(level=logging.INFO) 
     logger = logging.getLogger(__name__)
-    # add handler file
-    handler = logging.FileHandler('add_dataset.log')
-    handler.setLevel(logging.NOTSET) #NOTSET gives all the levels, e.g. INFO only .info
     rollback = Rollback()
 
     try:
