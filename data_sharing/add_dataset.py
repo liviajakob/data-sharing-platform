@@ -2,7 +2,6 @@
 Command line interface to add a new dataset
 File: add_dataset.py
 
-
 usage: add_dataset.py [-h] [-min min] [-max max] [-a layerfile layertype date]
                                 [-c cite] [--version]
                                 layerfile layertype date
