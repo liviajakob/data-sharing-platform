@@ -1,6 +1,6 @@
 '''
 Unittests for the RasterLayerProcessor
-File: prepare_raster.py
+File: test_rasterprocessing.py
 
 @author: livia
 '''

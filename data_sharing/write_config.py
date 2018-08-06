@@ -17,8 +17,6 @@ dir_path = os.path.dirname(module_path)
 
 
 
-
-
 #
 config['db'] = {}
 config['db']['name'] = 'metadata.db'
