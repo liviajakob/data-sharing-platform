@@ -6,7 +6,7 @@ File: write_config.py
 """
 
 from configobj import ConfigObj
-import os, sys
+import os
 config = ConfigObj()
 
 config.filename = "config.conf"
