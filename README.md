@@ -62,7 +62,7 @@ python add_layer.py --help
 ```
 
 
-### Run Webapplication:
+### Run web application:
 
 ```
 python app.py
