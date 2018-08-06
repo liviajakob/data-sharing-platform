@@ -12,7 +12,7 @@ config = ConfigObj()
 config.filename = "config.conf"
 
 # get absolute module directory
-module_path = sys.modules[__name__].__file__
+module_path = os.path.abspath(__file__)
 dir_path = os.path.dirname(module_path)
 
 
