@@ -109,6 +109,7 @@ class RasterLayerProcessor(object):
         assert self.raster is not None
         stats = self.band.GetStatistics(True, True)
         statsdir = {'min' : stats[0], 'max': stats[1], 'mean' : stats[2], 'stdev' : stats[3]}
+        self.logger.info("Statistics: ", statsdir)
         return statsdir
 
     

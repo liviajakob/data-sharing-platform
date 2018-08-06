@@ -175,10 +175,10 @@ class Database():
             if hasattr(Dataset, attr):
                 if attr == "startdate":
                     value = datetime.strptime(filters[attr], "%Y-%m-%d")
-                    query = query.filter(value >= getattr(Dataset, 'startdate'))
+                    query = query.filter(value <= getattr(Dataset, 'startdate'))
                 elif attr == "enddate":
                     value = datetime.strptime(filters[attr], "%Y-%m-%d")
-                    query = query.filter(value <= getattr(Dataset, 'enddate'))
+                    query = query.filter(value >= getattr(Dataset, 'enddate'))
                 else: 
                     query = query.filter(getattr(Dataset, attr) == value)
             elif hasattr(RasterLayerGroup, attr): #filter to join tables
